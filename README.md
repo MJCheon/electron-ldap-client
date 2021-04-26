@@ -1,6 +1,6 @@
 # electron-ldap-client
 
-> An electron-vue project
+> LDAP Client Tool based electron-vue project
 
 #### Requirement
  - node (v14.x)
