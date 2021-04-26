@@ -3,10 +3,12 @@
 > An electron-vue project
 
 #### Build Setup
+##### Requirement
+ - Node (v14.x)
 
 ``` bash
 # install dependencies
-npm install
+npm install or yarn install
 
 # serve with hot reload at localhost:9080
 npm run dev
