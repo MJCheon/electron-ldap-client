@@ -2,10 +2,12 @@
 
 > An electron-vue project
 
-#### Build Setup
-##### Requirement
- - Node (v14.x)
+#### Requirement
+ - node (v14.x)
+ - npm (v6.14.x)
+ - yarn (v1.22.x)  
 
+#### Build Setup
 ``` bash
 # install dependencies
 npm install or yarn install
