@@ -1,123 +1,129 @@
 <template>
-  <v-card
-    class="mx-auto"
-    max-width="500"
-  >
-    <v-sheet class="pa-4 primary lighten-2">
-      <v-text-field
-        v-model="search"
-        label="Search Company Directory"
-        dark
-        flat
-        solo-inverted
-        hide-details
-        clearable
-        clear-icon="mdi-close-circle-outline"
-      ></v-text-field>
-      <v-checkbox
-        v-model="caseSensitive"
-        dark
-        hide-details
-        label="Case sensitive search"
-      ></v-checkbox>
-    </v-sheet>
-    <v-card-text>
-      <v-treeview
-        :items="items"
-        :search="search"
-        :filter="filter"
-        :open.sync="open"
+  <v-app id="inspire">
+    <v-system-bar app>
+      <v-spacer></v-spacer>
+
+      <v-icon>mdi-square</v-icon>
+
+      <v-icon>mdi-circle</v-icon>
+
+      <v-icon>mdi-triangle</v-icon>
+    </v-system-bar>
+
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+    >
+      <v-sheet
+        color="grey lighten-4"
+        class="pa-4"
       >
-        <template v-slot:prepend="{ item }">
-          <v-icon
-            v-if="item.children"
-            v-text="`mdi-${item.id === 1 ? 'home-variant' : 'folder-network'}`"
-          ></v-icon>
-        </template>
-      </v-treeview>
-    </v-card-text>
-  </v-card>
+        <div class="pa-4">
+          <center>
+            <img src="https://img.icons8.com/dusk/64/000000/active-directory.png"/>
+          </center>
+        </div>
+      </v-sheet>
+
+      <v-divider></v-divider>
+
+      <v-list>
+        <v-list-item
+          v-for="[icon, text] in servers"
+          :key="text"
+          link
+        >
+          <v-list-item-icon>
+            <v-icon>{{ icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ text }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+
+      <v-fab-transition>
+        <v-btn
+          v-show="!hidden"
+          color="pink"
+          fab
+          dark
+          small
+          bottom
+          left
+          fixed
+          class="plus-btn"
+        >
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </v-fab-transition>
+    </v-navigation-drawer>
+
+    <v-main>
+      <v-container
+        class="py-8 px-6"
+        fluid
+      >
+        <v-row>
+          <v-col
+            v-for="card in cards"
+            :key="card"
+            cols="12"
+          >
+            <v-card>
+              <v-subheader>{{ card }}</v-subheader>
+
+              <v-list two-line>
+                <template v-for="n in 6">
+                  <v-list-item
+
+                    :key="n"
+                  >
+                    <v-list-item-avatar color="grey darken-1">
+                    </v-list-item-avatar>
+
+                    <v-list-item-content>
+                      <v-list-item-title>Message {{ n }}</v-list-item-title>
+
+                      <v-list-item-subtitle>
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil repellendus distinctio similique
+                      </v-list-item-subtitle>
+                    </v-list-item-content>
+                  </v-list-item>
+
+                  <v-divider
+                    v-if="n !== 6"
+                    :key="`divider-${n}`"
+                    inset
+                  ></v-divider>
+                </template>
+              </v-list>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
 export default {
   data: () => ({
-    items: [
-      {
-        id: 1,
-        name: 'Vuetify Human Resources',
-        children: [
-          {
-            id: 2,
-            name: 'Core team',
-            children: [
-              {
-                id: 201,
-                name: 'John'
-              },
-              {
-                id: 202,
-                name: 'Kael'
-              },
-              {
-                id: 203,
-                name: 'Nekosaur'
-              },
-              {
-                id: 204,
-                name: 'Jacek'
-              },
-              {
-                id: 205,
-                name: 'Andrew'
-              }
-            ]
-          },
-          {
-            id: 3,
-            name: 'Administrators',
-            children: [
-              {
-                id: 301,
-                name: 'Mike'
-              },
-              {
-                id: 302,
-                name: 'Hunt'
-              }
-            ]
-          },
-          {
-            id: 4,
-            name: 'Contributors',
-            children: [
-              {
-                id: 401,
-                name: 'Phlow'
-              },
-              {
-                id: 402,
-                name: 'Brandon'
-              },
-              {
-                id: 403,
-                name: 'Sean'
-              }
-            ]
-          }
-        ]
-      }
-    ],
-    open: [1, 2],
-    search: null,
-    caseSensitive: false
-  }),
-  computed: {
-    filter () {
-      return this.caseSensitive
-        ? (item, search, textKey) => item[textKey].indexOf(search) > -1
-        : undefined
-    }
-  }
+    cards: ['Today', 'Yesterday'],
+    drawer: null,
+    hidden: false,
+    servers: [
+      ['mdi-desktop-tower', 'Server1'],
+      ['mdi-desktop-tower', 'Server2']
+    ]
+  })
 }
 </script>
+
+<style>
+  /* This is for documentation purposes and will not be needed in your application */
+  #lateral .plus-btn {
+    margin: 5% 5% 10% 16px;
+  }
+</style>
