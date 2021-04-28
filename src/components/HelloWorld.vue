@@ -3,7 +3,7 @@
     <v-row class="text-center">
       <v-col cols="12">
         <v-img
-          :src="logo"
+          :src="require('../assets/logo.svg')"
           class="my-3"
           contain
           height="200"
@@ -12,7 +12,7 @@
 
       <v-col class="mb-4">
         <h1 class="display-2 font-weight-bold mb-3">
-          <div>Welcome to the Vuetify 3 Alpha</div>
+          Welcome to Vuetify
         </h1>
 
         <p class="subheading font-weight-regular">
@@ -29,7 +29,7 @@
         class="mb-5"
         cols="12"
       >
-        <h2 class="headline font-weight-bold mb-5">
+        <h2 class="headline font-weight-bold mb-3">
           What's next?
         </h2>
 
@@ -50,7 +50,7 @@
         class="mb-5"
         cols="12"
       >
-        <h2 class="headline font-weight-bold mb-5">
+        <h2 class="headline font-weight-bold mb-3">
           Important Links
         </h2>
 
@@ -71,7 +71,7 @@
         class="mb-5"
         cols="12"
       >
-        <h2 class="headline font-weight-bold mb-5">
+        <h2 class="headline font-weight-bold mb-3">
           Ecosystem
         </h2>
 
@@ -92,8 +92,6 @@
 </template>
 
 <script>
-import logo from '../assets/logo.svg'
-
 export default {
   name: 'HelloWorld',
 
@@ -114,6 +112,10 @@ export default {
     ],
     importantLinks: [
       {
+        text: 'Documentation',
+        href: 'https://vuetifyjs.com'
+      },
+      {
         text: 'Chat',
         href: 'https://community.vuetifyjs.com'
       },
@@ -130,15 +132,14 @@ export default {
         href: 'https://medium.com/vuetify'
       }
     ],
-    logo,
     whatsNext: [
       {
         text: 'Explore components',
-        href: 'https://vuetifyjs.com'
+        href: 'https://vuetifyjs.com/components/api-explorer'
       },
       {
-        text: 'Roadmap',
-        href: 'https://vuetifyjs.com/introduction/roadmap/'
+        text: 'Select a layout',
+        href: 'https://vuetifyjs.com/getting-started/pre-made-layouts'
       },
       {
         text: 'Frequently Asked Questions',
