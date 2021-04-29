@@ -32,6 +32,7 @@
           v-for="[icon, text] in servers"
           :key="text"
           link
+          @click="bind"
         >
           <v-list-item-icon>
             <v-icon>{{ icon }}</v-icon>
@@ -45,6 +46,7 @@
 
       <v-fab-transition>
         <v-btn
+          v-on:click="configAdd"
           v-show="!hidden"
           color="pink"
           fab
@@ -86,7 +88,15 @@ export default {
       ['mdi-desktop-tower', 'Server1'],
       ['mdi-desktop-tower', 'Server2']
     ]
-  })
+  }),
+  methods: {
+    configAdd: (event) => {
+      alert('Config Add Button Click')
+    },
+    bind: (event) => {
+      alert('Server Bind')
+    }
+  }
 }
 </script>
 
