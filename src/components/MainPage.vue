@@ -12,6 +12,7 @@
 
     <v-navigation-drawer
       v-model="drawer"
+      permanent
       app
     >
       <v-sheet
@@ -44,22 +45,7 @@
         </v-list-item>
       </v-list>
 
-      <v-fab-transition>
-        <v-btn
-          v-on:click="configAdd"
-          v-show="!hidden"
-          color="pink"
-          fab
-          dark
-          small
-          bottom
-          left
-          fixed
-          class="plus-btn"
-        >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-fab-transition>
+      <AddServerPage />
     </v-navigation-drawer>
 
     <v-main>
@@ -75,15 +61,15 @@
 
 <script>
 import TreePage from './TreePage'
+import AddServerPage from './AddServerPage'
 
 export default {
   components: {
-    TreePage
+    TreePage,
+    AddServerPage
   },
   data: () => ({
-    cards: ['Today', 'Yesterday'],
     drawer: null,
-    hidden: false,
     servers: [
       ['mdi-desktop-tower', 'Server1'],
       ['mdi-desktop-tower', 'Server2']
