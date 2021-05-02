@@ -9,7 +9,7 @@ export default new Vuex.Store({
     serverList: []
   },
   mutations: {
-    setServer: (state, payload) => {
+    SET_SERVER: (state, payload) => {
       state.serverList.push(payload)
     }
   },
