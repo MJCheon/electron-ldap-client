@@ -2,7 +2,6 @@
   <v-row justify='center'>
     <v-dialog
       v-model='dialog'
-      persistent
       max-width='600px'
     >
       <template v-slot:activator='{ on, attrs }'>
@@ -29,12 +28,16 @@
           <span class='headline'>Server Config</span>
         </v-card-title>
         <v-card-text>
-          <v-container>
+          <v-form
+            ref="form"
+            v-model="valid"
+          >
             <v-row>
               <v-col cols='12'>
                 <v-text-field
                   label='Server Name'
-                  v-model='server.serverName'
+                  v-model='server.name'
+                  :rules='[rules.required]'
                   requried
                 ></v-text-field>
               </v-col>
@@ -44,20 +47,31 @@
                 md='6'
               >
                 <v-text-field
-                  label='Server IP, PORT*'
-                  v-model='server.ipPort'
-                  hint='127.0.0.1:389'
+                  label='Server IP*'
+                  v-model='server.ip'
+                  hint='127.0.0.1'
+                  :rules='[rules.required,rules.isIp]'
                   required
                 ></v-text-field>
               </v-col>
               <v-col
                 cols='12'
-                sm='4'
+                sm='6'
+                md='6'
               >
+                <v-text-field
+                  label='Server Port*'
+                  v-model='server.port'
+                  :rules='[rules.required, rules.isPort]'
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols='12'>
                 <v-select
                   :items=sslItems
                   label='SSL/TLS*'
                   v-model='server.ssl'
+                  :rules='[rules.required]'
                   required
                 ></v-select>
               </v-col>
@@ -69,6 +83,7 @@
                   label='Base DN*'
                   v-model='server.baseDn'
                   hint='dc=example,dc=com'
+                  :rules='[rules.required]'
                   required
                 ></v-text-field>
               </v-col>
@@ -77,6 +92,7 @@
                   label='Root DN*'
                   v-model='server.rootDn'
                   hint='cn=root,dc=example,dc=com'
+                  :rules='[rules.required]'
                   required
                 ></v-text-field>
               </v-col>
@@ -84,6 +100,7 @@
                 <v-text-field
                   label='Password*'
                   v-model='server.password'
+                  :rules='[rules.required]'
                   type='password'
                   required
                 ></v-text-field>
@@ -95,11 +112,12 @@
                 <v-text-field
                   label='ConnectTimeout(ms)'
                   v-model='server.connTimeout'
+                  :rules='[rules.required]'
                   hint='5000'
                 ></v-text-field>
               </v-col>
             </v-row>
-          </v-container>
+          </v-form>
           <small>*indicates required field</small>
         </v-card-text>
         <v-card-actions>
@@ -112,6 +130,7 @@
             Close
           </v-btn>
           <v-btn
+            :disabled="!valid"
             color='blue darken-1'
             text
             @click='saveServer(server); dialog = false'
@@ -125,13 +144,32 @@
 </template>
 
 <script>
-import store from '../store/index'
-
 export default {
   data: () => ({
     hidden: false,
     dialog: false,
-    server: {},
+    valid: false,
+    rules: {
+      required: value => !!value || 'This Field is required',
+      isIp: value => {
+        const pattern = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}/
+        return pattern.test(value) || 'Invalid IPv4 Format'
+      },
+      isPort: value => {
+        const pattern = /\d{1,5}/
+        return pattern.test(value) || 'Only Number (1~65534)'
+      }
+    },
+    server: {
+      name: null,
+      ip: null,
+      port: null,
+      ssl: null,
+      baseDn: null,
+      rootDn: null,
+      password: null,
+      connTimeout: 5000
+    },
     sslItems: [
       {
         text: 'None',
