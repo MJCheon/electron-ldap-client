@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 const serverListStore = {
   state: {
-    serverList: {}
+    serverList: []
   },
   mutations: {
     SET_SERVER: (state, payload) => {
@@ -31,17 +31,21 @@ const serverListStore = {
   },
   getters: {
     getAllServerList: (state) => {
-      return state.serverList
+      if (state.serverList.length > 0) {
+        return state.serverList
+      }
     },
     getAllServerNameList: (state) => {
-      const serverIdList = []
-      state.serverList.forEach(server => {
-        serverIdList.push({
-          id: server.id,
-          name: server.name
+      const serverNameList = []
+      if (state.serverList.length > 0) {
+        state.serverList.forEach(server => {
+          serverNameList.push({
+            id: server.id,
+            name: server.name
+          })
         })
-      })
-      return serverIdList
+      }
+      return serverNameList
     }
   }
 }

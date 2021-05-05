@@ -33,9 +33,7 @@
             v-model="valid"
           >
             <v-row>
-              <v-col
-                cols='12'
-              >
+              <v-col cols='12'>
                 <v-text-field
                   label='Name'
                   v-model='server.name'
@@ -167,7 +165,7 @@ export default {
         const pattern = /\d{1,5}/
         return pattern.test(value) || 'Only Number'
       },
-      isPort: value => value >= 65535 || 'Only Port Range (1~65535)'
+      isPort: value => value < 65535 || 'Only Port Range (1~65535)'
     },
     server: {
       name: null,
