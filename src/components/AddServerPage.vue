@@ -144,6 +144,8 @@
 </template>
 
 <script>
+import store from '../store/index'
+
 export default {
   data: () => ({
     hidden: false,
@@ -187,7 +189,7 @@ export default {
   }),
   methods: {
     saveServer: (server) => {
-      console.log(server)
+      store.dispatch('ADD_SERVER', server)
     }
   }
 }

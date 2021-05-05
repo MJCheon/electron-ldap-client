@@ -30,17 +30,17 @@
 
       <v-list>
         <v-list-item
-          v-for="[icon, text] in servers"
-          :key="text"
+          v-for="server in this.$store.getters.getAllServerNameList"
+          :key='server.id'
           link
-          @click="bind"
+          @click="serverBind"
         >
           <v-list-item-icon>
-            <v-icon>{{ icon }}</v-icon>
+            <v-icon>mdi-desktop-tower</v-icon>
           </v-list-item-icon>
 
           <v-list-item-content>
-            <v-list-item-title>{{ text }}</v-list-item-title>
+            <v-list-item-title>{{ server.name }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -69,18 +69,11 @@ export default {
     AddServerPage
   },
   data: () => ({
-    drawer: null,
-    servers: [
-      ['mdi-desktop-tower', 'Server1'],
-      ['mdi-desktop-tower', 'Server2']
-    ]
+    drawer: null
   }),
   methods: {
-    configAdd: (event) => {
-      alert('Config Add Button Click')
-    },
-    bind: (event) => {
-      alert('Server Bind')
+    serverBind: (event) => {
+      alert(event)
     }
   }
 }
