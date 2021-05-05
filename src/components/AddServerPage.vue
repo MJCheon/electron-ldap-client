@@ -25,7 +25,7 @@
       </template>
       <v-card>
         <v-card-title>
-          <span class='headline'>Server Config</span>
+          <span class='headline'>Add Server Config</span>
         </v-card-title>
         <v-card-text>
           <v-form
@@ -33,18 +33,20 @@
             v-model="valid"
           >
             <v-row>
-              <v-col cols='12'>
+              <v-col
+                cols='12'
+              >
                 <v-text-field
-                  label='Server Name'
+                  label='Name'
                   v-model='server.name'
                   :rules='[rules.required]'
                   requried
                 ></v-text-field>
               </v-col>
               <v-col
-                cols='12'
-                sm='6'
-                md='6'
+                cols='auto'
+                sm='4'
+                md='4'
               >
                 <v-text-field
                   label='Server IP*'
@@ -55,18 +57,22 @@
                 ></v-text-field>
               </v-col>
               <v-col
-                cols='12'
-                sm='6'
-                md='6'
+                cols='auto'
+                sm='4'
+                md='4'
               >
                 <v-text-field
                   label='Server Port*'
                   v-model='server.port'
-                  :rules='[rules.required, rules.isPort]'
+                  :rules='[rules.required, rules.isNumber, rules.isPort]'
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols='12'>
+              <v-col
+                cols='auto'
+                sm='4'
+                md='4'
+              >
                 <v-select
                   :items=sslItems
                   label='SSL/TLS*'
@@ -76,7 +82,7 @@
                 ></v-select>
               </v-col>
               <v-col
-                cols='12'
+                cols='auto'
                 sm='6'
               >
                 <v-text-field
@@ -87,7 +93,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols='12'>
+              <v-col cols='8'>
                 <v-text-field
                   label='Root DN*'
                   v-model='server.rootDn'
@@ -96,7 +102,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols='12'>
+              <v-col cols='8'>
                 <v-text-field
                   label='Password*'
                   v-model='server.password'
@@ -106,7 +112,7 @@
                 ></v-text-field>
               </v-col>
               <v-col
-                cols='12'
+                cols='auto'
                 sm='5'
               >
                 <v-text-field
@@ -157,10 +163,11 @@ export default {
         const pattern = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}/
         return pattern.test(value) || 'Invalid IPv4 Format'
       },
-      isPort: value => {
+      isNumber: value => {
         const pattern = /\d{1,5}/
-        return pattern.test(value) || 'Only Number (1~65534)'
-      }
+        return pattern.test(value) || 'Only Number'
+      },
+      isPort: value => value >= 65535 || 'Only Port Range (1~65535)'
     },
     server: {
       name: null,
