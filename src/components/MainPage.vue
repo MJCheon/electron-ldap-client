@@ -30,10 +30,10 @@
 
       <v-list>
         <v-list-item
-          v-for="server in this.$store.getters.getAllServerNameList"
+          v-for="server in getServerName()"
           :key='server.id'
           link
-          @click="serverBind"
+          @click="serverClickEvent()"
         >
           <v-list-item-icon>
             <v-icon>mdi-desktop-tower</v-icon>
@@ -44,7 +44,6 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
-
       <AddServerPage />
     </v-navigation-drawer>
 
@@ -71,9 +70,15 @@ export default {
   data: () => ({
     drawer: null
   }),
+  watch: {
+
+  },
   methods: {
-    serverBind: (event) => {
-      alert(event)
+    serverClickEvent () {
+      console.log(this)
+    },
+    getServerName () {
+      return this.$store.getters.getAllServerNameList
     }
   }
 }

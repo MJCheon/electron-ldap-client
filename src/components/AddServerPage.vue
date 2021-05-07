@@ -25,7 +25,7 @@
       </template>
       <v-card>
         <v-card-title>
-          <span class='headline'>Add Server Config</span>
+          <span class='headline'>Server Config</span>
         </v-card-title>
         <v-card-text>
           <v-form
@@ -36,6 +36,7 @@
               <v-col cols='12'>
                 <v-text-field
                   label='Name'
+                  ref="name"
                   v-model='server.name'
                   :rules='[rules.required]'
                   requried
@@ -48,6 +49,7 @@
               >
                 <v-text-field
                   label='Server IP*'
+                  ref="ip"
                   v-model='server.ip'
                   hint='127.0.0.1'
                   :rules='[rules.required,rules.isIp]'
@@ -61,6 +63,7 @@
               >
                 <v-text-field
                   label='Server Port*'
+                  ref="port"
                   v-model='server.port'
                   :rules='[rules.required, rules.isNumber, rules.isPort]'
                   required
@@ -73,6 +76,7 @@
               >
                 <v-select
                   :items=sslItems
+                  ref="ssl"
                   label='SSL/TLS*'
                   v-model='server.ssl'
                   :rules='[rules.required]'
@@ -85,6 +89,7 @@
               >
                 <v-text-field
                   label='Base DN*'
+                  ref="baseDn"
                   v-model='server.baseDn'
                   hint='dc=example,dc=com'
                   :rules='[rules.required]'
@@ -95,6 +100,7 @@
                 <v-text-field
                   label='Root DN*'
                   v-model='server.rootDn'
+                  ref="rootDn"
                   hint='cn=root,dc=example,dc=com'
                   :rules='[rules.required]'
                   required
@@ -103,6 +109,7 @@
               <v-col cols='8'>
                 <v-text-field
                   label='Password*'
+                  ref="password"
                   v-model='server.password'
                   :rules='[rules.required]'
                   type='password'
@@ -115,6 +122,7 @@
               >
                 <v-text-field
                   label='ConnectTimeout(ms)'
+                  ref="connTimeout"
                   v-model='server.connTimeout'
                   :rules='[rules.required]'
                   hint='5000'
@@ -129,7 +137,7 @@
           <v-btn
             color='blue darken-1'
             text
-            @click='dialog = false'
+            @click='close()'
           >
             Close
           </v-btn>
@@ -137,7 +145,7 @@
             :disabled="!valid"
             color='blue darken-1'
             text
-            @click='saveServer(server); dialog = false'
+            @click='saveServer(server)'
           >
             Save
           </v-btn>
@@ -148,7 +156,6 @@
 </template>
 
 <script>
-import store from '../store/index'
 
 export default {
   data: () => ({
@@ -168,14 +175,14 @@ export default {
       isPort: value => value < 65535 || 'Only Port Range (1~65535)'
     },
     server: {
-      name: null,
-      ip: null,
-      port: null,
-      ssl: null,
-      baseDn: null,
-      rootDn: null,
-      password: null,
-      connTimeout: 5000
+      name: '',
+      ip: '',
+      port: '',
+      ssl: '',
+      baseDn: '',
+      rootDn: '',
+      password: '',
+      connTimeout: ''
     },
     sslItems: [
       {
@@ -193,8 +200,16 @@ export default {
     ]
   }),
   methods: {
-    saveServer: (server) => {
-      store.dispatch('ADD_SERVER', server)
+    saveServer (server) {
+      this.$store.dispatch('SET_SERVER', server)
+      this.close()
+    },
+    close () {
+      this.reset()
+      this.dialog = false
+    },
+    reset () {
+      this.$refs.form.reset()
     }
   }
 }
