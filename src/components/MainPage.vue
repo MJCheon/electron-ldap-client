@@ -30,10 +30,10 @@
 
       <v-list>
         <v-list-item
-          v-for="server in getServerName()"
+          v-for="server in getServerName"
           :key='server.id'
           link
-          @click="serverClickEvent()"
+          @click="serverClickEvent(server.id)"
         >
           <v-list-item-icon>
             <v-icon>mdi-desktop-tower</v-icon>
@@ -70,15 +70,14 @@ export default {
   data: () => ({
     drawer: null
   }),
-  watch: {
-
-  },
-  methods: {
-    serverClickEvent () {
-      console.log(this)
-    },
+  computed: {
     getServerName () {
       return this.$store.getters.getAllServerNameList
+    }
+  },
+  methods: {
+    serverClickEvent (id) {
+      this.$store.dispatch('DELETE_SERVER', id)
     }
   }
 }
