@@ -1,7 +1,7 @@
 <template>
   <v-row justify='center'>
     <v-dialog
-      v-model='dialog'
+      v-model='showDialog'
       max-width='600px'
     >
       <template v-slot:activator='{ on, attrs }'>
@@ -129,27 +129,27 @@
                 ></v-text-field>
               </v-col>
             </v-row>
+            <small>*indicates required field</small>
+            <v-spacer></v-spacer>
+            <v-btn
+              color='blue darken-1'
+              text
+              @click='close()'
+            >
+              Close
+            </v-btn>
+            <v-btn
+              :disabled="!valid"
+              color='blue darken-1'
+              absolute
+              right
+              text
+              @click='saveServer(server)'
+            >
+              Save
+            </v-btn>
           </v-form>
-          <small>*indicates required field</small>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color='blue darken-1'
-            text
-            @click='close()'
-          >
-            Close
-          </v-btn>
-          <v-btn
-            :disabled="!valid"
-            color='blue darken-1'
-            text
-            @click='saveServer(server)'
-          >
-            Save
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-row>
@@ -160,7 +160,7 @@
 export default {
   data: () => ({
     hidden: false,
-    dialog: false,
+    showDialog: false,
     valid: false,
     rules: {
       required: value => !!value || 'This Field is required',
@@ -199,17 +199,29 @@ export default {
       }
     ]
   }),
+  watch: {
+    showDialog (value) {
+      if (value) {
+        this.server = {
+          name: '',
+          ip: '',
+          port: '',
+          ssl: '',
+          baseDn: '',
+          rootDn: '',
+          password: '',
+          connTimeout: ''
+        }
+      }
+    }
+  },
   methods: {
     saveServer (server) {
       this.$store.dispatch('SET_SERVER', server)
       this.close()
     },
     close () {
-      this.reset()
-      this.dialog = false
-    },
-    reset () {
-      this.$refs.form.reset()
+      this.showDialog = false
     }
   }
 }
