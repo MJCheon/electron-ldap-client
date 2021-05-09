@@ -6,19 +6,12 @@ const serverListStore = {
   },
   mutations: {
     SETTING_SERVER: (state, payload) => {
-      const server = payload
+      const newServer = payload
 
-      if (!server.id) {
+      if (!newServer.id) {
         const serverId = uuidv4()
-        server.id = serverId
-        state.serverList.push(server)
-      } else {
-        for (let idx = 0; idx < state.serverList.length; idx++) {
-          if (server.id === state.serverList[idx].id) {
-            const oldServer = state.serverList[idx]
-            state.serverList.splice(idx, 1, oldServer, server)
-          }
-        }
+        newServer.id = serverId
+        state.serverList.push(newServer)
       }
     },
     DEL_SERVER: (state, payload) => {
@@ -39,6 +32,15 @@ const serverListStore = {
     }
   },
   getters: {
+    getServer: (state) => (serverId) => {
+      var returnServer = null
+      state.serverList.forEach(server => {
+        if (serverId === server.id) {
+          returnServer = server
+        }
+      })
+      return returnServer
+    },
     getAllServerList: (state) => {
       if (state.serverList.length > 0) {
         return state.serverList

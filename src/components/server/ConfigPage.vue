@@ -144,7 +144,7 @@
               absolute
               right
               text
-              @click='saveServer(server)'
+              @click='saveServer(server); close()'
             >
               Save
             </v-btn>
@@ -157,9 +157,14 @@
 
 <script>
 
+import Store from '../../store/index'
+import EventBus from '../../event-bus'
+
 export default {
+  props: ['server.id'],
   data: () => ({
     hidden: false,
+    edit: false,
     showDialog: false,
     valid: false,
     rules: {
@@ -199,9 +204,20 @@ export default {
       }
     ]
   }),
+  created () {
+    EventBus.$on('editServer', serverId => {
+      const editServer = Store.getters.getServer(serverId)
+
+      if (editServer) {
+        this.server = editServer
+        this.edit = true
+        this.showDialog = true
+      }
+    })
+  },
   watch: {
     showDialog (value) {
-      if (value) {
+      if (value && !this.edit) {
         this.server = {
           name: '',
           ip: '',
@@ -216,12 +232,12 @@ export default {
     }
   },
   methods: {
-    saveServer (server) {
-      this.$store.dispatch('SET_SERVER', server)
-      this.close()
+    saveServer: (server) => {
+      Store.dispatch('SET_SERVER', server)
     },
     close () {
       this.showDialog = false
+      this.edit = false
     }
   }
 }
