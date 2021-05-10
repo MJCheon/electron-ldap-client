@@ -1,4 +1,5 @@
-import { v4 as uuidv4 } from 'uuid'
+import Uuid from '../../utils/uuid'
+import Password from '../../utils/password'
 
 const serverListStore = {
   state: {
@@ -9,8 +10,9 @@ const serverListStore = {
       const newServer = payload
 
       if (!newServer.id) {
-        const serverId = uuidv4()
+        const serverId = Uuid.getServerUuid()
         newServer.id = serverId
+        newServer.password = Password.encrypt(newServer.password, serverId)
         state.serverList.push(newServer)
       }
     },

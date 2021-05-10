@@ -32,6 +32,7 @@
         <v-list-item
           v-for="server in getAllServerNameList"
           :key="server.id"
+          @click="bindServer"
           link
         >
           <v-list-item-icon>
@@ -90,6 +91,8 @@ import TreePage from './TreePage'
 import ServerConfigPage from './server/ConfigPage'
 import EventBus from '../event-bus'
 import Store from '../store/index'
+import Password from '../utils/password'
+import Uuid from '../utils/uuid'
 
 export default {
   components: {
@@ -113,11 +116,20 @@ export default {
       if (event.target.id === 'Delete') {
         this.deleteServer(serverId)
       } else if (event.target.id === 'Edit') {
-        EventBus.$emit('editServer', serverId)
+        this.editServer(serverId)
       }
     },
     deleteServer: (serverId) => {
       Store.dispatch('DELETE_SERVER', serverId)
+    },
+    editServer: (serverId) => {
+      EventBus.$emit('editServer', serverId)
+    },
+    bindServer: () => {
+      const testUuid = Uuid.getServerUuid()
+      const password = 'test1234'
+      console.log(Password.encrypt(password, testUuid))
+      console.log(Password.decrypt(password, testUuid))
     }
   }
 }
