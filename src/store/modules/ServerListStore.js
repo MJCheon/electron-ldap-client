@@ -1,5 +1,4 @@
 import Uuid from '../../utils/uuid'
-import Password from '../../utils/password'
 
 const serverListStore = {
   state: {
@@ -12,7 +11,6 @@ const serverListStore = {
       if (!newServer.id) {
         const serverId = Uuid.getServerUuid()
         newServer.id = serverId
-        newServer.password = Password.encrypt(newServer.password, serverId)
         state.serverList.push(newServer)
       }
     },
