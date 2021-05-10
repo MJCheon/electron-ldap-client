@@ -91,8 +91,6 @@ import TreePage from './TreePage'
 import ServerConfigPage from './server/ConfigPage'
 import EventBus from '../event-bus'
 import Store from '../store/index'
-import Uuid from '../utils/uuid'
-import Password from '../utils/password'
 
 export default {
   components: {
@@ -126,12 +124,7 @@ export default {
       EventBus.$emit('editServer', serverId)
     },
     bindServer: () => {
-      const testUuid = Uuid.uuidParse(Uuid.getServerUuid())
-      const password = 'test1234'
-      const iv = Password.getIv()
-      const enPassword = Password.encrypt(password, testUuid, iv)
-      console.log(enPassword)
-      console.log(Password.decrypt(enPassword, testUuid, iv))
+      console.log('Server Bind')
     }
   }
 }

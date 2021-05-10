@@ -1,8 +1,9 @@
+import Password from '../../utils/password'
 import Uuid from '../../utils/uuid'
 
 const serverListStore = {
   state: {
-    serverList: []
+    serverList: null
   },
   mutations: {
     SETTING_SERVER: (state, payload) => {
@@ -10,8 +11,15 @@ const serverListStore = {
 
       if (!newServer.id) {
         const serverId = Uuid.getServerUuid()
+        const serverIv = Password.getIv()
+
         newServer.id = serverId
+        newServer.iv = serverIv
+        newServer.password = Password.encrypt(newServer.password, Uuid.getParsedUuid(serverId), serverIv)
         state.serverList.push(newServer)
+      } else {
+        const serverIdx = state.serverList.findIndex((server) => (server.id === newServer.id))
+        state.serverList[serverIdx] = newServer
       }
     },
     DEL_SERVER: (state, payload) => {
@@ -33,12 +41,7 @@ const serverListStore = {
   },
   getters: {
     getServer: (state) => (serverId) => {
-      var returnServer = null
-      state.serverList.forEach(server => {
-        if (serverId === server.id) {
-          returnServer = server
-        }
-      })
+      const returnServer = state.serverList.find((server) => (server.id === serverId))
       return returnServer
     },
     getAllServerList: (state) => {
@@ -47,16 +50,7 @@ const serverListStore = {
       }
     },
     getAllServerNameList: (state) => {
-      const serverNameList = []
-      if (state.serverList.length > 0) {
-        state.serverList.forEach(server => {
-          serverNameList.push({
-            id: server.id,
-            name: server.name
-          })
-        })
-      }
-      return serverNameList
+      return state.serverList.map((server) => ({ id: server.id, name: server.name }))
     }
   }
 }

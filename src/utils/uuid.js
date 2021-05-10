@@ -4,7 +4,7 @@ const Uuid = {
   getServerUuid: () => {
     return uuidv4()
   },
-  uuidParse: (uuid) => {
+  getParsedUuid: (uuid) => {
     return parse(uuid)
   }
 }
