@@ -30,7 +30,7 @@
 
       <v-list>
         <v-list-item
-          v-for="server in getAllServerNameList"
+          v-for="server in serverNameList"
           :key="server.id"
           @click="bindServer"
           link
@@ -105,8 +105,9 @@ export default {
     ]
   }),
   computed: {
-    getAllServerNameList: () => {
-      return Store.getters.getAllServerNameList
+    serverNameList: () => {
+      const serverNameList = Store.getters.getServerNameList
+      return serverNameList
     }
   },
   methods: {

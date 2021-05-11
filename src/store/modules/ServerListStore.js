@@ -21,6 +21,8 @@ const serverListStore = {
         const serverIdx = state.serverList.findIndex((server) => (server.id === newServer.id))
         state.serverList[serverIdx] = newServer
       }
+
+      state.serverList.sort()
     },
     DEL_SERVER: (state, payload) => {
       const serverId = payload
@@ -44,13 +46,14 @@ const serverListStore = {
       const returnServer = state.serverList.find((server) => (server.id === serverId))
       return returnServer
     },
-    getAllServerList: (state) => {
+    getServerList: (state) => {
       if (state.serverList.length > 0) {
         return state.serverList
       }
     },
-    getAllServerNameList: (state) => {
-      return state.serverList.map((server) => ({ id: server.id, name: server.name }))
+    getServerNameList: (state) => {
+      const serverNameList = state.serverList.map((server) => ({ id: server.id, name: server.name }))
+      return serverNameList
     }
   }
 }
