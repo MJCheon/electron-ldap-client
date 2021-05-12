@@ -32,7 +32,7 @@
         <v-list-item
           v-for="server in serverNameList"
           :key="server.id"
-          @click="bindServer"
+          @click="bindServer(server.id)"
           link
         >
           <v-list-item-icon>
@@ -91,6 +91,7 @@ import TreePage from './TreePage'
 import ServerConfigPage from './server/ConfigPage'
 import EventBus from '../event-bus'
 import Store from '../store/index'
+import Ldapjs from '../utils/ldap.js'
 
 export default {
   components: {
@@ -124,8 +125,8 @@ export default {
     editServer: (serverId) => {
       EventBus.$emit('editServer', serverId)
     },
-    bindServer: () => {
-      console.log('Server Bind')
+    bindServer: (serverId) => {
+      Ldapjs.connect(serverId)
     }
   }
 }

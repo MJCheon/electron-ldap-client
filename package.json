@@ -15,6 +15,8 @@
   "dependencies": {
     "@mdi/font": "5.9.55",
     "core-js": "^3.6.5",
+    "dtrace-provider": "^0.8.8",
+    "ldapjs": "^2.2.4",
     "node-machine-id": "^1.1.12",
     "roboto-fontface": "*",
     "uuid": "^8.3.2",

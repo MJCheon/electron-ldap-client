@@ -124,7 +124,7 @@
                   label='ConnectTimeout(ms)'
                   ref="connTimeout"
                   v-model='server.connTimeout'
-                  :rules='[rules.required]'
+                  :rules='[rules.isNumber]'
                   hint='5000'
                 ></v-text-field>
               </v-col>
@@ -174,7 +174,7 @@ export default {
         return pattern.test(value) || 'Invalid IPv4 Format'
       },
       isNumber: value => {
-        const pattern = /\d{1,5}/
+        const pattern = /\d/
         return pattern.test(value) || 'Only Number'
       },
       isPort: value => value < 65535 || 'Only Port Range (1~65535)'
