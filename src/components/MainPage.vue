@@ -91,7 +91,7 @@ import TreePage from './TreePage'
 import ServerConfigPage from './server/ConfigPage'
 import EventBus from '../event-bus'
 import Store from '../store/index'
-import Ldapjs from '../utils/ldap.js'
+import Ldap from '../utils/ldap'
 
 export default {
   components: {
@@ -126,7 +126,7 @@ export default {
       EventBus.$emit('editServer', serverId)
     },
     bindServer: (serverId) => {
-      Ldapjs.connect(serverId)
+      Ldap.connect(serverId)
     }
   }
 }
