@@ -19,6 +19,7 @@ const serverListStore = {
         state.serverList.push(newServer)
       } else {
         const serverIdx = state.serverList.findIndex((server) => (server.id === newServer.id))
+        newServer.password = Password.encrypt(newServer.password, Uuid.getParsedUuid(newServer.id), Buffer.from(newServer.iv))
         state.serverList[serverIdx] = newServer
       }
 
@@ -43,7 +44,8 @@ const serverListStore = {
   },
   getters: {
     getServer: (state) => (serverId) => {
-      const returnServer = state.serverList.find((server) => (server.id === serverId))
+      const returnServer = JSON.parse(JSON.stringify(state.serverList.find((server) => (server.id === serverId))))
+      returnServer.password = Password.decrypt(returnServer.password, Uuid.getParsedUuid(serverId), Buffer.from(returnServer.iv))
       return returnServer
     },
     getServerList: (state) => {

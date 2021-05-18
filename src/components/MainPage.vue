@@ -91,7 +91,7 @@ import TreePage from './TreePage'
 import ServerConfigPage from './server/ConfigPage'
 import EventBus from '../event-bus'
 import Store from '../store/index'
-import Ldap from '../utils/ldap'
+import { ipcRenderer } from 'electron'
 
 export default {
   components: {
@@ -126,7 +126,8 @@ export default {
       EventBus.$emit('editServer', serverId)
     },
     bindServer: (serverId) => {
-      Ldap.connect(serverId)
+      const server = Store.getters.getServer(serverId)
+      ipcRenderer.send('serverBind', server)
     }
   }
 }

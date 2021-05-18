@@ -1,11 +1,7 @@
-const { dependencies } = require('./package.json')
-
-
-
 module.exports = {
-  configureWebpack: {
-    externals: {
-      'socket.io-client': 'commonjs socket.io-client'
+  pluginOptions: {
+    electronBuilder: {
+        nodeIntegration: true
     }
   },
   transpileDependencies: [

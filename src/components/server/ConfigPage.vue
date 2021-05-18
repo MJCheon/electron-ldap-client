@@ -209,7 +209,7 @@ export default {
       const editServer = Store.getters.getServer(serverId)
 
       if (editServer) {
-        this.server = JSON.parse(JSON.stringify(editServer))
+        this.server = editServer
         this.edit = true
         this.showDialog = true
       }

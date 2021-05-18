@@ -1,8 +1,9 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import Ldap from './library/ldap'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -17,6 +18,7 @@ async function createWindow () {
     height: 768,
     useContentSize: true,
     webPreferences: {
+      nodeIntegration: true
     }
   })
 
@@ -59,6 +61,10 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+})
+
+ipcMain.on('serverBind', (event, server) => {
+  Ldap.connect(event, server)
 })
 
 // Exit cleanly on request from parent process in development mode.
