@@ -63,8 +63,9 @@ app.on('ready', async () => {
   createWindow()
 })
 
-ipcMain.on('serverBind', (event, server) => {
-  Ldap.connect(event, server)
+ipcMain.on('serverBind', async (event, server) => {
+  const searchEntryList = await Ldap.connect(server)
+  event.sender.send('serverBindResponse', searchEntryList)
 })
 
 // Exit cleanly on request from parent process in development mode.
