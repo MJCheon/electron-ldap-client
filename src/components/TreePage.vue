@@ -6,7 +6,7 @@
     <v-sheet class="pa-4 primary lighten-2">
       <v-text-field
         v-model="search"
-        label="Search Company Directory"
+        label="Search"
         dark
         flat
         solo-inverted
