@@ -20,17 +20,17 @@ const Ldapjs = {
         scope: 'sub'
       }
 
-      const entries = await client.search(server.baseDn, searchOptions)
+      const searchEntries = await client.search(server.baseDn, searchOptions)
 
-      return entries
-
+      return searchEntries
+      
     } catch (e) {
-      await client.unbind()
+      await client.destroy()
       Assert.ifError(e)
     } finally {
       await client.unbind()
     }
-  },
+  }
 }
 
 export default Ldapjs

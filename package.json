@@ -18,6 +18,7 @@
     "ldapjs-client": "^0.1.1",
     "node-machine-id": "^1.1.12",
     "roboto-fontface": "*",
+    "tree-model": "^1.0.7",
     "uuid": "^8.3.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",

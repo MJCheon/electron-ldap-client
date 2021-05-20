@@ -4,6 +4,8 @@ import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import Ldap from './library/ldap'
+import Tree from './library/Tree'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Scheme must be registered before the app is ready
@@ -14,8 +16,8 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 1280,
+    height: 960,
     useContentSize: true,
     webPreferences: {
       nodeIntegration: true
@@ -65,7 +67,8 @@ app.on('ready', async () => {
 
 ipcMain.on('serverBind', async (event, server) => {
   const searchEntryList = await Ldap.connect(server)
-  event.sender.send('serverBindResponse', searchEntryList)
+  const rootTree = Tree.makeTree(server.baseDn, searchEntryList)
+  event.sender.send('serverBindResponse', rootTree)
 })
 
 // Exit cleanly on request from parent process in development mode.
