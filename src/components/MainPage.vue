@@ -14,6 +14,7 @@
       v-model="drawer"
       permanent
       app
+      width='25%'
     >
       <v-sheet
         color="grey lighten-4"
@@ -43,6 +44,7 @@
             <v-list-item-title v-text="server.name">
             </v-list-item-title>
           </v-list-item-content>
+
           <v-menu
             bottom
             left
@@ -71,13 +73,11 @@
           </v-menu>
         </v-list-item>
       </v-list>
-
       <ServerConfigPage />
     </v-navigation-drawer>
 
     <v-main>
       <v-container
-        class="py-8 px-6"
         fluid
       >
         <TreePage />

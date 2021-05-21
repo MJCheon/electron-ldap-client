@@ -1,49 +1,35 @@
 <template>
-  <v-card
-    class="mx-auto"
-    v-model='showCard'
-  >
-    <v-sheet class="pa-4 primary lighten-2">
-      <v-text-field
-        v-model="search"
-        label="Search"
-        dark
-        flat
-        solo-inverted
-        hide-details
-        clearable
-        clear-icon="mdi-close-circle-outline"
-      ></v-text-field>
-      <v-checkbox
-        v-model="caseSensitive"
-        dark
-        hide-details
-        label="Case sensitive search"
-      ></v-checkbox>
-    </v-sheet>
-    <v-card-text>
-      <v-treeview
-        v-model='tree'
-        :open='initiallyOpen'
-        :load-children='fetch'
-        :items='items'
-        :search='search'
-        :filter='filter'
-        activatable
-        item-key='name'
-        open-on-click
-      >
-        <template v-slot:prepend='{ item, open }'>
-          <v-icon v-if='!item.file'>
-            {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
-          </v-icon>
-          <v-icon v-else>
-            {{ 'mdi-file-document' }}
-          </v-icon>
-        </template>
-      </v-treeview>
-    </v-card-text>
-  </v-card>
+<split-pane v-on:resize="resize" :min-percent='20' :default-percent='45' split="vertical">
+  <template slot="paneL">
+    <v-treeview
+      v-model='tree'
+      :open='initiallyOpen'
+      :load-children='fetch'
+      :items='items'
+      activatable
+      item-key='name'
+      open-on-click
+    >
+      <template v-slot:prepend='{ item, open }'>
+        <v-icon v-if='!item.file'>
+          {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
+        </v-icon>
+        <v-icon v-else>
+          {{ 'mdi-file-document' }}
+        </v-icon>
+      </template>
+    </v-treeview>
+  </template>
+  <template slot="paneR">
+    <v-data-table
+      :headers="headers"
+      :items="desserts"
+      :hide-default-header='hideHeaders'
+      hide-default-footer
+      class="elevation-1"
+    ></v-data-table>
+  </template>
+</split-pane>
 </template>
 
 <script>
@@ -51,13 +37,15 @@ import { ipcRenderer } from 'electron'
 
 export default {
   data: () => ({
+    valid: false,
     initiallyOpen: [],
     file: [],
     tree: [],
     items: [],
     search: null,
     caseSensitive: false,
-    showCard: false
+    showCard: false,
+    hideHeaders: true
   }),
   created () {
     ipcRenderer.on('serverBindResponse', (event, searchEntryTree) => {
@@ -68,18 +56,15 @@ export default {
       this.initiallyOpen = [searchEntryTree[0].name]
     })
   },
-  computed: {
-    filter () {
-      return this.caseSensitive
-        ? (item, search, textKey) => {
-          return item[textKey].indexOf(search) > -1
-        }
-        : undefined
-    }
-  },
   methods: {
+    resize: () => {
+      console.log('resize')
+    },
     fetch: (item) => {
-      console.log(item.data)
+      Object.keys(item.data).forEach((key) => {
+        console.log('key : ' + key)
+        console.log('value : ' + item.data[key])
+      })
     }
   }
 }
