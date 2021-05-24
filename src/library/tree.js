@@ -1,8 +1,12 @@
 import TreeModel from 'tree-model'
 const Tree = {
-  makeTree: (baseDn, entries) => {
+  makeEntryTree: (baseDn, entries) => {
     const baseDnList = baseDn.split(',')
-    const tree = new TreeModel()
+    const tree = new TreeModel({
+      modelComparatorFn: (left, right) => {
+        return left.name > right.name
+      }
+    }) 
     var rootTree = []
 
     entries.forEach(entry => {
@@ -20,7 +24,8 @@ const Tree = {
           }
         })
 
-        const newNode = { name: realDn.pop(), data: entry, file: true, children: [] }
+        const dn = realDn.pop()
+        const newNode = { name: dn, data: entry, file: true, children: [] }
 
         if (!parentNode) {
           rootTree.addChild(tree.parse(newNode))

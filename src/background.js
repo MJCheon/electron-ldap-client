@@ -67,7 +67,7 @@ app.on('ready', async () => {
 
 ipcMain.on('serverBind', async (event, server) => {
   const searchEntryList = await Ldap.connect(server)
-  const rootTree = Tree.makeTree(server.baseDn, searchEntryList)
+  const rootTree = Tree.makeEntryTree(server.baseDn, searchEntryList)
   event.sender.send('serverBindResponse', rootTree)
 })
 
