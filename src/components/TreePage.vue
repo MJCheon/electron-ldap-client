@@ -1,6 +1,6 @@
 <template>
-  <Split>
-    <SplitArea :size='35'>
+  <split-pane v-on:resize="resize" :min-percent='20' :default-percent='40' split="vertical">
+    <template slot='paneL'>
       <v-treeview
         v-model='entryTree'
         :open.sync='initiallyOpen'
@@ -27,8 +27,8 @@
           </div>
         </template>
       </v-treeview>
-    </SplitArea>
-    <SplitArea :size='65'>
+    </template>
+    <template slot='paneR'>
       <v-treeview
         v-model='attributeTree'
         :items='attributes'
@@ -38,7 +38,7 @@
           <div>
             {{ item.data }}
             <v-icon v-if='!item.file' @click.stop='addChild(item)'
-              color='blue'
+              color='purple'
               fab
               dark
               small
@@ -46,8 +46,8 @@
           </div>
         </template>
       </v-treeview>
-    </SplitArea>
-  </Split>
+    </template>
+  </split-pane>
 </template>
 
 <script>
@@ -70,27 +70,18 @@ export default {
     ipcRenderer.on('serverBindResponse', (event, searchEntryTree) => {
       this.entries = []
       this.initiallyOpen = []
+      this.attributes = []
       this.showCard = true
       this.entries = Object.assign([], searchEntryTree)
       this.initiallyOpen = [searchEntryTree[0].name]
     })
+    ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
+      this.attributes = attrTree
+    })
   },
   methods: {
     fetch (item) {
-      this.attributes = []
-      Object.keys(item.data).sort().forEach((key) => {
-        var data = ''
-        if (Array.isArray(item.data[key])) {
-          var attrChild = []
-          item.data[key].forEach((attr) => {
-            attrChild.push({ id: attr, file: true, data: attr })
-          })
-          this.attributes.push({ id: key, file: false, data: key, children: attrChild })
-        } else {
-          data = key + ' : ' + item.data[key]
-          this.attributes.push({ id: key, file: true, data: data })
-        }
-      })
+      ipcRenderer.send('attributeTree', item.data)
     },
     addChild (item) {
       console.log(item)

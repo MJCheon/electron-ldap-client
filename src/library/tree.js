@@ -37,6 +37,23 @@ const Tree = {
     });
 
     return [ rootTree.model ]
+  },
+  makeAttrTree: (attrData) => {
+    var attrTree = []
+    Object.keys(attrData).sort().forEach((key) => {
+      if (Array.isArray(attrData[key])) {
+        var attrChild = []
+        attrData[key].forEach((attr) => {
+          attrChild.push({ id: attr, file: true, data: attr })
+        })
+        attrTree.push({ id: key, file: false, data: key, children: attrChild })
+      } else {
+        const data = key + ' : ' + attrData[key]
+        attrTree.push({ id: key, file: true, data: data })
+      }
+    })
+  
+    return attrTree
   }
 }
 

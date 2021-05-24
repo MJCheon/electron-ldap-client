@@ -3,7 +3,6 @@
     v-model="drawer"
     permanent
     app
-    width='25%'
   >
     <v-sheet
       color="grey lighten-4"

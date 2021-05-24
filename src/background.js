@@ -71,6 +71,11 @@ ipcMain.on('serverBind', async (event, server) => {
   event.sender.send('serverBindResponse', rootTree)
 })
 
+ipcMain.on('attributeTree', (event, attributes) => {
+  const attrTree = Tree.makeAttrTree(attributes)
+  event.sender.send('attributeTreeResponse', attrTree)
+})
+
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
   if (process.platform === 'win32') {
