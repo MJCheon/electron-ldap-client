@@ -1,7 +1,7 @@
 <template>
   <v-row justify='center'>
     <v-dialog
-      v-model='showDialog'
+      v-model='showServerDialog'
       max-width='600px'
     >
       <template v-slot:activator='{ on, attrs }'>
@@ -29,7 +29,6 @@
         </v-card-title>
         <v-card-text>
           <v-form
-            ref="form"
             v-model="valid"
           >
             <v-row>
@@ -161,11 +160,10 @@ import Store from '../../store/index'
 import EventBus from '../../event-bus'
 
 export default {
-  props: ['server.id'],
   data: () => ({
     hidden: false,
     edit: false,
-    showDialog: false,
+    showServerDialog: false,
     valid: false,
     rules: {
       required: value => !!value || 'This Field is required',
@@ -211,12 +209,12 @@ export default {
       if (editServer) {
         this.server = editServer
         this.edit = true
-        this.showDialog = true
+        this.showServerDialog = true
       }
     })
   },
   watch: {
-    showDialog (value) {
+    showServerDialog (value) {
       if (value && !this.edit) {
         this.server = {
           name: '',
@@ -236,7 +234,7 @@ export default {
       Store.dispatch('SET_SERVER', server)
     },
     close () {
-      this.showDialog = false
+      this.showServerDialog = false
       this.edit = false
     }
   }

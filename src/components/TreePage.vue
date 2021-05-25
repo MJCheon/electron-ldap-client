@@ -1,5 +1,5 @@
 <template>
-  <split-pane v-on:resize="resize" :min-percent='20' :default-percent='40' split="vertical">
+  <split-pane :min-percent='20' :default-percent='40' split="vertical">
     <template slot='paneL'>
       <v-treeview
         v-model='entryTree'
@@ -18,12 +18,7 @@
             {{ 'mdi-file-document' }}
           </v-icon>
             {{ item.name }}
-          <v-icon v-if='!item.file' @click.stop='addChild(item)'
-            color='blue'
-            fab
-            dark
-            small
-          >mdi-plus</v-icon>
+            <TreeEntryEditPage v-if='!item.file' :click='addEntry(item)' />
           </div>
         </template>
       </v-treeview>
@@ -35,9 +30,9 @@
         activatable
       >
         <template v-slot:label='{ item }' >
-          <div>
+          <div @click.stop='modify(item)'>
             {{ item.data }}
-            <v-icon v-if='!item.file' @click.stop='addChild(item)'
+            <v-icon v-if='!item.file' @click.stop='addAttr(item)'
               color='purple'
               fab
               dark
@@ -52,8 +47,12 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import TreeEntryEditPage from './tree/EntryEditPage'
 
 export default {
+  components: {
+    TreeEntryEditPage
+  },
   data: () => ({
     valid: false,
     initiallyOpen: [],
@@ -83,11 +82,14 @@ export default {
     fetch (item) {
       ipcRenderer.send('attributeTree', item.data)
     },
-    addChild (item) {
+    addEntry (item) {
       console.log(item)
     },
-    modify (item) {
-      alert(item)
+    addAttr: (item) => {
+      console.log('addAttr')
+    },
+    modify: (item) => {
+      console.log('modify')
     }
   }
 }
