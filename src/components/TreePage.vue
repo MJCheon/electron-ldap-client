@@ -1,6 +1,4 @@
 <template>
-  <split-pane :min-percent='20' :default-percent='40' split="vertical">
-    <template slot='paneL'>
       <v-treeview
         v-model='entryTree'
         :open.sync='initiallyOpen'
@@ -18,42 +16,37 @@
             {{ 'mdi-file-document' }}
           </v-icon>
             {{ item.name }}
-            <TreeEntryEditPage v-if='!item.file' :click='addEntry(item)' />
-          </div>
-        </template>
-      </v-treeview>
-    </template>
-    <template slot='paneR'>
-      <v-treeview
-        v-model='attributeTree'
-        :items='attributes'
-        activatable
-      >
-        <template v-slot:label='{ item }' >
-          <div @click.stop='modify(item)'>
-            {{ item.data }}
-            <v-icon v-if='!item.file' @click.stop='addAttr(item)'
-              color='purple'
+          <v-btn
+            @click.stop='editEntry(item)'
+            icon
+            fab
+            x-small
+          >
+            <v-icon
+              color='blue'
               fab
               dark
               small
-            >mdi-plus</v-icon>
+            >mdi-file-document-edit-outline</v-icon>
+          </v-btn>
           </div>
         </template>
       </v-treeview>
-    </template>
-  </split-pane>
+
 </template>
 
 <script>
 import { ipcRenderer } from 'electron'
-import TreeEntryEditPage from './tree/EntryEditPage'
+import EventBus from '../event-bus'
 
 export default {
-  components: {
-    TreeEntryEditPage
-  },
   data: () => ({
+    ops: {
+      vuescroll: {},
+      scrollPanel: {},
+      rail: {},
+      bar: {}
+    },
     valid: false,
     initiallyOpen: [],
     entryTree: [],
@@ -79,14 +72,11 @@ export default {
     })
   },
   methods: {
-    fetch (item) {
-      ipcRenderer.send('attributeTree', item.data)
+    fetch (treeNode) {
+      ipcRenderer.send('attributeTree', treeNode.data)
     },
-    addEntry (item) {
-      console.log(item)
-    },
-    addAttr: (item) => {
-      console.log('addAttr')
+    editEntry: (entry) => {
+      EventBus.$emit('editEntry', entry)
     },
     modify: (item) => {
       console.log('modify')

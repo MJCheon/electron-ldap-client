@@ -1,22 +1,7 @@
 <template>
     <v-dialog
-      v-model='showTreeDialog'
-      max-width='600px'
+      v-model='showEntryDialog'
     >
-    <template v-slot:activator='{ on, attr }'>
-        <v-fab-transition>
-          <v-icon
-            v-on='on'
-            v-bind='attr'
-            v-show='!hidden'
-            color='blue'
-            fab
-            top
-            dark
-            small
-          >mdi-plus</v-icon>
-        </v-fab-transition>
-      </template>
       <v-card>
         <v-card-title>
           <span class='headline'>Edit Entry</span>
@@ -25,11 +10,7 @@
           <v-form
             ref="form"
           >
-            <v-row>
-              <v-col>
-                {{ attrNode }}
-              </v-col>
-            </v-row>
+            {{ entry }}
             <v-spacer></v-spacer>
             <v-btn
               color='blue darken-1'
@@ -58,26 +39,24 @@ import EventBus from '../../event-bus'
 
 export default {
   data: () => ({
-    attrNode: [],
-    hidden: false,
-    showTreeDialog: false,
+    entry: [],
+    showEntryDialog: false,
     server: {
       name: ''
     },
     sslItems: []
   }),
   created () {
-    EventBus.$on('addEntry', node => {
-      console.log('event accept')
-      this.attrNode = node
-      this.showTreeDialog = true
+    EventBus.$on('editEntry', entry => {
+      this.entry = entry
+      this.showEntryDialog = true
     })
   },
   watch: {
   },
   methods: {
     close () {
-      this.showTreeDialog = false
+      this.showEntryDialog = false
     }
   }
 }

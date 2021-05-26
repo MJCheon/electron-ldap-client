@@ -7,6 +7,7 @@
         fluid
       >
         <TreePage />
+        <TreeEntryEditPage />
       </v-container>
     </v-main>
   </v-app>
@@ -14,11 +15,13 @@
 
 <script>
 import TreePage from './TreePage'
+import TreeEntryEditPage from './tree/EntryEditPage'
 import NavigationPage from './NavigationPage'
 
 export default {
   components: {
     TreePage,
+    TreeEntryEditPage,
     NavigationPage
   }
 }
@@ -31,11 +34,5 @@ export default {
 }
 .v-subheader {
   font-size: '10px';
-}
-html {
-  overflow-y: hidden;
-}
-::-webkit-scrollbar {
-  width: 0px; /* Remove scrollbar space */
 }
 </style>
