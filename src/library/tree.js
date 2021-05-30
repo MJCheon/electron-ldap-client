@@ -110,7 +110,7 @@ const Tree = {
             attrId = rootId
           }
           var modifyData = {}
-          modifyData[attrId] = node.model.name
+          modifyData[attrId] = [ node.model.name ]
           saveDataList.push({ operation: node.model.state, modifyData: modifyData })
         }
       } else if (node.model.id === '') {

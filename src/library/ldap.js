@@ -38,17 +38,15 @@ const Ldapjs = {
   },
   modify: async (saveData) => {
     try {
-      const id = saveData.id
+      const id = 'cn=cvs,ou=Netgroup,dc=gldap,dc=com'
 
       saveData.data.forEach(async (item) => {
         const change = {
           operation: item.operation,
           modification: item.modifyData
         }
-
-        console.log(id)
         console.log(change)
-        // await client.modify(id, change)
+        await client.modify(id, change)
       })
     } catch (e) {
       Assert.ifError(e)
