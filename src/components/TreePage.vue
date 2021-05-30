@@ -1,86 +1,104 @@
 <template>
-      <v-treeview
-        v-model='entryTree'
-        :open.sync='initiallyOpen'
-        :items='entries'
-        item-key='name'
-        open-on-click
-        activatable
-      >
-        <template v-slot:label='{ item, open }'>
-          <div @click.stop='fetch(item)'>
-          <v-icon v-if='!item.file'>
-            {{ open ? 'mdi-folder-open' : 'mdi-folder' }}
-          </v-icon>
-          <v-icon v-else>
-            {{ 'mdi-file-document' }}
-          </v-icon>
-            {{ item.name }}
-          <v-btn
-            @click.stop='editEntry(item)'
-            icon
-            fab
-            x-small
-          >
-            <v-icon
-              color='blue'
-              fab
-              dark
-              small
-            >mdi-file-document-edit-outline</v-icon>
-          </v-btn>
-          </div>
-        </template>
-      </v-treeview>
-
+  <div>
+    <vue-tree-list
+      @click="onClick"
+      @change-name="onChangeName"
+      @delete-node="onDel"
+      @add-node="onAddNode"
+      :model="entryTree"
+      :default-tree-node-name="defaultTreeNode"
+      :default-leaf-node-name="defaultLeafNode"
+      v-bind:default-expanded="false"
+    >
+      <template v-slot:leafNameDisplay="slotProps">
+        <span>
+          {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
+        </span>
+      </template>
+      <span
+        class="icon"
+        slot="addTreeNodeIcon"
+      ><v-icon dense color='purple lighten-2'>mdi-folder-plus-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="addLeafNodeIcon"
+      ><v-icon dense color='blue lighten-2'>mdi-text-box-plus-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="editNodeIcon"
+      ><v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="delNodeIcon"
+      ><v-icon dense color='red lighten-2'>mdi-trash-can-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="leafNodeIcon"
+      ><v-icon color='green lighten-2'>mdi-file-document</v-icon></span>
+      <span
+        class="icon"
+        slot="treeNodeIcon"
+      ><v-icon color='yellow darken-2'>mdi-folder</v-icon></span>
+    </vue-tree-list>
+  </div>
 </template>
-
 <script>
+import { VueTreeList, Tree, TreeNode } from 'vue-tree-list'
 import { ipcRenderer } from 'electron'
-import EventBus from '../event-bus'
 
 export default {
+  components: {
+    VueTreeList
+  },
   data: () => ({
-    ops: {
-      vuescroll: {},
-      scrollPanel: {},
-      rail: {},
-      bar: {}
-    },
-    valid: false,
-    initiallyOpen: [],
-    entryTree: [],
-    attributeTree: [],
-    entries: [],
-    attributes: [],
-    search: null,
-    caseSensitive: false,
-    showCard: false,
-    hideHeaders: true
+    newTree: {},
+    defaultTreeNode: 'New Tree',
+    defaultLeafNode: 'New Leaf',
+    entryTree: new Tree([])
   }),
   created () {
     ipcRenderer.on('serverBindResponse', (event, searchEntryTree) => {
-      this.entries = []
-      this.initiallyOpen = []
-      this.attributes = []
-      this.showCard = true
-      this.entries = Object.assign([], searchEntryTree)
-      this.initiallyOpen = [searchEntryTree[0].name]
-    })
-    ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
-      this.attributes = attrTree
+      this.entryTree = []
+      this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
   },
   methods: {
-    fetch (treeNode) {
-      ipcRenderer.send('attributeTree', treeNode.data)
+    onDel (node) {
+      console.log(node)
+      node.remove()
     },
-    editEntry: (entry) => {
-      EventBus.$emit('editEntry', entry)
+    onChangeName (params) {
+      console.log(params)
     },
-    modify: (item) => {
-      console.log('modify')
+    onAddNode (params) {
+      console.log(params)
+    },
+    onClick (params) {
+      ipcRenderer.send('attributeTree', params.id, params.data)
+    },
+    addNode () {
+      var node = new TreeNode({ name: 'new node', isLeaf: false })
+      if (!this.data.children) this.data.children = []
+      this.data.addChildren(node)
     }
   }
 }
 </script>
+<style>
+.vtl .vtl-drag-disabled {
+  background-color: #d0cfcf;
+}
+.vtl .vtl-drag-disabled:hover {
+  background-color: #d0cfcf;
+}
+.vtl .vtl-disabled {
+  background-color: #d0cfcf;
+}
+.icon:hover {
+  cursor: pointer;
+}
+.muted {
+  color: gray;
+  font-size: 80%;
+}
+</style>

@@ -1,14 +1,21 @@
 import LdapClient from 'ldapjs-client'
 import Assert from 'assert'
 
+let client = ''
+
 const Ldapjs = {
   connect: async (server) => {
+    if (client !== '') {
+      client.unbind()
+    }
+
     var url = 'ldap://' + server.ip + ':' + server.port
+    
     if (server.ssl === 'ssl') {
       url = 'ldaps://' + server.ip + ':' + server.port
     }
 
-    const client = new LdapClient({
+    client = new LdapClient({
       url: url,
       timeout: parseInt(server.connTimeout)
     })
@@ -27,8 +34,24 @@ const Ldapjs = {
     } catch (e) {
       await client.destroy()
       Assert.ifError(e)
-    } finally {
-      await client.unbind()
+    }
+  },
+  modify: async (saveData) => {
+    try {
+      const id = saveData.id
+
+      saveData.data.forEach(async (item) => {
+        const change = {
+          operation: item.operation,
+          modification: item.modifyData
+        }
+
+        console.log(id)
+        console.log(change)
+        // await client.modify(id, change)
+      })
+    } catch (e) {
+      Assert.ifError(e)
     }
   }
 }

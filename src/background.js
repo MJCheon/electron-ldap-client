@@ -5,6 +5,7 @@ import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import Ldap from './library/ldap'
 import Tree from './library/Tree'
+import Ldapjs from './library/ldap'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -71,9 +72,14 @@ ipcMain.on('serverBind', async (event, server) => {
   event.sender.send('serverBindResponse', rootTree)
 })
 
-ipcMain.on('attributeTree', (event, attributes) => {
-  const attrTree = Tree.makeAttrTree(attributes)
+ipcMain.on('attributeTree', (event, id, attributes) => {
+  const attrTree = Tree.makeAttrTree(id, attributes)
   event.sender.send('attributeTreeResponse', attrTree)
+})
+
+ipcMain.on('saveAttribute', async (event, attrTree) => {
+  const saveData = Tree.getSaveData(attrTree)
+  await Ldapjs.modify(saveData)
 })
 
 // Exit cleanly on request from parent process in development mode.

@@ -4,13 +4,49 @@
     >
       <v-card>
         <v-card-title>
-          <span class='headline'>Edit Entry</span>
+          <span class='headline'>Edit Attribute</span>
         </v-card-title>
         <v-card-text>
-          <v-form
-            ref="form"
-          >
-            {{ entry }}
+            <vue-tree-list
+      @click="onClick"
+      @change-name="onChangeName"
+      @delete-node="onDel"
+      @add-node="onAddNode"
+      :model="attrTree"
+      :default-tree-node-name="defaultTreeNode"
+      :default-leaf-node-name="defaultLeafNode"
+      v-bind:default-expanded="true"
+    >
+      <template v-slot:leafNameDisplay="slotProps">
+        <span>
+          {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
+        </span>
+      </template>
+      <span
+        class="icon"
+        slot="addTreeNodeIcon"
+      ><v-icon dense color='purple lighten-2'>mdi-folder-plus-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="addLeafNodeIcon"
+      ><v-icon dense color='blue lighten-2'>mdi-text-box-plus-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="editNodeIcon"
+      ><v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="delNodeIcon"
+      ><v-icon dense color='red lighten-2'>mdi-trash-can-outline</v-icon></span>
+      <span
+        class="icon"
+        slot="leafNodeIcon"
+      ><v-icon color='green lighten-2'>mdi-file-document</v-icon></span>
+      <span
+        class="icon"
+        slot="treeNodeIcon"
+      ><v-icon color='yellow darken-2'>mdi-folder</v-icon></span>
+    </vue-tree-list>
             <v-spacer></v-spacer>
             <v-btn
               color='blue darken-1'
@@ -24,22 +60,27 @@
               absolute
               right
               text
-              @click='close()'
+              @click='save(attrTree)'
             >
               Save
             </v-btn>
-          </v-form>
         </v-card-text>
       </v-card>
     </v-dialog>
 </template>
 
 <script>
-import EventBus from '../../event-bus'
+import { VueTreeList, Tree } from 'vue-tree-list'
+import { ipcRenderer } from 'electron'
 
 export default {
+  components: {
+    VueTreeList
+  },
   data: () => ({
-    entry: [],
+    defaultTreeNode: 'New Tree',
+    defaultLeafNode: 'New Leaf',
+    attrTree: new Tree([]),
     showEntryDialog: false,
     server: {
       name: ''
@@ -47,17 +88,49 @@ export default {
     sslItems: []
   }),
   created () {
-    EventBus.$on('editEntry', entry => {
-      this.entry = entry
+    ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
+      this.attrTree = new Tree(attrTree)
       this.showEntryDialog = true
     })
   },
-  watch: {
-  },
   methods: {
+    onDel (node) {
+      console.log(node)
+      node.remove()
+    },
+    onChangeName (params) {
+      params.state = 'replace'
+    },
+    onAddNode (params) {
+      params.state = 'add'
+    },
+    onClick (params) {
+    },
+    save (attrTree) {
+      ipcRenderer.send('saveAttribute', attrTree)
+      this.close()
+    },
     close () {
       this.showEntryDialog = false
     }
   }
 }
 </script>
+<style>
+.vtl .vtl-drag-disabled {
+  background-color: #d0cfcf;
+}
+.vtl .vtl-drag-disabled:hover {
+  background-color: #d0cfcf;
+}
+.vtl .vtl-disabled {
+  background-color: #d0cfcf;
+}
+.icon:hover {
+  cursor: pointer;
+}
+.muted {
+  color: gray;
+  font-size: 80%;
+}
+</style>

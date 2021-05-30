@@ -25,7 +25,7 @@
         link
       >
         <v-list-item-icon>
-          <v-icon>mdi-desktop-tower</v-icon>
+          <v-icon color='red lighten-2'>mdi-desktop-tower</v-icon>
         </v-list-item-icon>
 
         <v-list-item-content>
