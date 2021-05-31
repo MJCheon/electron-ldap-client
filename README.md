@@ -1,5 +1,7 @@
 # electron-ldap-client
 
+## This project is under development!!
+
 ## Project setup
 ```
 yarn install
@@ -7,18 +9,15 @@ yarn install
 
 ### Compiles and hot-reloads for development
 ```
-yarn serve
+yarn electron:serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn build
+yarn electron:build
 ```
 
 ### Lints and fixes files
 ```
 yarn lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
