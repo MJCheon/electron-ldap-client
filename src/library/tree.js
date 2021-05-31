@@ -1,8 +1,9 @@
 import TreeModel from 'tree-model'
 
 const Tree = {
-  makeEntryTree: (baseDn, entries) => {
-    const baseDnList = baseDn.split(',')
+  makeEntryTree: (searchEntries) => {
+    const baseDnList = searchEntries.baseDn.split(',')
+    const entries = searchEntries.entries
     const tree = new TreeModel({
       modelComparatorFn: (left, right) => {
         return left.name > right.name
@@ -14,11 +15,12 @@ const Tree = {
       const realDn = entry.dn.split(',').reverse().filter((node) => !baseDnList.includes(node))
       var parentNode = ''
 
-      if (realDn.length === 0) { 
+      if (rootTree.length === 0) { 
         const rootNode = { 
           id: entry.dn,
           name: entry.dn,
           isLeaf: true,
+          dragDisabled: true,
           data: entry,
           children: []
         }
@@ -36,6 +38,7 @@ const Tree = {
           id: dn,
           name: dn,
           isLeaf: true,
+          dragDisabled: true,
           data: entry
         }
 
@@ -93,7 +96,7 @@ const Tree = {
     
     return [ attrTree ]
   },
-  getSaveData: (tree) => {
+  getSaveData: (tree, deleteNodeList) => {
     const parseTree = new TreeModel().parse(tree)
     
     const saveDataList = []
@@ -101,23 +104,50 @@ const Tree = {
 
     parseTree.walk((node) => {
       var attrId = ''
-
+      var data = ''
+  
       if (!node.isRoot() && node.model.id !== '') {
-        if ( node.model.state ) {
-          if ( node.model.pid ) {
-            attrId = node.model.pid
-          } else {
-            attrId = rootId
-          }
-          var modifyData = {}
-          modifyData[attrId] = [ node.model.name ]
-          saveDataList.push({ operation: node.model.state, modifyData: modifyData })
+
+        if ( rootId === '' && node.model.data.includes('dn') ) {
+          const tmpData = node.model.data.split(':')
+          rootId = tmpData[1]
         }
-      } else if (node.model.id === '') {
-        rootId = node.model.name
+
+        if ( attrId === '') {
+          if (node.model.name.includes(':')) {
+            const attribute = node.model.name.split(':')
+            attrId = attribute[0]
+            data = attribute[1]
+          } else if (node.model.id) {
+            attrId = node.model.id
+            data = node.model.name
+          } else if (node.model.pid) {
+            attrId = node.model.pid
+            data = node.model.name
+          }
+
+          var modifyData = {}
+          modifyData[attrId] = data
+
+        }
+        
+        if (!node.model.data && node.model.name) { // add
+          saveDataList.push({ operation: 'add', modifyData: modifyData })
+        } else if (!node.model.data.includes(node.model.name)) { // modify
+          saveDataList.push({ operation: 'replace', modifyData: modifyData })  
+        }
       }
     })
 
+    if (deleteNodeList.length > 0) {  // delete
+      deleteNodeList.forEach(node => {
+        var modifyData = {}
+        modifyData[node.id] = node.name
+
+        saveDataList.push({ operation: 'delete', modifyData: modifyData })
+      });
+    }
+    
     const returnData = { id: rootId, data: saveDataList }
     return returnData
   }

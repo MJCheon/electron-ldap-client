@@ -80,6 +80,7 @@ export default {
   data: () => ({
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
+    deleteNodeList: [],
     attrTree: new Tree([]),
     showEntryDialog: false,
     server: {
@@ -95,19 +96,18 @@ export default {
   },
   methods: {
     onDel (node) {
-      console.log(node)
+      this.deleteNodeList.push(node)
       node.remove()
     },
     onChangeName (params) {
-      params.state = 'replace'
     },
     onAddNode (params) {
-      params.state = 'add'
     },
     onClick (params) {
     },
     save (attrTree) {
-      ipcRenderer.send('saveAttribute', attrTree)
+      ipcRenderer.send('saveAttribute', attrTree, this.deleteNodeList)
+      ipcRenderer.send('refreshRootTree')
       this.close()
     },
     close () {
@@ -117,15 +117,6 @@ export default {
 }
 </script>
 <style>
-.vtl .vtl-drag-disabled {
-  background-color: #d0cfcf;
-}
-.vtl .vtl-drag-disabled:hover {
-  background-color: #d0cfcf;
-}
-.vtl .vtl-disabled {
-  background-color: #d0cfcf;
-}
 .icon:hover {
   cursor: pointer;
 }

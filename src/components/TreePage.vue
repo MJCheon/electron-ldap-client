@@ -85,15 +85,6 @@ export default {
 }
 </script>
 <style>
-.vtl .vtl-drag-disabled {
-  background-color: #d0cfcf;
-}
-.vtl .vtl-drag-disabled:hover {
-  background-color: #d0cfcf;
-}
-.vtl .vtl-disabled {
-  background-color: #d0cfcf;
-}
 .icon:hover {
   cursor: pointer;
 }

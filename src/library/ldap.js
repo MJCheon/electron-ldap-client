@@ -2,12 +2,14 @@ import LdapClient from 'ldapjs-client'
 import Assert from 'assert'
 
 let client = ''
+let baseDn = ''
 
 const Ldapjs = {
   connect: async (server) => {
     if (client !== '') {
       client.unbind()
     }
+    baseDn = server.baseDn
 
     var url = 'ldap://' + server.ip + ':' + server.port
     
@@ -29,23 +31,30 @@ const Ldapjs = {
 
       const searchEntries = await client.search(server.baseDn, searchOptions)
 
-      return searchEntries
+      return { baseDn: baseDn, entries: searchEntries }
       
     } catch (e) {
       await client.destroy()
       Assert.ifError(e)
     }
   },
+  search: async (dn = '', options = '') => {
+    if (dn === '') dn = baseDn
+    if (options === '') options = { scope: 'sub' }
+
+    const searchEntries = await client.search(dn, options)
+
+    return { baseDn: dn, entries: searchEntries }
+  },
   modify: async (saveData) => {
     try {
-      const id = 'cn=cvs,ou=Netgroup,dc=gldap,dc=com'
+      const id = saveData.id
 
       saveData.data.forEach(async (item) => {
         const change = {
           operation: item.operation,
           modification: item.modifyData
         }
-        console.log(change)
         await client.modify(id, change)
       })
     } catch (e) {
