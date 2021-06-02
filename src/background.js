@@ -69,23 +69,23 @@ app.on('ready', async () => {
 ipcMain.on('serverBind', async (event, server) => {
   const searchEntries = await Ldap.connect(server)
   const rootTree = Tree.makeEntryTree(searchEntries)
-  event.sender.send('serverBindResponse', rootTree)
+  event.reply('serverBindResponse', rootTree)
 })
 
 ipcMain.on('attributeTree', (event, id, attributes) => {
   const attrTree = Tree.makeAttrTree(id, attributes)
-  event.sender.send('attributeTreeResponse', attrTree)
+  event.reply('attributeTreeResponse', attrTree)
 })
 
 ipcMain.on('saveAttribute', async (event, attrTree, deleteNodeList) => {
-  const saveData = Tree.getSaveData(attrTree, deleteNodeList)
-  await Ldapjs.modify(saveData)
+  const changeData = Tree.getChangesFromData(attrTree, deleteNodeList)
+  await Ldapjs.modify(changeData)
 })
 
 ipcMain.on('refreshRootTree', async (event) => {
   const searchEntries = await Ldap.search()
   const rootTree = Tree.makeEntryTree(searchEntries)
-  event.sender.send('serverBindResponse', rootTree)
+  event.reply('serverBindResponse', rootTree)
 })
 
 // Exit cleanly on request from parent process in development mode.

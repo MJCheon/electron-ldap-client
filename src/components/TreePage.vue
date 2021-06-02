@@ -1,5 +1,24 @@
 <template>
   <div>
+    <v-btn
+      elevation='2'
+      icon
+      color='blue darken-1'
+      @click='refreshTree()'
+    >
+    <v-icon>mdi-refresh</v-icon>
+    </v-btn>
+    <v-btn
+      elevation='2'
+      color='blue darken-1'
+      absolute
+      right
+      icon
+      @click='save(entryTree)'
+    >
+    <v-icon>mdi-content-save</v-icon>
+    </v-btn>
+    <v-spacer></v-spacer>
     <vue-tree-list
       @click="onClick"
       @change-name="onChangeName"
@@ -58,7 +77,7 @@ export default {
   }),
   created () {
     ipcRenderer.on('serverBindResponse', (event, searchEntryTree) => {
-      this.entryTree = []
+      this.entryTree = null
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
   },
@@ -66,6 +85,9 @@ export default {
     onDel (node) {
       console.log(node)
       node.remove()
+    },
+    refreshTree () {
+      ipcRenderer.send('refreshRootTree')
     },
     onChangeName (params) {
       console.log(params)

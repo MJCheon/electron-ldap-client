@@ -2,9 +2,9 @@ import TreeModel from 'tree-model'
 
 const Tree = {
   makeEntryTree: (searchEntries) => {
-    const baseDnList = searchEntries.baseDn.split(',')
-    const entries = searchEntries.entries
-    const tree = new TreeModel({
+    var baseDnList = searchEntries.baseDn.split(',')
+    var entries = searchEntries.entries
+    var tree = new TreeModel({
       modelComparatorFn: (left, right) => {
         return left.name > right.name
       }
@@ -96,11 +96,39 @@ const Tree = {
     
     return [ attrTree ]
   },
-  getSaveData: (tree, deleteNodeList) => {
+  getChangesFromData: (tree, deleteNodeList) => {
     const parseTree = new TreeModel().parse(tree)
     
-    const saveDataList = []
+    var changeDataList = []
+
+    var addChangeData = {}
+    var replaceChangeData = {}
+    var deleteChangeData = {}
+
     var rootId = ''
+
+    if (deleteNodeList.length > 0) {  // delete
+      deleteNodeList.forEach(node => {
+        var attrId = node.id
+        var data = node.name
+
+        if(node.id === node.name) {  // netgroup
+          var parentNode = node.parent
+          var replaceDataInDeleteList = []
+
+          attrId = parentNode.id
+          parentNode.children.forEach(childNode => {
+            if (childNode.name !== data) {
+              replaceDataInDeleteList.push(childNode.name)
+            }
+          });
+
+          replaceChangeData[attrId] = replaceDataInDeleteList
+        } else {
+          deleteChangeData[attrId] = data
+        }
+      });
+    }
 
     parseTree.walk((node) => {
       var attrId = ''
@@ -109,46 +137,63 @@ const Tree = {
       if (!node.isRoot() && node.model.id !== '') {
 
         if ( rootId === '' && node.model.data.includes('dn') ) {
-          const tmpData = node.model.data.split(':')
+          var tmpData = node.model.data.split(':')
           rootId = tmpData[1]
         }
 
         if ( attrId === '') {
-          if (node.model.name.includes(':')) {
-            const attribute = node.model.name.split(':')
-            attrId = attribute[0]
-            data = attribute[1]
-          } else if (node.model.id) {
+          const newIdPattern = /\d{13}/
+          if (newIdPattern.test(node.model.id)) { // 신규 Node
+            if (node.model.name.includes(':')) { // key:value 형식일 때, add
+              var attribute = node.model.name.split(':')
+              attrId = attribute[0]
+              data = attribute[1].trim()
+              addChangeData[attrId] = data
+            } else { // 값만 들어간 경우, 배열로 만들어 replace
+              var parentNode = node.model.parent
+              var replaceDataList = []
+
+              attrId = parentNode.id
+              parentNode.children.forEach(childNode => {
+                replaceDataList.push(childNode.name.trim())
+              });
+
+              replaceChangeData[attrId] = replaceDataList
+            } 
+          } else {// 기존 ID가 있고, data가 다른 경우 replace
             attrId = node.model.id
-            data = node.model.name
-          } else if (node.model.pid) {
-            attrId = node.model.pid
-            data = node.model.name
+            data = node.model.name.trim()
+            if (!node.model.data.includes(data)) {
+              var parentNode = node.model.parent
+              var replaceDataList = []
+
+              if (parentNode.id === parentNode.name) {
+                attrId = parentNode.id
+                parentNode.children.forEach(childNode => {
+                  replaceDataList.push(childNode.name.trim())
+                });
+
+                replaceChangeData[attrId] = replaceDataList
+              } else {
+                replaceChangeData[attrId] = data
+              }
+            }
           }
-
-          var modifyData = {}
-          modifyData[attrId] = data
-
-        }
-        
-        if (!node.model.data && node.model.name) { // add
-          saveDataList.push({ operation: 'add', modifyData: modifyData })
-        } else if (!node.model.data.includes(node.model.name)) { // modify
-          saveDataList.push({ operation: 'replace', modifyData: modifyData })  
         }
       }
     })
 
-    if (deleteNodeList.length > 0) {  // delete
-      deleteNodeList.forEach(node => {
-        var modifyData = {}
-        modifyData[node.id] = node.name
-
-        saveDataList.push({ operation: 'delete', modifyData: modifyData })
-      });
+    if (deleteChangeData !== {}) {
+      changeDataList.push({ operation: 'delete', modifyData: deleteChangeData })
+    }
+    if (replaceChangeData !== {}) {
+      changeDataList.push({ operation: 'replace', modifyData: replaceChangeData })
+    }
+    if (addChangeData !== {}) {
+      changeDataList.push({ operation: 'add', modifyData: addChangeData })
     }
     
-    const returnData = { id: rootId, data: saveDataList }
+    var returnData = { id: rootId, data: changeDataList }
     return returnData
   }
 }

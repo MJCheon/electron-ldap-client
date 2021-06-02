@@ -107,7 +107,6 @@ export default {
     },
     save (attrTree) {
       ipcRenderer.send('saveAttribute', attrTree, this.deleteNodeList)
-      ipcRenderer.send('refreshRootTree')
       this.close()
     },
     close () {
