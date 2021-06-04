@@ -195,10 +195,6 @@ export default {
       {
         text: 'SSL',
         value: 'ssl'
-      },
-      {
-        text: 'TLS',
-        value: 'tls'
       }
     ]
   }),
