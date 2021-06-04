@@ -1,5 +1,6 @@
 <template>
     <v-dialog
+      max-width='60%'
       v-model='showEntryDialog'
     >
       <v-card>
@@ -92,6 +93,9 @@ export default {
     ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
       this.attrTree = new Tree(attrTree)
       this.showEntryDialog = true
+    })
+    ipcRenderer.on('saveAttributeResponse', (event) => {
+      ipcRenderer.send('refreshRootTree')
     })
   },
   methods: {

@@ -80,6 +80,7 @@ ipcMain.on('attributeTree', (event, id, attributes) => {
 ipcMain.on('saveAttribute', async (event, attrTree, deleteNodeList) => {
   const changeData = Tree.getChangesFromData(attrTree, deleteNodeList)
   await Ldapjs.modify(changeData)
+  event.reply('saveAttributeResponse')
 })
 
 ipcMain.on('refreshRootTree', async (event) => {
