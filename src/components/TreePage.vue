@@ -1,24 +1,25 @@
 <template>
-  <div>
-    <v-btn
-      elevation='2'
-      icon
-      color='blue darken-1'
-      @click='refreshTree()'
+  <v-app>
+    <div
+      class='d-flex flex-row-reverse'
     >
-    <v-icon>mdi-refresh</v-icon>
-    </v-btn>
-    <v-btn
-      elevation='2'
-      color='blue darken-1'
-      absolute
-      right
-      icon
-      @click='save(entryTree)'
-    >
-    <v-icon>mdi-content-save</v-icon>
-    </v-btn>
-    <v-spacer></v-spacer>
+      <v-btn
+        elevation='2'
+        icon
+        color='blue darken-1'
+        @click='refreshTree()'
+      >
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
+      <v-btn
+        elevation='2'
+        right
+        color='blue darken-1'
+        icon
+      >
+        <v-icon>mdi-content-save</v-icon>
+      </v-btn>
+    </div>
     <vue-tree-list
       @click="onClick"
       @change-name="onChangeName"
@@ -59,7 +60,7 @@
         slot="treeNodeIcon"
       ><v-icon color='yellow darken-2'>mdi-folder</v-icon></span>
     </vue-tree-list>
-  </div>
+  </v-app>
 </template>
 <script>
 import { VueTreeList, Tree, TreeNode } from 'vue-tree-list'
