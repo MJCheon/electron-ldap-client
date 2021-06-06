@@ -46,7 +46,7 @@
       <span
         class="icon"
         slot="editNodeIcon"
-      ><v-icon dense color='blue lighten-2' @click.stop='isEditable'>mdi-file-document-edit-outline</v-icon></span>
+      ><v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon></span>
       <span
         class="icon"
         slot="delNodeIcon"
@@ -90,11 +90,9 @@ export default {
     },
     onChangeName (params) {
       if (params.eventType && params.eventType === 'blur' && params.id !== params.newName) {
-        console.log(params)
       }
     },
     onAddNode (params) {
-      console.log(params)
     },
     onClick (params) {
       ipcRenderer.send('attributeTree', params.id, params.data)
@@ -106,10 +104,6 @@ export default {
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
-    },
-    isEditable () {
-      this.editEntry = true
-      console.log(this.editEntry)
     }
   }
 }
