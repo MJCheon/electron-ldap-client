@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import Ldap from './library/ldap'
@@ -72,7 +72,7 @@ ipcMain.on('serverBind', async (event, server) => {
   event.reply('serverBindResponse', rootTree)
 })
 
-ipcMain.on('attributeTree', (event, id, attributes) => {
+ipcMain.on('attributeTree', (event, id, attributes) => { 
   const attrTree = Tree.makeAttrTree(id, attributes)
   event.reply('attributeTreeResponse', attrTree)
 })

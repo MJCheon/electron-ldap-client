@@ -1,5 +1,6 @@
 import LdapClient from 'ldapjs-client'
-import Assert from 'assert'
+import ErrorBox from './errorBox'
+
 
 let client = ''
 let baseDn = ''
@@ -7,7 +8,9 @@ let baseDn = ''
 const Ldapjs = {
   connect: async (server) => {
     if (client !== '') {
-      client.unbind()
+      await client.unbind().catch((error) => {
+        ErrorBox.showError('LDAP Error', error.code + ' : ' + error.name)
+      })
     }
     baseDn = server.baseDn
 
@@ -22,21 +25,20 @@ const Ldapjs = {
       timeout: parseInt(server.connTimeout)
     })
 
-    try{
-      await client.bind(server.rootDn, server.password)
 
-      const searchOptions = {
-        scope: 'sub'
-      }
+    await client.bind(server.rootDn, server.password).catch((error) => {
+      ErrorBox.showError('LDAP Error', error.code + ' : ' + error.name)
+    })
 
-      const searchEntries = await client.search(server.baseDn, searchOptions)
-
-      return { baseDn: baseDn, entries: searchEntries }
-      
-    } catch (e) {
-      await client.destroy()
-      Assert.ifError(e)
+    const searchOptions = {
+      scope: 'sub'
     }
+
+    const searchEntries = await client.search(server.baseDn, searchOptions).catch((error) => {
+      ErrorBox.showError('LDAP Error', error.code + ' : ' + error.name)
+    })
+
+    return { baseDn: baseDn, entries: searchEntries }  
   },
   search: async (dn = '', options = '') => {
     if (dn === '') dn = baseDn
@@ -47,7 +49,7 @@ const Ldapjs = {
     return { baseDn: dn, entries: searchEntries }
   },
   modify: async (changeData) => {
-    try {
+    try{
       var id = changeData.id
 
       if (changeData.data) {
@@ -56,12 +58,20 @@ const Ldapjs = {
             operation: item.operation,
             modification: item.modifyData
           }
-          await client.modify(id, change)
+          await client.modify(id, change).catch((error) => {
+              ErrorBox.showError('LDAP Error', error.code + ' : ' + error.name)
+            }
+          )
         })
       }
     } catch (e) {
-      Assert.ifError(e)
+      console.log('Error')
     }
+  },
+  unbind: async () => {
+    await client.unbind().catch((error) => {
+      ErrorBox.showError('LDAP Error', error.code + ' : ' + error.name)
+    })
   }
 }
 
