@@ -16,17 +16,31 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: 14
+          architecture: 'x64'
 
-      - name: Build/release Electron app
+      - name: Install Dependency
+        run: yarn install
+
+      - name: Build app
+        run: yarn electron:build
+      
+      - name: Release app
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "dist_electron/electron-ldap-client*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: samuelmeuli/action-electron-builder@v1
         with:
           build_script_name: electron:build
+          args: ''
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
