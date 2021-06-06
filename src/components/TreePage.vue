@@ -46,7 +46,7 @@
       <span
         class="icon"
         slot="editNodeIcon"
-      ><v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon></span>
+      ><v-icon dense color='blue lighten-2' @click.stop='isEditable'>mdi-file-document-edit-outline</v-icon></span>
       <span
         class="icon"
         slot="delNodeIcon"
@@ -71,6 +71,7 @@ export default {
     VueTreeList
   },
   data: () => ({
+    deleteEntryList: [],
     newTree: {},
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
@@ -84,14 +85,13 @@ export default {
   },
   methods: {
     onDel (node) {
-      console.log(node)
+      this.deleteEntryList.push(node)
       node.remove()
     },
-    refreshTree () {
-      ipcRenderer.send('refreshRootTree')
-    },
     onChangeName (params) {
-      console.log(params)
+      if (params.eventType && params.eventType === 'blur' && params.id !== params.newName) {
+        console.log(params)
+      }
     },
     onAddNode (params) {
       console.log(params)
@@ -103,6 +103,13 @@ export default {
       var node = new TreeNode({ name: 'new node', isLeaf: false })
       if (!this.data.children) this.data.children = []
       this.data.addChildren(node)
+    },
+    refreshTree () {
+      ipcRenderer.send('refreshRootTree')
+    },
+    isEditable () {
+      this.editEntry = true
+      console.log(this.editEntry)
     }
   }
 }
