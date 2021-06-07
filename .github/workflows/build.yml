@@ -31,6 +31,7 @@ jobs:
         uses: samuelmeuli/action-electron-builder@v1
         with:
           build_script_name: electron:build
+          use_vue_cli: true
           args: '--publish onTag'
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
