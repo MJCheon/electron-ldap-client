@@ -1,6 +1,7 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, dialog } from 'electron'
+import Path from 'path'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import Ldap from './library/ldap'
@@ -20,6 +21,7 @@ async function createWindow () {
     width: 1280,
     height: 960,
     useContentSize: true,
+    icon: Path.join(__dirname,'./assets/icons/icon.png'),
     webPreferences: {
       nodeIntegration: true
     }
