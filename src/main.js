@@ -3,13 +3,10 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import VueSplitPane from 'vue-splitpane'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
 
 Vue.config.productionTip = false
-
-Vue.component('split-pane', VueSplitPane)
 
 new Vue({
   router,
