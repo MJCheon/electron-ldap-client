@@ -5,6 +5,7 @@
     "name": "MJCheon",
     "email": "myungjae92@gmail.com"
   },
+  "description": "LDAP Client for desktop",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
