@@ -11,14 +11,6 @@
       >
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
-      <v-btn
-        elevation='2'
-        right
-        color='blue darken-1'
-        icon
-      >
-        <v-icon>mdi-content-save</v-icon>
-      </v-btn>
     </div>
     <vue-tree-list
       @click="onClick"
