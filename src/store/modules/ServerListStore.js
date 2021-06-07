@@ -3,7 +3,7 @@ import Uuid from '../../utils/uuid'
 
 const serverListStore = {
   state: {
-    serverList: null
+    serverList: []
   },
   mutations: {
     SETTING_SERVER: (state, payload) => {
