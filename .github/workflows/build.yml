@@ -28,7 +28,7 @@ jobs:
         run: yarn install
 
       - name: Build/release Electron window portable app
-        if: ${{ matrix.os == 'window-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: samuelmeuli/action-electron-builder@v1
         with:
           build_script_name: electron:build
@@ -43,7 +43,7 @@ jobs:
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
       
       - name: Build/release Electron window app
-        if: ${{ matrix.os == 'window-latest' }}
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: samuelmeuli/action-electron-builder@v1
         with:
           build_script_name: electron:build
