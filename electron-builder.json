@@ -1,0 +1,8 @@
+{
+  "mac": {
+    "icon": "src/assets/icons/icon.png"
+  },
+  "win": {
+    "icon": "src/assets/icons/icon.png"
+  }
+}
