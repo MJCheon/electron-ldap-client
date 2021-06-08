@@ -51,7 +51,7 @@ async function createWindow () {
     }
 
     if (process.platform === 'win32') {
-      if(input.key.toLowerCase() === 'r' && input.control) {
+      if(input.key.toLowerCase() === 'f5') {
         mainWindow.webContents.send('refreshRootTreeFromMain')
         event.preventDefault()
       } else if (input.key.toLowerCase() === 's' && input.control) {
