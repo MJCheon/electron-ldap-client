@@ -70,7 +70,7 @@ export default {
     entryTree: new Tree([])
   }),
   created () {
-    ipcRenderer.on('serverBindResponse', (event, searchEntryTree) => {
+    ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })

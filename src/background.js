@@ -38,47 +38,30 @@ async function createWindow () {
     // Load the index.html when not in development
     mainWindow.loadURL('app://./index.html')
   }
-}
 
-// Quit when all windows are closed.
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
-})
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS)
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString())
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (process.platform === 'darwin') {
+      if(input.key.toLowerCase() === 'r' && input.meta) {
+        mainWindow.webContents.send('refreshRootTreeFromMain')
+        event.preventDefault()
+      } else if (input.key.toLowerCase() === 's' && input.meta ) {
+        mainWindow.webContents.send('saveAttributeFromShortcut')
+        event.preventDefault()
+      }
     }
-  }
 
-  globalShortcut.register('F5', () => {
-    BrowserWindow.getFocusedWindow().webContents.send('saveAttributesResponse')
+    if (process.platform === 'win32') {
+      if(input.key.toLowerCase() === 'r' && input.control) {
+        mainWindow.webContents.send('refreshRootTreeFromMain')
+        event.preventDefault()
+      } else if (input.key.toLowerCase() === 's' && input.control) {
+        mainWindow.webContents.send('saveAttributeFromShortcut')
+        event.preventDefault()
+      }
+    }
+    
   })
-
-  createWindow()
-  createMenu()
-})
-
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll()
-})
+}
 
 function createMenu() {
   const file = {
@@ -138,10 +121,46 @@ function createMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
+// Quit when all windows are closed.
+app.on('window-all-closed', () => {
+  // On macOS it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  // On macOS it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (BrowserWindow.getAllWindows().length === 0) createWindow()
+})
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on('ready', async () => {
+  if (isDevelopment && !process.env.IS_TEST) {
+    // Install Vue Devtools
+    try {
+      await installExtension(VUEJS_DEVTOOLS)
+    } catch (e) {
+      console.error('Vue Devtools failed to install:', e.toString())
+    }
+  }
+  
+  createWindow()
+  createMenu()
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
+})
+
 ipcMain.on('serverBind', async (event, server) => {
   const searchEntries = await Ldap.connect(server)
   const rootTree = Tree.makeEntryTree(searchEntries)
-  event.reply('serverBindResponse', rootTree)
+  event.reply('allSearchResponse', rootTree)
 })
 
 ipcMain.on('attributeTree', (event, id, attributes) => { 
@@ -152,13 +171,13 @@ ipcMain.on('attributeTree', (event, id, attributes) => {
 ipcMain.on('saveAttribute', async (event, attrTree, deleteNodeList) => {
   const changeData = Tree.getChangesFromData(attrTree, deleteNodeList)
   await Ldapjs.modify(changeData)
-  event.reply('saveAttributeResponse')
+  event.reply('refreshRootTreeFromMain')
 })
 
 ipcMain.on('refreshRootTree', async (event) => {
   const searchEntries = await Ldap.search()
   const rootTree = Tree.makeEntryTree(searchEntries)
-  event.reply('serverBindResponse', rootTree)
+  event.reply('allSearchResponse', rootTree)
 })
 
 // Exit cleanly on request from parent process in development mode.

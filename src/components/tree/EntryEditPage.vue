@@ -94,8 +94,11 @@ export default {
       this.attrTree = new Tree(attrTree)
       this.showEntryDialog = true
     })
-    ipcRenderer.on('saveAttributeResponse', (event) => {
+    ipcRenderer.on('refreshRootTreeFromMain', (event) => {
       ipcRenderer.send('refreshRootTree')
+    })
+    ipcRenderer.on('saveAttributeFromShortcut', (event) => {
+      this.save(this.attrTree)
     })
   },
   methods: {
