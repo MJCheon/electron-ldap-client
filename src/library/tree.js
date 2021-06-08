@@ -183,13 +183,13 @@ const Tree = {
       }
     })
 
-    if (deleteChangeData !== {}) {
+    if (Object.keys(deleteChangeData).length > 0) {
       changeDataList.push({ operation: 'delete', modifyData: deleteChangeData })
     }
-    if (replaceChangeData !== {}) {
+    if (Object.keys(replaceChangeData).length > 0) {
       changeDataList.push({ operation: 'replace', modifyData: replaceChangeData })
     }
-    if (addChangeData !== {}) {
+    if (Object.keys(addChangeData).length > 0) {
       changeDataList.push({ operation: 'add', modifyData: addChangeData })
     }
     
