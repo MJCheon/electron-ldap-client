@@ -31,9 +31,8 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         uses: samuelmeuli/action-electron-builder@v1
         with:
-          build_script_name: electron:build
+          build_script_name: electron:build:win
           use_vue_cli: true
-          args: 'portable'
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
@@ -46,7 +45,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         uses: samuelmeuli/action-electron-builder@v1
         with:
-          build_script_name: electron:build
+          build_script_name: electron:build:mac
           use_vue_cli: true
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
