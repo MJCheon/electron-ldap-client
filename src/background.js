@@ -69,7 +69,7 @@ app.on('ready', async () => {
   }
 
   globalShortcut.register('F5', () => {
-    console.log('F5 event')
+    BrowserWindow.getFocusedWindow().webContents.send('saveAttributesResponse')
   })
 
   createWindow()
