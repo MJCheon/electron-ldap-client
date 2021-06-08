@@ -1,6 +1,7 @@
 {
   "name": "electron-ldap-client",
   "version": "0.0.0",
+  "license": "MIT License",
   "author": {
     "name": "MJCheon",
     "email": "myungjae92@gmail.com"
