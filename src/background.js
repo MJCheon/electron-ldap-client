@@ -1,7 +1,7 @@
 'use strict'
 
 import Path from 'path'
-import { app, protocol, BrowserWindow, ipcMain } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Menu, globalShortcut } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import Ldap from './library/ldap'
@@ -10,6 +10,8 @@ import Ldapjs from './library/ldap'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+const mainIcon = Path.join(__dirname,'./assets/icons/icon.png')
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
@@ -17,11 +19,11 @@ protocol.registerSchemesAsPrivileged([
 
 async function createWindow () {
   // Create the browser window.
-  const win = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 1280,
     height: 960,
     useContentSize: true,
-    icon: Path.join(__dirname,'./assets/icons/icon.png'),
+    icon: mainIcon,
     webPreferences: {
       nodeIntegration: true
     }
@@ -29,12 +31,12 @@ async function createWindow () {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
-    await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    await mainWindow.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+    if (!process.env.IS_TEST) mainWindow.webContents.openDevTools()
   } else {
     createProtocol('app')
     // Load the index.html when not in development
-    win.loadURL('app://./index.html')
+    mainWindow.loadURL('app://./index.html')
   }
 }
 
@@ -65,8 +67,76 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+
+  globalShortcut.register('F5', () => {
+    console.log('F5 event')
+  })
+
   createWindow()
+  createMenu()
 })
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
+})
+
+function createMenu() {
+  const file = {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Minimize',
+        role: 'minimize'
+      },
+      {
+        label: 'Quit',
+        role: 'quit'
+      }
+    ]
+  }
+  
+  const edit = {
+    label: 'Edit',
+    role: 'editMenu'
+  }
+
+  const help = {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Version',
+        click: async () => {
+          const { dialog } = require('electron')
+
+          const message = 'Version : ' + app.getVersion()
+          const option = {
+            type: 'info',
+            title: 'Version',
+            icon: mainIcon,
+            message: message
+          }
+      
+          dialog.showMessageBox(option)
+        }
+      },
+      {
+        label: 'Help',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client')
+        }
+      }
+    ]
+  }
+  
+  const template = [
+    file,
+    edit,
+    help
+  ]
+  
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+}
 
 ipcMain.on('serverBind', async (event, server) => {
   const searchEntries = await Ldap.connect(server)
