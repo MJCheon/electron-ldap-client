@@ -1,6 +1,21 @@
 <template>
-  <v-app>
-    <div
+  <v-card v-if='isBinding'
+    class="mx-auto"
+  >
+    <v-sheet class="pa-4 primary lighten-2">
+      <v-text-field
+        v-model="search"
+        label="Search Company Directory"
+        dark
+        flat
+        solo-inverted
+        hide-details
+        clearable
+        clear-icon="mdi-close-circle-outline"
+      ></v-text-field>
+    </v-sheet>
+    <v-card-text>
+      <div
       class='d-flex flex-row-reverse'
     >
       <v-btn
@@ -13,6 +28,7 @@
       </v-btn>
     </div>
     <vue-tree-list
+      :search='search'
       @click="onClick"
       @change-name="onChangeName"
       @delete-node="onDel"
@@ -52,10 +68,11 @@
         slot="treeNodeIcon"
       ><v-icon color='yellow darken-2'>mdi-folder</v-icon></span>
     </vue-tree-list>
-  </v-app>
+    </v-card-text>
+  </v-card>
 </template>
 <script>
-import { VueTreeList, Tree, TreeNode } from 'vue-tree-list'
+import { VueTreeList, Tree, TreeNode } from './vue-tree-list'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -63,6 +80,8 @@ export default {
     VueTreeList
   },
   data: () => ({
+    search: null,
+    isBinding: false,
     deleteEntryList: [],
     newTree: {},
     defaultTreeNode: 'New Tree',
@@ -72,6 +91,7 @@ export default {
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
+      this.isBinding = true
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
   },

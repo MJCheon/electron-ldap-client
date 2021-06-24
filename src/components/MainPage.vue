@@ -15,7 +15,7 @@
 
 <script>
 import TreePage from './TreePage'
-import TreeEntryEditPage from './tree/EntryEditPage'
+import TreeEntryEditPage from './entry/EditPage'
 import NavigationPage from './NavigationPage'
 
 export default {

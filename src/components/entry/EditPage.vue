@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { VueTreeList, Tree } from 'vue-tree-list'
+import { VueTreeList, Tree } from '../vue-tree-list'
 import { ipcRenderer } from 'electron'
 
 export default {

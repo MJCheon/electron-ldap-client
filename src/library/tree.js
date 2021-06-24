@@ -20,6 +20,8 @@ const Tree = {
           id: entry.dn,
           name: entry.dn,
           isLeaf: true,
+          isVisible: true,
+          isExpanded: true,
           dragDisabled: true,
           data: entry,
           children: []
@@ -38,6 +40,7 @@ const Tree = {
           id: dn,
           name: dn,
           isLeaf: true,
+          isVisible: true,
           dragDisabled: true,
           data: entry
         }
@@ -58,8 +61,11 @@ const Tree = {
     const attrTree = {
       id: '',
       name: id,
+      children: [],
+      isExpanded: true,
+      isVisible: true,
       isLeaf: false,
-      children: []
+      dragDisabled: true
     }
 
     Object.keys(attrData).sort().forEach((key) => {
@@ -69,27 +75,36 @@ const Tree = {
           attrChild.push({ 
             id: attr,
             name: attr,
-            isLeaf: true,
             data: attr,
-            children: []
+            children: [],
+            isExpanded: true,
+            isVisible: true,
+            isLeaf: true,
+            dragDisabled: true
           })
         })
         attrTree.children.push({
           id: key,
           name: key,
+          data: key,
+          children: attrChild.sort(),
+          isExpanded: true,
+          isVisible: true,
           isLeaf: false,
           addTreeNodeDisabled: true,
-          data: key,
-          children: attrChild.sort()
+          dragDisabled: true
         })
       } else {
         const data = key + ' : ' + attrData[key]
         attrTree.children.push({
           id: key,
           name: attrData[key],
-          isLeaf: true,
           data: data,
-          children: []
+          children: [],
+          isExpanded: true,
+          isVisible: true,
+          isLeaf: true,
+          dragDisabled: true
         })
       }
     })
