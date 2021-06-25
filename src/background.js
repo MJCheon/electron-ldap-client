@@ -153,7 +153,7 @@ app.on('ready', async () => {
 })
 
 ipcMain.on('serverBind', async (event, server) => {
-  const searchEntries = await Ldap.connect(server)
+  const searchEntries = await Ldapjs.connect(server)
   const rootTree = Tree.makeEntryTree(searchEntries)
   event.reply('allSearchResponse', rootTree)
 })
@@ -170,7 +170,7 @@ ipcMain.on('saveAttribute', async (event, attrTree, deleteNodeList) => {
 })
 
 ipcMain.on('refreshRootTree', async (event) => {
-  const searchEntries = await Ldap.search()
+  const searchEntries = await Ldapjs.search()
   const rootTree = Tree.makeEntryTree(searchEntries)
   event.reply('allSearchResponse', rootTree)
 })

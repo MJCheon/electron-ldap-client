@@ -84,6 +84,7 @@ export const traverseFilteredTree = (root, search) => {
       root.isVisible = true
       root.isExpanded = true
     } else {
+      root.isVisible = true
       root.isExpanded = false
     }
     if (root.children && root.children.length > 0) {
