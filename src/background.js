@@ -1,10 +1,9 @@
 'use strict'
 
 import Path from 'path'
-import { app, protocol, BrowserWindow, ipcMain, Menu, globalShortcut } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Menu } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import Ldap from './library/ldap'
 import Tree from './library/Tree'
 import Ldapjs from './library/ldap'
 
@@ -151,10 +150,7 @@ app.on('ready', async () => {
   
   createWindow()
   createMenu()
-})
-
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll()
+  updateApplication()
 })
 
 ipcMain.on('serverBind', async (event, server) => {
