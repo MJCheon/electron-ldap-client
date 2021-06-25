@@ -150,7 +150,6 @@ app.on('ready', async () => {
   
   createWindow()
   createMenu()
-  updateApplication()
 })
 
 ipcMain.on('serverBind', async (event, server) => {
