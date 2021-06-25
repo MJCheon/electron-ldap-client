@@ -21,24 +21,6 @@ export const removeHandler = function (element, type) {
   }
 }
 
-export const isFiltered = (list, search) => {
-  list.forEach(value => {
-    if (Array.isArray(value)) {
-      value.forEach(value => {
-        if (value.indexOf(search)) {
-          console.log(value)
-          return true
-        }
-      })
-    } else {
-      if (value.indexOf(search)) {
-        return true
-      }
-    }
-  })
-  return false
-}
-
 // depth first search
 export const traverseTree = root => {
   var newRoot = {}
@@ -60,29 +42,50 @@ export const traverseTree = root => {
 
 // depth first filter search
 export const traverseFilteredTree = (root, search) => {
-  if (search !== '' && search.length > 0) {
-    if (root.name.indexOf(search) < 0) {
-      root.isVisible = false
-    } else {
+  var parent = root.parent
+
+  if (search && search !== '' && search.length > 0) {
+    if (root.name.indexOf(search) > -1) {
       root.isVisible = true
-      root.isExpanded = !root.isExpanded
+      root.isExpanded = true
+      while (parent) {
+        parent.isVisible = true
+        parent.isExpanded = true
+        parent = parent.parent
+      }
+    } else if (root.data) {
+      var data = Object.values(root.data).toString()
+
+      parent = root.parent
+
+      if (data.indexOf(search) > -1) {
+        root.isVisible = true
+        root.isExpanded = true
+        while (parent) {
+          parent.isVisible = true
+          parent.isExpanded = true
+          parent = parent.parent
+        }
+      } else {
+        root.isVisible = false
+        root.isExpanded = false
+      }
+    } else {
+      root.isVisible = false
+      root.isExpanded = false
     }
     if (root.children && root.children.length > 0) {
-      for (var i = 0, len = root.children.length; i < len; i++) {
-        var childrenData = Object.values(root.children[i].data)
-        if (root.children[i].name.indexOf(search) || isFiltered(childrenData)) {
-          root.isVisible = true
-          root.isExpanded = true
-        } else {
-          root.isVisible = false
-        }
-        traverseFilteredTree(root.children[i], search)
-      }
+      root.children.forEach(child => {
+        traverseFilteredTree(child, search)
+      })
     }
   } else {
-    root.isVisible = true
-    root.isExpanded = true
-
+    if ((root.name === 'root' && root.id === 0) || (root.parent && root.parent.name === 'root' && root.parent.id === 0)) {
+      root.isVisible = true
+      root.isExpanded = true
+    } else {
+      root.isExpanded = false
+    }
     if (root.children && root.children.length > 0) {
       root.children.forEach(child => {
         traverseFilteredTree(child, search)
