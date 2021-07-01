@@ -51,7 +51,7 @@
                   ref="ip"
                   v-model='server.ip'
                   hint='127.0.0.1 or example.com or host1'
-                  :rules='[rules.required, rules.isIpDomain]'
+                  :rules='[rules.required, rules.isIpOrDomainOrHost]'
                   required
                 ></v-text-field>
               </v-col>
@@ -167,7 +167,7 @@ export default {
     valid: false,
     rules: {
       required: value => !!value || 'This Field is required',
-      isIpDomain: value => {
+      isIpOrDomainOrHost: value => {
         const ptn = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}|^[a-zA-Z]+$|^([0-9a-zA-Z\\-]+\.)+[a-zA-Z]{2,6}(\\:[0-9]+)?(\/\S*)?$/
 
         if (!ptn.test(value)) {
