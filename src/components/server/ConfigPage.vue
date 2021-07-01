@@ -44,21 +44,21 @@
               <v-col
                 cols='auto'
                 sm='4'
-                md='4'
+                md='6'
               >
                 <v-text-field
                   label='Server IP*'
                   ref="ip"
                   v-model='server.ip'
-                  hint='127.0.0.1'
-                  :rules='[rules.required,rules.isIp]'
+                  hint='127.0.0.1 or example.com or host1'
+                  :rules='[rules.required, rules.isIpDomain]'
                   required
                 ></v-text-field>
               </v-col>
               <v-col
                 cols='auto'
                 sm='4'
-                md='4'
+                md='3'
               >
                 <v-text-field
                   label='Server Port*'
@@ -71,7 +71,7 @@
               <v-col
                 cols='auto'
                 sm='4'
-                md='4'
+                md='3'
               >
                 <v-select
                   :items=sslItems
@@ -167,9 +167,14 @@ export default {
     valid: false,
     rules: {
       required: value => !!value || 'This Field is required',
-      isIp: value => {
-        const pattern = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}/
-        return pattern.test(value) || 'Invalid IPv4 Format'
+      isIpDomain: value => {
+        const ptn = /(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}|^[a-zA-Z]+$|^([0-9a-zA-Z\\-]+\.)+[a-zA-Z]{2,6}(\\:[0-9]+)?(\/\S*)?$/
+
+        if (!ptn.test(value)) {
+          return 'Invalid IPv4 Format or Domain'
+        }
+
+        return true
       },
       isNumber: value => {
         const pattern = /\d/
