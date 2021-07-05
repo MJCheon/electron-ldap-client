@@ -14,6 +14,9 @@ Cmd + Shift + R : LDAP Entry Refresh
 Ctrl + S : Current LDAP Entry Save
 ```
 
+#### Function
+ - Add/Delete/Modify Attributes
+
 ## For Development
 ### Requirements
 ```
