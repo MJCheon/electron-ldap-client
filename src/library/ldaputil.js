@@ -7,7 +7,7 @@ const LdapUtil = {
     var encryptPwd = ''
     pwdAlgo = pwdAlgo.toLowerCase()
 
-    encryptPwd = createHash(pwdAlgo, password, salt)
+    encryptPwd = LdapUtil.createHash(pwdAlgo, password)
     
     if (encryptPwd === -1) {
       const errorMsg = 'Possible Password Algorithm\n' + 
@@ -23,7 +23,7 @@ const LdapUtil = {
 
     return encryptPwd
   },
-  createHash: (pwdAlgo, pwd, salt) => {
+  createHash: (pwdAlgo, pwd) => {
     var hash = ''
     var salt = ''
     var encodingHash = ''
@@ -31,28 +31,30 @@ const LdapUtil = {
 
     switch (pwdAlgo) {
       case 'ssha':
+        salt = Crypto.randomBytes(16)
+        hash = Crypto.createHash('sha1').update(pwd).update(salt).digest()
+        encodingHash = Buffer.concat([hash, salt]).toString('base64')
+        break;
       case 'smd5':
         salt = Crypto.randomBytes(16)
-        hash = Crypto.createHash(pwdAlgo).update(pwd).update(salt).digest()
+        hash = Crypto.createHash('md5').update(pwd).update(salt).digest()
         encodingHash = Buffer.concat([hash, salt]).toString('base64')
-        rfcHash = '{' + pwdAlgo.toUpperCase() + '}' + encodingHash
         break;
       case 'sha':
-      case 'smd5':
+      case 'md5':
         salt = Crypto.randomBytes(0)
         hash = Crypto.createHash(pwdAlgo).update(pwd).update(salt).digest()
         encodingHash = Buffer.concat([hash, salt]).toString('base64')
-        rfcHash = '{' + pwdAlogo.toUpperCase() + '}' + encodingHash
         break;
       case 'crypt':
         salt = Crypto.randomBytes(9)
-        encodingHash = CryptMD5.cryptMD5(password)
-        rfcHash = '{CRYPT}' + encodingHash
+        encodingHash = CryptMD5.cryptMD5(pwd)
         break;
       default:
         return -1
     }
 
+    rfcHash = '{' + pwdAlgo.toUpperCase() + '}' + encodingHash
     return rfcHash
   }
 }
