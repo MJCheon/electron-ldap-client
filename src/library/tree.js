@@ -149,7 +149,10 @@ const Tree = {
     parseTree.walk((node) => {
       var attrId = ''
       var data = ''
-  
+      var tmpData = ''
+      var pwdAlgo = ''
+      var pwd = ''
+
       if (!node.isRoot() && node.model.id !== '') {
 
         if ( rootId === '' && node.model.data.includes('dn') ) {
@@ -159,11 +162,20 @@ const Tree = {
 
         if ( attrId === '') {
           const newIdPattern = /\d{13}/
+
           if (newIdPattern.test(node.model.id)) { // 신규 Node
-            if (node.model.name.includes('=')) { // key:value 형식일 때, add
+            if (node.model.name.includes('=')) { // key=value 형식일 때, add
               var attribute = node.model.name.split('=')
               attrId = attribute[0]
               data = attribute[1].trim()
+
+              if (attrId === 'userPassword') { // userPassword 인 경우, pwd 암호화 처리
+                tmpData = data.split(':')
+                pwdAlgo = tmpData[0]
+                pwd = tmpData[1]
+                data = LdapUtil.getEncryptPassword(pwd, pwdAlgo)
+              }
+
               addChangeData[attrId] = data
             } else { // 값만 들어간 경우, 배열로 만들어 replace
               var parentNode = node.model.parent
@@ -179,6 +191,7 @@ const Tree = {
           } else {// 기존 ID가 있고, data가 다른 경우 replace
             attrId = node.model.id
             data = node.model.name.trim()
+
             if (!node.model.data.includes(data)) {
               var parentNode = node.model.parent
               var replaceDataList = []
@@ -191,13 +204,13 @@ const Tree = {
 
                 replaceChangeData[attrId] = replaceDataList
               } else {
-                // userPassword 인 경우, data 암호화 처리
+                // userPassword 인 경우, pwd 암호화 처리
                 if (attrId === 'userPassword') {
-                  var tmpData = node.model.name.split(':')
-                  var pwdAlgo = tmpData[0]
-                  var pwd = tmpData[1]
+                  tmpData = node.model.name.split(':')
+                  pwdAlgo = tmpData[0]
+                  pwd = tmpData[1]
 
-                  data = LdapUtil.getPassword(pwd, pwdAlgo)
+                  data = LdapUtil.getEncryptPassword(pwd, pwdAlgo)
                 }
 
                 if (data && data !== '') {
