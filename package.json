@@ -1,6 +1,6 @@
 {
   "name": "electron-ldap-client",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT License",
   "author": {
     "name": "MJCheon",
@@ -22,8 +22,10 @@
   "dependencies": {
     "@mdi/font": "5.9.55",
     "core-js": "^3.6.5",
+    "cryptmd5": "^0.1.2",
     "ldapjs-client": "^0.1.1",
     "node-machine-id": "^1.1.12",
+    "password-hasher": "^1.0.1",
     "roboto-fontface": "*",
     "tree-model": "^1.0.7",
     "uuid": "^8.3.2",

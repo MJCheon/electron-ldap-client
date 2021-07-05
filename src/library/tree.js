@@ -1,4 +1,5 @@
 import TreeModel from 'tree-model'
+import LdapUtil from './ldaputil'
 
 const Tree = {
   makeEntryTree: (searchEntries) => {
@@ -159,8 +160,8 @@ const Tree = {
         if ( attrId === '') {
           const newIdPattern = /\d{13}/
           if (newIdPattern.test(node.model.id)) { // 신규 Node
-            if (node.model.name.includes(':')) { // key:value 형식일 때, add
-              var attribute = node.model.name.split(':')
+            if (node.model.name.includes('=')) { // key:value 형식일 때, add
+              var attribute = node.model.name.split('=')
               attrId = attribute[0]
               data = attribute[1].trim()
               addChangeData[attrId] = data
@@ -190,7 +191,18 @@ const Tree = {
 
                 replaceChangeData[attrId] = replaceDataList
               } else {
-                replaceChangeData[attrId] = data
+                // userPassword 인 경우, data 암호화 처리
+                if (attrId === 'userPassword') {
+                  var tmpData = node.model.name.split(':')
+                  var pwdAlgo = tmpData[0]
+                  var pwd = tmpData[1]
+
+                  data = LdapUtil.getPassword(pwd, pwdAlgo)
+                }
+
+                if (data && data !== '') {
+                  replaceChangeData[attrId] = data
+                }
               }
             }
           }
