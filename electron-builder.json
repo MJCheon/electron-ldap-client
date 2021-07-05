@@ -2,6 +2,9 @@
   "mac": {
     "icon": "src/assets/icons/icon.png"
   },
+  "dmg": {
+    "sign": false
+  },
   "win": {
     "icon": "src/assets/icons/icon.png"
   }
