@@ -21,14 +21,14 @@ const LdapUtil = {
           var hash = CryptMD5.cryptMD5(password)
           rfcHash = '{CRYPT}' + hash
         } else {
-          const errorMsg = 'Check Password Algorithm\n' + 
+          const errorMsg = 'Possible Password Algorithm\n' + 
           '- ssha\n' +
           '- smd5\n' +
           '- sha\n' +
           '- md5\n' +
           '- crypt (md5 crypt)'
 
-          ErrorBox.showError('LDAP Password Error', errorMsg)
+          ErrorBox.showError('Unavailable Algorithm', errorMsg)
         }
       } 
 
