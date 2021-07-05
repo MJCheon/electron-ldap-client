@@ -1,6 +1,6 @@
 {
   "name": "electron-ldap-client",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "license": "MIT License",
   "author": {
     "name": "MJCheon",
@@ -12,8 +12,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:build:win": "vue-cli-service electron:build --win",
-    "electron:build:mac": "vue-cli-service electron:build --mac",
+    "electron:build:win": "vue-cli-service electron:build --win --x64",
+    "electron:build:mac": "vue-cli-service electron:build --mac --x64",
     "electron:serve": "vue-cli-service electron:serve",
     "postinstall": "electron-builder install-app-deps",
     "postuninstall": "electron-builder install-app-deps"
