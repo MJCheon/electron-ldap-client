@@ -1,6 +1,6 @@
 # electron-ldap-client
 
-## For User
+## User Manual
 ### ShortCut
 #### Window
 ```
@@ -16,8 +16,8 @@ Ctrl + S : Current LDAP Entry Save
 
 #### Function
  - Add/Delete/Modify Attributes
-
-## For Development
+  
+## Developer Manual
 ### Requirements
 ```
  - Node.js (v14)
@@ -37,3 +37,7 @@ yarn electron:serve
 ```
 yarn electron:build
 ```
+---  
+
+## FAQ
+https://github.com/MJCheon/electron-ldap-client/wiki
