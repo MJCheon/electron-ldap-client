@@ -170,7 +170,8 @@ ipcMain.on('saveAttribute', async (event, attrTree, deleteNodeList) => {
 })
 
 ipcMain.on('refreshRootTree', async (event) => {
-  const searchEntries = await Ldapjs.search()
+  var isRefresh = true
+  const searchEntries = await Ldapjs.search(isRefresh)
   const rootTree = Tree.makeEntryTree(searchEntries)
   event.reply('allSearchResponse', rootTree)
 })

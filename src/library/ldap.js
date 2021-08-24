@@ -40,9 +40,11 @@ const Ldapjs = {
 
     return { baseDn: baseDn, entries: searchEntries }  
   },
-  search: async (dn = '', options = '') => {
+  search: async (isRefresh = false, dn = '', options = '') => {
     if (dn === '') dn = baseDn
     if (options === '') options = { scope: 'sub' }
+
+    if (isRefresh) await new Promise(resolve => setTimeout(resolve, 1000))
 
     const searchEntries = await client.search(dn, options)
 
