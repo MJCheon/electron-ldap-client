@@ -189,10 +189,19 @@ const Tree = {
               replaceChangeData[attrId] = replaceDataList
             } 
           } else {// 기존 ID가 있고, data가 다른 경우 replace
+            var originData
+
             attrId = node.model.id
             data = node.model.name.trim()
 
-            if (!node.model.data.includes(data)) {
+            if (node.model.data.includes(':')) {
+              originData = node.model.data.split(':')[1].trim()
+            } else {
+              originData = node.model.data
+            }
+            
+            if (originData !== data) {
+
               var parentNode = node.model.parent
               var replaceDataList = []
 
