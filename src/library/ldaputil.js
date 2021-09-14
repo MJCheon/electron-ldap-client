@@ -48,7 +48,7 @@ const LdapUtil = {
         break;
       case 'crypt':
         salt = Crypto.randomBytes(9)
-        encodingHash = CryptMD5.cryptMD5(pwd)
+        encodingHash = CryptMD5.cryptMD5(pwd, salt)
         break;
       default:
         return -1
