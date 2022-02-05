@@ -1,9 +1,15 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, Menu, MenuItem } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
+import { join } from 'path'
+import { LdapServer } from './library/LdapServer'
+import { LdapFactory } from './library/LdapFactory'
+import { LdapTree } from './library/LdapTree'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+const mainIcon = join(__dirname, "./assets/icons/icon.png");
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -13,15 +19,14 @@ protocol.registerSchemesAsPrivileged([
 async function createWindow () {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 960,
+    icon: mainIcon,
     webPreferences: {
-
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: (process.env
-        .ELECTRON_NODE_INTEGRATION as unknown) as boolean,
-      contextIsolation: !process.env.ELECTRON_NODE_INTEGRATION
+      nodeIntegration: true,
+      contextIsolation: false
     }
   })
 
@@ -34,6 +39,86 @@ async function createWindow () {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+
+  win.webContents.on("before-input-event", (event, input) => {
+    if (process.platform === "darwin") {
+      if (input.key.toLowerCase() === "r" && input.meta) {
+        win.webContents.send("refreshRootTreeFromMain");
+        event.preventDefault();
+      } else if (input.key.toLowerCase() === "s" && input.meta) {
+        win.webContents.send("saveAttributeFromShortcut");
+        event.preventDefault();
+      }
+    }
+
+    if (process.platform === "win32") {
+      if (input.key.toLowerCase() === "f5") {
+        win.webContents.send("refreshRootTreeFromMain");
+        event.preventDefault();
+      } else if (input.key.toLowerCase() === "s" && input.control) {
+        win.webContents.send("saveAttributeFromShortcut");
+        event.preventDefault();
+      }
+    }
+  });
+}
+
+function createMenu() {
+  const file = {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Minimize',
+        role: 'minimize'
+      },
+      {
+        label: 'Quit',
+        role: 'quit'
+      }
+    ]
+  }
+  
+  const edit = {
+    label: 'Edit',
+    role: 'editMenu'
+  }
+
+  const help = {
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Version',
+        click: async () => {
+          const { dialog } = require('electron')
+
+          const message = 'Version : ' + app.getVersion()
+          const option = {
+            type: 'info',
+            title: 'Version',
+            icon: mainIcon,
+            message: message
+          }
+      
+          dialog.showMessageBox(option)
+        }
+      },
+      {
+        label: 'Help',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client')
+        }
+      }
+    ]
+  }
+  
+  const template = [
+    file,
+    edit,
+    help
+  ]
+  
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // Quit when all windows are closed.
@@ -59,12 +144,42 @@ app.on('ready', async () => {
     // Install Vue Devtools
     try {
       await installExtension(VUEJS_DEVTOOLS)
-    } catch (e) {
+    } catch (e : any) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
   createWindow()
+  createMenu()
 })
+
+ipcMain.on("serverBind", async (event, ldapConfig) => {
+  let ldapServer : LdapServer = LdapFactory.Instance(ldapConfig)
+  const isAuthenticated : boolean = await ldapServer.connect()
+
+  if (isAuthenticated) {
+    let ldapTree = new LdapTree()
+    ldapTree.makeEntryTree(ldapServer.search())
+    event.reply("allSearchResponse", ldapTree.rootNode);
+  }
+});
+
+// ipcMain.on("attributeTree", (event, id, attributes) => {
+//   const attrTree = Tree.makeAttrTree(id, attributes);
+//   event.reply("attributeTreeResponse", attrTree);
+// });
+
+// ipcMain.on("saveAttribute", async (event, attrTree, deleteNodeList) => {
+//   const changeData = Tree.getChangesFromData(attrTree, deleteNodeList);
+//   await Ldapjs.modify(changeData);
+//   event.reply("refreshRootTreeFromMain");
+// });
+
+// ipcMain.on("refreshRootTree", async (event) => {
+//   const isRefresh = true;
+//   const searchEntries = await Ldapjs.search(isRefresh);
+//   const rootTree = Tree.makeEntryTree(searchEntries);
+//   event.reply("allSearchResponse", rootTree);
+// });
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
