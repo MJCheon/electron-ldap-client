@@ -1,43 +1,24 @@
 # electron-ldap-client
 
-## User Manual
-### ShortCut
-#### Window
+## Project setup
 ```
-F5 : LDAP Entry Refresh
-Ctrl + S : Current LDAP Entry Save
-```
-
-#### Mac
-```
-Cmd + Shift + R : LDAP Entry Refresh
-Ctrl + S : Current LDAP Entry Save
-```
-
-#### Function
- - Add/Delete/Modify Attributes
-  
-## Developer Manual
-### Requirements
-```
- - Node.js (v14)
- - Yarn (v1.22.10)
-```
-### Project setup
-```
-yarn install
+npm install
 ```
 
 ### Compiles and hot-reloads for development
 ```
-yarn electron:serve
+npm run serve
 ```
 
 ### Compiles and minifies for production
 ```
-yarn electron:build
+npm run build
 ```
----  
 
-## FAQ
-https://github.com/MJCheon/electron-ldap-client/wiki
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
