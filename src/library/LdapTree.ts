@@ -1,75 +1,76 @@
-import { Attribute } from "ldapts";
-import TreeModel from "tree-model"
-import { LdapChange } from "./common";
-import { getEncryptPassword } from "./LdapCrypto";
-import { TreeNode, ChangeDataList } from "./LdapTree"
-
+import { Attribute } from 'ldapts'
+import TreeModel, { Node } from 'tree-model'
+import { LdapChange, TreeNode, ChangeDataList } from './common'
+import { getEncryptPassword } from './LdapCrypto'
 
 export class LdapTree {
-  private dummyRootNode : TreeNode;
-  private tree : TreeModel;
+  private dummyRootNode: Node<TreeNode>;
+  private tree: TreeModel;
 
   constructor() {
     this.tree = new TreeModel({
       modelComparatorFn: (left, right) => {
-        return left.name > right.name;
-      },
-    });
+        return left.name > right.name
+      }
+    })
 
     this.dummyRootNode = this.tree.parse({
-      id : '0',
-      children : []
+      id: '0',
+      children: []
     })
   }
 
-  get rootNode() : TreeNode | boolean {
-    return this.dummyRootNode.first((node : TreeNode) => {
+  get rootNode(): Node<TreeNode> | undefined {
+    return this.dummyRootNode.first((node: Node<TreeNode>) => {
       if (node.isRoot() && node.hasChildren()) {
         return node.children[0]
       }
     })
   }
 
-  makeEntryTree(searchEntries : any) : void {
-    let baseDnList = searchEntries.baseDn.split(",");
-    let entries = searchEntries.entries;
+  makeEntryTree(searchEntries: any): void {
+    const baseDnList = searchEntries.baseDn.split(',')
+    const entries = searchEntries.entries
 
-    entries.forEach((entry : any) => {
+    entries.forEach((entry: any) => {
       const realDn = entry.dn
-        .split(",")
+        .split(',')
         .reverse()
-        .filter((dnNode : string) => !baseDnList.includes(dnNode));
+        .filter((dnNode: string) => !baseDnList.includes(dnNode))
 
-      let parentNode : TreeNode;
-      
-      // Create Real Root Node 
+      let parentNode: Node<TreeNode> = this.tree.parse({
+        id: 'tmp',
+        children: []
+      })
+
+      // Create Real Root Node
       // Or
-      // Create Child Node 
+      // Create Child Node
       if (!this.dummyRootNode.hasChildren()) {
-        const rootNode = {
-          id: entry.dn, 
+        const rootNode: Node<TreeNode> = this.tree.parse({
+          id: entry.dn,
           name: entry.dn,
           isLeaf: true,
           isVisible: true,
           isExpanded: true,
           dragDisabled: true,
           data: entry,
-          children: [],
-        };
+          children: []
+        })
 
-        this.dummyRootNode.addChild(rootNode);
+        this.dummyRootNode.addChild(rootNode)
       } else {
-        realDn.forEach((nodeName : string) => {
-          let tmpNode : TreeNode | boolean = this.dummyRootNode.first(
-            (node : TreeNode) => node.model.name === nodeName
-          );
+        realDn.forEach((nodeName: string) => {
+          const tmpNode: Node<TreeNode> | undefined = this.dummyRootNode.first(
+            (node: Node<TreeNode>) => node.model.name === nodeName
+          )
 
           if (tmpNode) {
-            parentNode = tmpNode;
+            parentNode = tmpNode
           }
-        });
+        })
 
-        const dn = realDn.pop();
+        const dn = realDn.pop()
         const newNode = {
           id: dn,
           name: dn,
@@ -78,38 +79,40 @@ export class LdapTree {
           dragDisabled: true,
           data: entry,
           children: []
-        };
+        }
 
-        if (!parentNode) {
-          this.rootNode.model.isLeaf = false;
-          this.rootNode.addChild(this.tree.parse(newNode));
+        if (parentNode.model.id === 'tmp') {
+          if (this.rootNode) {
+            this.rootNode.model.isLeaf = false
+            this.rootNode.addChild(this.tree.parse(newNode))
+          }
         } else {
           if (parentNode.model.isLeaf) {
-            parentNode.model.isLeaf = false;
+            parentNode.model.isLeaf = false
           }
-          parentNode.addChild(this.tree.parse(newNode));
+          parentNode.addChild(this.tree.parse(newNode))
         }
       }
-    });
+    })
   }
 
-  makeAttrTree(id : string, attrData : any) : TreeNode {
-    const attrRootNode : TreeNode = {
-      id: "",
+  makeAttrTree(id: string, attrData: any): TreeNode {
+    const attrRootNode: TreeNode = {
+      id: '',
       name: id,
       children: [],
       isExpanded: true,
       isVisible: true,
       isLeaf: false,
-      dragDisabled: true,
-    };
-  
+      dragDisabled: true
+    }
+
     Object.keys(attrData)
       .sort()
       .forEach((key) => {
         if (Array.isArray(attrData[key])) {
-          let attrChild  : TreeNode[]= [];
-          attrData[key].forEach((attr : string) => {
+          const attrChild: TreeNode[] = []
+          attrData[key].forEach((attr: string) => {
             attrChild.push({
               id: attr,
               name: attr,
@@ -118,9 +121,9 @@ export class LdapTree {
               isExpanded: true,
               isVisible: true,
               isLeaf: true,
-              dragDisabled: true,
-            });
-          });
+              dragDisabled: true
+            })
+          })
           attrRootNode.children.push({
             id: key,
             name: key,
@@ -130,10 +133,10 @@ export class LdapTree {
             isVisible: true,
             isLeaf: false,
             addTreeNodeDisabled: true,
-            dragDisabled: true,
-          });
+            dragDisabled: true
+          })
         } else {
-          const data = key + " : " + attrData[key];
+          const data = key + ' : ' + attrData[key]
           attrRootNode.children.push({
             id: key,
             name: attrData[key],
@@ -142,176 +145,199 @@ export class LdapTree {
             isExpanded: true,
             isVisible: true,
             isLeaf: true,
-            dragDisabled: true,
-          });
+            dragDisabled: true
+          })
         }
-      });
-  
-    return attrRootNode;
+      })
+
+    return attrRootNode
   }
 
-  getChangesFromData(tree : Object, deleteNodeList : TreeNode[]) {
-    const rootNode : TreeNode = new TreeModel().parse(tree);
+  getChangesFromData(tree: TreeNode, deleteNodeList: TreeNode[]) {
+    const rootNode: Node<TreeNode> = new TreeModel().parse(tree)
 
-    let allChangeDataList : ChangeDataList[] = [];
+    const allChangeDataList: ChangeDataList[] = []
 
-    let addChangeData : Attribute[] = [];
-    let replaceChangeData : Attribute[] = [];
-    let deleteChangeData : Attribute[] = [];
+    const addChangeData: Attribute[] = []
+    const replaceChangeData: Attribute[] = []
+    const deleteChangeData: Attribute[] = []
 
-    let rootId : string = "";
+    let rootId = ''
 
     if (deleteNodeList.length > 0) {
       // delete
       deleteNodeList.forEach((node) => {
-        let attrId : string = node.id;
-        let deleteNodeName : string = node.name;
-  
+        let attrId: string = node.id
+        const deleteNodeName: string | undefined = node.name
+
         if (node.id === node.name) {
           // netgroup
-          let parentNode = node.parent;
-          let replaceDataInDeleteList : string[] =  [];
-  
-          attrId = parentNode.id;
-          parentNode.children.forEach((childNode : TreeNode) => {
-            if (childNode.name !== deleteNodeName) {
-              replaceDataInDeleteList.push(childNode.name);
-            }
-          });
-  
-          replaceChangeData.push(new Attribute({
-            type: attrId,
-            values: replaceDataInDeleteList
-          }));
+          const parentNode = node.parent
+          const replaceDataInDeleteList: string[] = []
+
+          if (parentNode) {
+            attrId = parentNode.id
+            parentNode.children.forEach((childNode: TreeNode) => {
+              if (childNode.name && childNode.name !== deleteNodeName) {
+                replaceDataInDeleteList.push(childNode.name)
+              }
+            })
+          }
+
+          replaceChangeData.push(
+            new Attribute({
+              type: attrId,
+              values: replaceDataInDeleteList
+            })
+          )
         } else {
-          deleteChangeData.push(new Attribute({
-            type: attrId, 
-            values: [deleteNodeName]
-          }));
+          if (deleteNodeName) {
+            deleteChangeData.push(
+              new Attribute({
+                type: attrId,
+                values: [deleteNodeName]
+              })
+            )
+          }
         }
-      });
+      })
     }
 
-    rootNode.walk((node : TreeNode) => {
-      let attrId : string = "";
-      let data : string = "";
-      let pwdAlgo : string = "";
-      let pwd : string = "";
-  
-      if (!node.isRoot() && node.model.id !== "") {
-        if (rootId === "" && node.model.data.includes("dn")) {
-          let tmpData : string[] = node.model.data.split(":");
-          rootId = tmpData[1];
+    rootNode.walk((node) => {
+      let attrId = ''
+      let data = ''
+      let pwdAlgo = ''
+      let pwd = ''
+
+      if (!node.isRoot() && node.model.id !== '') {
+        if (rootId === '' && node.model.data.includes('dn')) {
+          const tmpData: string[] = node.model.data.split(':')
+          rootId = tmpData[1]
         }
-  
-        const newIdPattern = /\d{13}/;
-  
+
+        const newIdPattern = /\d{13}/
+
         if (newIdPattern.test(node.model.id)) {
           // 신규 Node
-          if (node.model.name.includes("=")) {
+          if (node.model.name.includes('=')) {
             // key=value 형식일 때, add
-            let attribute : string[] = node.model.name.split("=");
-            attrId = attribute[0];
-            data = attribute[1].trim();
-  
-            if (attrId === "userPassword") {
-              // userPassword 인 경우, pwd 암호화 처리
-              let tmpData : string[] = data.split(":");
-              pwdAlgo = tmpData[0];
-              pwd = tmpData[1];
-              data = getEncryptPassword(pwd, pwdAlgo);
-            }
-  
-            addChangeData.push(new Attribute({
-              type: attrId,
-              values: [data]
-            }));
+            const attribute: string[] = node.model.name.split('=')
+            attrId = attribute[0]
+            data = attribute[1].trim()
 
+            if (attrId === 'userPassword') {
+              // userPassword 인 경우, pwd 암호화 처리
+              const tmpData: string[] = data.split(':')
+              pwdAlgo = tmpData[0]
+              pwd = tmpData[1]
+              data = getEncryptPassword(pwd, pwdAlgo)
+            }
+
+            addChangeData.push(
+              new Attribute({
+                type: attrId,
+                values: [data]
+              })
+            )
           } else {
             // 값만 들어간 경우, 배열로 만들어 replace
-            let parentNode = node.model.parent;
-            let replaceDataList : string[] = [];
-  
-            attrId = parentNode.id;
-            parentNode.children.forEach((childNode : TreeNode) => {
-              replaceDataList.push(childNode.name.trim());
-            });
-  
-            replaceChangeData.push(new Attribute({
-              type: attrId, 
-              values: replaceDataList
-            }));
+            const parentNode = node.model.parent
+            const replaceDataList: string[] = []
+
+            attrId = parentNode.id
+            parentNode.children.forEach((childNode: TreeNode) => {
+              if (childNode.name) {
+                replaceDataList.push(childNode.name.trim())
+              }
+            })
+
+            replaceChangeData.push(
+              new Attribute({
+                type: attrId,
+                values: replaceDataList
+              })
+            )
           }
         } else {
           // 기존 ID가 있고, data가 다른 경우 replace
-          let originData : string;
-  
-          attrId = node.model.id;
-          data = node.model.name.trim();
-  
-          if (node.model.data.includes(":")) {
-            originData = node.model.data.split(":")[1].trim();
-          } else {
-            originData = node.model.data;
-          }
-  
-          if (originData !== data) {
-            let parentNode = node.model.parent;
-            let replaceDataList : string[] = [];
-  
-            if (parentNode.id === parentNode.name) {
-              attrId = parentNode.id;
-              parentNode.children.forEach((childNode : TreeNode) => {
-                replaceDataList.push(childNode.name.trim());
-              });
-  
-              replaceChangeData.push(new Attribute({
-                type: attrId,
-                values: replaceDataList
-              }));
+          let originData: string
 
+          attrId = node.model.id
+          data = node.model.name.trim()
+
+          if (node.model.data.includes(':')) {
+            originData = node.model.data.split(':')[1].trim()
+          } else {
+            originData = node.model.data
+          }
+
+          if (originData !== data) {
+            const parentNode = node.model.parent
+            const replaceDataList: string[] = []
+
+            if (parentNode.id === parentNode.name) {
+              attrId = parentNode.id
+              parentNode.children.forEach((childNode: TreeNode) => {
+                if (childNode.name) {
+                  replaceDataList.push(childNode.name.trim())
+                }
+              })
+
+              replaceChangeData.push(
+                new Attribute({
+                  type: attrId,
+                  values: replaceDataList
+                })
+              )
             } else {
               // userPassword 인 경우, pwd 암호화 처리
-              if (attrId === "userPassword") {
-                let tmpData : string[] = node.model.name.split(":");
-                pwdAlgo = tmpData[0];
-                pwd = tmpData[1];
-  
-                data = getEncryptPassword(pwd, pwdAlgo);
+              if (attrId === 'userPassword') {
+                const tmpData: string[] = node.model.name.split(':')
+                pwdAlgo = tmpData[0]
+                pwd = tmpData[1]
+
+                data = getEncryptPassword(pwd, pwdAlgo)
               }
-  
-              if (data && data !== "") {
-                replaceChangeData.push(new Attribute({
-                  type: attrId,
-                  values: [data]
-                }));
+
+              if (data && data !== '') {
+                replaceChangeData.push(
+                  new Attribute({
+                    type: attrId,
+                    values: [data]
+                  })
+                )
               }
             }
           }
         }
       }
-    });
+
+      return true
+    })
 
     if (deleteChangeData.length > 0) {
       allChangeDataList.push({
-        operation: "delete",
-        modificationList: deleteChangeData,
-      });
+        operation: 'delete',
+        modificationList: deleteChangeData
+      })
     }
     if (replaceChangeData.length > 0) {
       allChangeDataList.push({
-        operation: "replace",
-        modificationList: replaceChangeData,
-      });
+        operation: 'replace',
+        modificationList: replaceChangeData
+      })
     }
     if (addChangeData.length > 0) {
-      allChangeDataList.push({ 
-        operation: "add", 
-        modificationList: addChangeData 
-      });
+      allChangeDataList.push({
+        operation: 'add',
+        modificationList: addChangeData
+      })
     }
-  
-    let returnData : LdapChange = { dn: rootId, changeDataList: allChangeDataList };
-    return returnData;
+
+    const returnData: LdapChange = {
+      dn: rootId,
+      changeDataList: allChangeDataList
+    }
+    return returnData
   }
 }

@@ -1,15 +1,20 @@
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex, { StoreOptions } from 'vuex'
+import VuexPersistence from 'vuex-persist'
+import ServerListModules from './ServerListStore'
+import { RootState } from './types'
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
-  state: {
-  },
-  mutations: {
-  },
-  actions: {
-  },
-  modules: {
-  }
+const vuexLocal = new VuexPersistence({
+  storage: window.localStorage
 })
+
+const store: StoreOptions<RootState> = {
+  modules: {
+    ServerList: ServerListModules
+  },
+  plugins: [vuexLocal.plugin]
+}
+
+export default new Vuex.Store(store)

@@ -1,15 +1,22 @@
 'use strict'
 
-import { app, protocol, BrowserWindow, ipcMain, Menu, MenuItem } from 'electron'
+import {
+  app,
+  protocol,
+  BrowserWindow,
+  ipcMain
+} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
+import { SearchResult } from 'ldapts'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const mainIcon = join(__dirname, "./assets/icons/icon.png");
+const mainIcon = join(__dirname, './assets/icons/icon.png')
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -40,86 +47,84 @@ async function createWindow () {
     win.loadURL('app://./index.html')
   }
 
-  win.webContents.on("before-input-event", (event, input) => {
-    if (process.platform === "darwin") {
-      if (input.key.toLowerCase() === "r" && input.meta) {
-        win.webContents.send("refreshRootTreeFromMain");
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === "s" && input.meta) {
-        win.webContents.send("saveAttributeFromShortcut");
-        event.preventDefault();
+  win.webContents.on('before-input-event', (event, input) => {
+    if (process.platform === 'darwin') {
+      if (input.key.toLowerCase() === 'r' && input.meta) {
+        win.webContents.send('refreshRootTreeFromMain')
+        event.preventDefault()
+      } else if (input.key.toLowerCase() === 's' && input.meta) {
+        win.webContents.send('saveAttributeFromShortcut')
+        event.preventDefault()
       }
     }
 
-    if (process.platform === "win32") {
-      if (input.key.toLowerCase() === "f5") {
-        win.webContents.send("refreshRootTreeFromMain");
-        event.preventDefault();
-      } else if (input.key.toLowerCase() === "s" && input.control) {
-        win.webContents.send("saveAttributeFromShortcut");
-        event.preventDefault();
+    if (process.platform === 'win32') {
+      if (input.key.toLowerCase() === 'f5') {
+        win.webContents.send('refreshRootTreeFromMain')
+        event.preventDefault()
+      } else if (input.key.toLowerCase() === 's' && input.control) {
+        win.webContents.send('saveAttributeFromShortcut')
+        event.preventDefault()
       }
     }
-  });
+  })
 }
 
-function createMenu() {
-  const file = {
-    label: 'File',
-    submenu: [
-      {
-        label: 'Minimize',
-        role: 'minimize'
-      },
-      {
-        label: 'Quit',
-        role: 'quit'
-      }
-    ]
-  }
-  
-  const edit = {
-    label: 'Edit',
-    role: 'editMenu'
-  }
+// function createMenu () {
+//   const file = {
+//     label: 'File',
+//     submenu: [
+//       {
+//         label: 'Minimize',
+//         role: 'minimize'
+//       },
+//       {
+//         label: 'Quit',
+//         role: 'quit'
+//       }
+//     ]
+//   }
 
-  const help = {
-    label: 'Help',
-    submenu: [
-      {
-        label: 'Version',
-        click: async () => {
-          const { dialog } = require('electron')
+//   const edit = {
+//     label: 'Edit',
+//     role: 'editMenu'
+//   }
 
-          const message = 'Version : ' + app.getVersion()
-          const option = {
-            type: 'info',
-            title: 'Version',
-            icon: mainIcon,
-            message: message
-          }
-      
-          dialog.showMessageBox(option)
-        }
-      },
-      {
-        label: 'Help',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client')
-        }
-      }
-    ]
-  }
-  
-  const template = [
-    file,
-    edit,
-    help
-  ]
-  
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-}
+//   const help = {
+//     label: 'Help',
+//     submenu: [
+//       {
+//         label: 'Version',
+//         click: async () => {
+//           const { dialog } = require('electron')
+
+//           const message = 'Version : ' + app.getVersion()
+//           const option = {
+//             type: 'info',
+//             title: 'Version',
+//             icon: mainIcon,
+//             message: message
+//           }
+
+//           dialog.showMessageBox(option)
+//         }
+//       },
+//       {
+//         label: 'Help',
+//         click: async () => {
+//           const { shell } = require('electron')
+//           await shell.openExternal(
+//             'https://github.com/MJCheon/electron-ldap-client'
+//           )
+//         }
+//       }
+//     ]
+//   }
+
+//   const template = [file, edit, help]
+
+//   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
+// }
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -144,24 +149,25 @@ app.on('ready', async () => {
     // Install Vue Devtools
     try {
       await installExtension(VUEJS_DEVTOOLS)
-    } catch (e : any) {
+    } catch (e) {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
   createWindow()
-  createMenu()
+  // createMenu()
 })
 
-ipcMain.on("serverBind", async (event, ldapConfig) => {
-  let ldapServer : LdapServer = LdapFactory.Instance(ldapConfig)
-  const isAuthenticated : boolean = await ldapServer.connect()
+ipcMain.on('serverBind', async (event, ldapConfig) => {
+  const ldapServer: LdapServer = LdapFactory.Instance(ldapConfig)
+  const isAuthenticated: boolean = await ldapServer.connect()
 
-  if (isAuthenticated) {
-    let ldapTree = new LdapTree()
-    ldapTree.makeEntryTree(ldapServer.search())
-    event.reply("allSearchResponse", ldapTree.rootNode);
+  if (isAuthenticated){
+    let searchResult: SearchResult | null = await ldapServer.search()
+    console.log(searchResult)
   }
-});
+  
+  // event.reply('allSearchResponse', ldapTree.rootNode)
+})
 
 // ipcMain.on("attributeTree", (event, id, attributes) => {
 //   const attrTree = Tree.makeAttrTree(id, attributes);
