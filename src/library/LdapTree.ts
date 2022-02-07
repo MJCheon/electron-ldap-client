@@ -1,4 +1,4 @@
-import { Attribute } from 'ldapts'
+import { Attribute, Entry, SearchEntry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
 import { LdapChange, TreeNode, ChangeDataList } from './common'
 import { getEncryptPassword } from './LdapCrypto'
@@ -28,11 +28,11 @@ export class LdapTree {
     })
   }
 
-  makeEntryTree(searchEntries: any): void {
-    const baseDnList = searchEntries.baseDn.split(',')
-    const entries = searchEntries.entries
+  makeEntryTree(baseDn: string, searchResult: SearchResult): void {
+    const baseDnList = baseDn.split(',')
+    const entries = searchResult.searchEntries
 
-    entries.forEach((entry: any) => {
+    entries.forEach((entry) => {
       const realDn = entry.dn
         .split(',')
         .reverse()

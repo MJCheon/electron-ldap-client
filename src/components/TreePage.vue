@@ -78,6 +78,7 @@ export default {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
       this.isBinding = true
+      console.log(searchEntryTree)
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
   },

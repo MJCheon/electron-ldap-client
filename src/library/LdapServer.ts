@@ -3,7 +3,7 @@ import { LdapConfig, ChangeDataList, showError, LdapChange } from './common'
 
 export class LdapServer {
   private ldapConfig: LdapConfig;
-  private client: Client;
+  private client!: Client;
 
   constructor (ldapConfig: LdapConfig) {
     this.ldapConfig = ldapConfig
@@ -33,7 +33,6 @@ export class LdapServer {
     } catch (ex) {
       isAuthenticated = false
       showError('LDAP Error', String(ex))
-    } finally {
       await this.client.unbind()
     }
 
@@ -42,6 +41,10 @@ export class LdapServer {
 
   isConnected (): boolean {
     return this.client.isConnected
+  }
+
+  get baseDn (): string {
+    return this.ldapConfig.baseDn
   }
 
   async search (
@@ -57,8 +60,6 @@ export class LdapServer {
     }
 
     try {
-      console.log('searchDn : ' + searchDn)
-      console.log('searchOptions : ' + searchOptions.scope)
       const searchResult: SearchResult = await this.client.search(
         searchDn,
         searchOptions
@@ -67,7 +68,6 @@ export class LdapServer {
       return searchResult
     } catch (ex) {
       showError('LDAP Error', String(ex))
-    } finally {
       await this.client.unbind()
     }
 

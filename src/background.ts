@@ -150,7 +150,7 @@ app.on('ready', async () => {
     try {
       await installExtension(VUEJS_DEVTOOLS)
     } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString())
+      console.error('Vue Devtools failed to install:', String(e))
     }
   }
   createWindow()
@@ -163,10 +163,17 @@ ipcMain.on('serverBind', async (event, ldapConfig) => {
 
   if (isAuthenticated){
     let searchResult: SearchResult | null = await ldapServer.search()
-    console.log(searchResult)
+    let ldapTree: LdapTree = new LdapTree()
+    if (searchResult){
+      ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
+      if (ldapTree.rootNode) {
+        ldapTree.rootNode.model.children.forEach((node: any) => {
+          console.log(node)
+        })
+      }
+        //event.reply('allSearchResponse', ldapTree.rootNode)
+    }
   }
-  
-  // event.reply('allSearchResponse', ldapTree.rootNode)
 })
 
 // ipcMain.on("attributeTree", (event, id, attributes) => {
