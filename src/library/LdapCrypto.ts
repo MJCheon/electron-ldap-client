@@ -1,10 +1,10 @@
 import { randomBytes, createHash } from 'crypto'
 import { showError } from './common'
 
-function saltedMD5 (pw: string, salt: Buffer) {
+function saltedMD5 (pw: string): string {
   const magic = '$1$'
   let fin: string
-  const sp = salt || generateSalt(8)
+  const sp: string = generateSalt(8)
 
   const ctx = createHash('md5')
 
@@ -135,7 +135,7 @@ function to64 (data: string): string {
     'z'
   ]
 
-  let rearranged = ''
+  let rearranged: string = ''
 
   const opt: number[][] = [
     [0, 6, 12],
@@ -184,8 +184,8 @@ function generateSalt (len: number): string {
 function createHashedPwd (pwdAlgo: string, pwd: string): string {
   let hash: Buffer
   let salt: Buffer
-  let encodingHash = ''
-  let rfcHash = ''
+  let encodingHash: string
+  let rfcHash: string
 
   switch (pwdAlgo) {
     case 'ssha':
@@ -205,8 +205,7 @@ function createHashedPwd (pwdAlgo: string, pwd: string): string {
       encodingHash = Buffer.concat([hash, salt]).toString('base64')
       break
     case 'crypt':
-      salt = randomBytes(9)
-      encodingHash = saltedMD5(pwd, salt)
+      encodingHash = saltedMD5(pwd)
       break
     default:
       return ''

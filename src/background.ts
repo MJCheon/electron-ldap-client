@@ -14,7 +14,7 @@ import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
 import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig } from './library/common'
+import { TreeNode, LdapConfig, LdapChange } from './library/common'
 import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -40,7 +40,7 @@ async function createWindow () {
     }
   })
 
-  if (process.env.WEBPACK_DEV_SERVER_URL) {
+  if (process.env.WEBPACK_DEV_SERVER_URL) { 
     // Load the url of the dev server if in development mode
     await win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string)
     if (!process.env.IS_TEST) win.webContents.openDevTools()
@@ -170,8 +170,11 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
     let ldapTree: LdapTree = new LdapTree()
     if (searchResult){
       ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
-      const searchResponse: Node<TreeNode>[] = [ ldapTree.rootNode.model ]
-      event.reply('allSearchResponse', searchResponse )
+      let rootNode : Node<TreeNode> | undefined = ldapTree.rootNode
+      if (rootNode) {
+        const searchResponse: Node<TreeNode>[] = [ rootNode.model ]
+        event.reply('allSearchResponse', searchResponse )
+      }
     }
   }
 })
@@ -180,13 +183,18 @@ ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Ent
   let ldapTree: LdapTree = new LdapTree()
   const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
   event.reply("attributeTreeResponse", attrResponse);
-});
+})
 
-// ipcMain.on("saveAttribute", async (event, attrTree, deleteNodeList) => {
-//   const changeData = Tree.getChangesFromData(attrTree, deleteNodeList);
-//   await Ldapjs.modify(changeData);
-//   event.reply("refreshRootTreeFromMain");
-// });
+ipcMain.on("saveAttribute", async (event : IpcMainEvent, attrTree : TreeNode[], deleteNodeList : TreeNode[]) => {
+  const ldapServer: LdapServer = LdapFactory.Instance()
+  let ldapTree: LdapTree = new LdapTree()
+  let changeData: LdapChange = ldapTree.getChangesFromData(attrTree, deleteNodeList)
+
+  if (ldapServer.isConnected()) {
+    await ldapServer.modify(changeData)
+    event.reply("refreshRootTreeFromMain");
+  }
+})
 
 ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
@@ -194,9 +202,11 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
   let ldapTree: LdapTree = new LdapTree()
   if (searchResult){
     ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
-    const searchResponse: Node<TreeNode>[] = [ ldapTree.rootNode.model ]
-      
-    event.reply('allSearchResponse', searchResponse )
+    let rootNode : Node<TreeNode> | undefined = ldapTree.rootNode
+      if (rootNode) {
+        const searchResponse: Node<TreeNode>[] = [ rootNode.model ]
+        event.reply('allSearchResponse', searchResponse )
+      }
   }
 })
 

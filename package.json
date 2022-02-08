@@ -21,6 +21,7 @@
     "tree-model": "^1.0.7",
     "uuid": "^8.3.2",
     "vue": "^2.6.11",
+    "vue-bus-ts": "^1.0.8",
     "vue-class-component": "^7.2.3",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.2.0",

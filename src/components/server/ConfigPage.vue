@@ -125,7 +125,6 @@
 
 <script>
 import Store from '../../store/index'
-import EventBus from '../../event-bus'
 
 export default {
   data: () => ({
@@ -172,7 +171,7 @@ export default {
     ]
   }),
   created () {
-    EventBus.$on('editServer', serverId => {
+    this.$bus.$on('editServer', serverId => {
       const editServer = Store.getters.getServer(serverId)
 
       if (editServer) {

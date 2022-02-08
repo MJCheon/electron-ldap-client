@@ -57,12 +57,14 @@ export class LdapTree {
         this.dummyRootNode.addChild(rootNode)
       } else {
         realDn.forEach((nodeName: string) => {
-          const tmpNode: Node<TreeNode> | undefined = this.rootNode.first(
-            (node: Node<TreeNode>) => node.model.name === nodeName
-          )
-
-          if (tmpNode) {
-            parentNode = tmpNode
+          if (this.rootNode) {
+            const tmpNode: Node<TreeNode> | undefined = this.rootNode.first(
+              (node: Node<TreeNode>) => node.model.name === nodeName
+            )
+  
+            if (tmpNode) {
+              parentNode = tmpNode
+            }
           }
         })
 
@@ -92,7 +94,7 @@ export class LdapTree {
     })
   }
 
-  makeAttrTree(id: string, attrData: Entry): TreeNode {
+  makeAttrTree(id: string, attrEntry: Entry): TreeNode {
     const attrRootNode: TreeNode = {
       id: '',
       name: id,
@@ -103,12 +105,14 @@ export class LdapTree {
       dragDisabled: true
     }
 
-    Object.keys(attrData)
+    Object.keys(attrEntry)
       .sort()
       .forEach((key : string) => {
-        if (Array.isArray(attrData[key])) {
-          const attrChild: TreeNode[] = []
-          attrData[key].forEach((attr: string) => {
+        
+        if (Array.isArray(attrEntry[key])) {
+          const attrChild: TreeNode[] = [];
+
+          (attrEntry[key] as string[]).forEach((attr: string) => {
             attrChild.push({
               id: attr,
               name: attr,
@@ -132,10 +136,10 @@ export class LdapTree {
             dragDisabled: true
           })
         } else {
-          const data = key + ' : ' + attrData[key]
+          const data: string = key + ' : ' + (attrEntry[key] as string)
           attrRootNode.children.push({
             id: key,
-            name: attrData[key],
+            name: (attrEntry[key] as string),
             data: data,
             children: [],
             isExpanded: true,
@@ -149,8 +153,8 @@ export class LdapTree {
     return attrRootNode
   }
 
-  getChangesFromData(tree: TreeNode, deleteNodeList: TreeNode[]) {
-    const rootNode: Node<TreeNode> = new TreeModel().parse(tree)
+  getChangesFromData(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
+    const attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
     const allChangeDataList: ChangeDataList[] = []
 
@@ -199,7 +203,7 @@ export class LdapTree {
       })
     }
 
-    rootNode.walk((node : Node<TreeNode>) => {
+    attrRootNode.walk((node : Node<TreeNode>) => {
       let attrId = ''
       let data = ''
       let pwdAlgo = ''

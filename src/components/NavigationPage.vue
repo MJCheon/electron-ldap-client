@@ -51,7 +51,6 @@
 
 <script>
 import ServerConfigPage from './server/ConfigPage'
-import EventBus from '../event-bus'
 import Store from '../store/index'
 import { ipcRenderer } from 'electron'
 
@@ -81,7 +80,7 @@ export default {
       Store.dispatch('DELETE_SERVER', serverId)
     },
     editServer: serverId => {
-      EventBus.$emit('editServer', serverId)
+      this.$bus.$emit('editServer', serverId)
     },
     bindServer: serverId => {
       const server = Store.getters.GET_SERVER(serverId)
