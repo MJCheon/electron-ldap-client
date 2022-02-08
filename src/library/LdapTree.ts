@@ -29,7 +29,7 @@ export class LdapTree {
     const entries = searchResult.searchEntries
 
     entries.forEach((entry : Entry) => {
-      const realDn = entry.dn
+      let realDn: string[] = entry.dn
         .split(',')
         .reverse()
         .filter((dnNode: string) => !baseDnList.includes(dnNode))
@@ -68,27 +68,30 @@ export class LdapTree {
           }
         })
 
-        const dn = realDn.pop()
-        const newNode = {
-          id: dn,
-          name: dn,
-          isLeaf: true,
-          isVisible: true,
-          dragDisabled: true,
-          data: entry,
-          children: []
-        }
+        let dn: string | undefined = realDn.pop()
 
-        if (parentNode.model.id === 'tmp') {
-          if (this.rootNode) {
-            this.rootNode.model.isLeaf = false
-            this.rootNode.addChild(this.tree.parse(newNode))
+        if (dn){
+          let newNode: TreeNode = {
+            id: dn,
+            name: dn,
+            isLeaf: true,
+            isVisible: true,
+            dragDisabled: true,
+            data: (entry as unknown as string),
+            children: []
           }
-        } else {
-          if (parentNode.model.isLeaf) {
-            parentNode.model.isLeaf = false
+  
+          if (parentNode.model.id === 'tmp') {
+            if (this.rootNode) {
+              this.rootNode.model.isLeaf = false
+              this.rootNode.addChild(this.tree.parse(newNode))
+            }
+          } else {
+            if (parentNode.model.isLeaf) {
+              parentNode.model.isLeaf = false
+            }
+            parentNode.addChild(this.tree.parse(newNode))
           }
-          parentNode.addChild(this.tree.parse(newNode))
         }
       }
     })
@@ -154,26 +157,26 @@ export class LdapTree {
   }
 
   getChangesFromData(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
-    const attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
+    let attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
-    const allChangeDataList: ChangeDataList[] = []
+    let allChangeDataList: ChangeDataList[] = []
 
-    const addChangeData: Attribute[] = []
-    const replaceChangeData: Attribute[] = []
-    const deleteChangeData: Attribute[] = []
+    let addChangeData: Attribute[] = []
+    let replaceChangeData: Attribute[] = []
+    let deleteChangeData: Attribute[] = []
 
-    let rootId = ''
+    let rootId: string = ''
 
     if (deleteNodeList.length > 0) {
       // delete
-      deleteNodeList.forEach((node) => {
+      deleteNodeList.forEach((node: TreeNode) => {
         let attrId: string = node.id
-        const deleteNodeName: string | undefined = node.name
+        let deleteNodeName: string | undefined = node.name
 
         if (node.id === node.name) {
           // netgroup
-          const parentNode = node.parent
-          const replaceDataInDeleteList: string[] = []
+          let parentNode: TreeNode | undefined = node.parent
+          let replaceDataInDeleteList: string[] = []
 
           if (parentNode) {
             attrId = parentNode.id

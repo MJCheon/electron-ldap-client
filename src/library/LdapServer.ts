@@ -93,7 +93,7 @@ export class LdapServer {
             )
           })
         })
-
+        
         await this.client.modify(dn, changeList)
       }
     } catch (ex) {

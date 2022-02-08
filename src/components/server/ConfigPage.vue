@@ -125,6 +125,7 @@
 
 <script>
 import Store from '../../store/index'
+import EventBus from '../../event-bus'
 
 export default {
   data: () => ({
@@ -171,8 +172,8 @@ export default {
     ]
   }),
   created () {
-    this.$bus.$on('editServer', serverId => {
-      const editServer = Store.getters.getServer(serverId)
+    EventBus.$on('editServer', serverId => {
+      const editServer = Store.getters.GET_SERVER(serverId)
 
       if (editServer) {
         this.server = editServer
@@ -183,7 +184,7 @@ export default {
   },
   watch: {
     showServerDialog (value) {
-      if (value && !this.edit) {
+      if ((value && !this.edit) || !value) {
         this.server = {
           name: '',
           ip: '',
