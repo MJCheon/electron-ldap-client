@@ -51,7 +51,7 @@
           <v-icon color="green lighten-2">mdi-file-document</v-icon>
         </span>
         <span class="icon" slot="treeNodeIcon">
-          <v-icon color="yellow darken-2">mdi-folder</v-icon>
+          <v-icon color="yellow darken-2" >mdi-folder</v-icon>
         </span>
       </vue-tree-list>
     </v-card-text>

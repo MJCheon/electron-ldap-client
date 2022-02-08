@@ -302,15 +302,11 @@ export default {
       }
     }
   },
-  beforeCreate () {
-    this.$options.components.item = require('./VueTreeList').default
-  },
   mounted () {
-    const vm = this
     addHandler(window, 'keyup', function (e) {
       // click enter
-      if (e.keyCode === 13 && vm.editable) {
-        vm.editable = false
+      if (e.keyCode === 13 && this.editable) {
+        this.editable = false
       }
     })
   },
@@ -356,7 +352,6 @@ export default {
 
     toggle () {
       if (this.isFolder) {
-        this.model.isExpanded = !this.model.isExpanded
         this.expanded = !this.expanded
       }
     },

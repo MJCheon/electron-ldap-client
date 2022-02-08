@@ -3,7 +3,7 @@ import {
 } from './tools'
 
 export class TreeNode {
-  constructor(data) {
+  constructor (data) {
     const {
       id,
       isLeaf
@@ -22,11 +22,11 @@ export class TreeNode {
     }
   }
 
-  changeName(name) {
+  changeName (name) {
     this.name = name
   }
 
-  addChildren(children) {
+  addChildren (children) {
     if (!this.children) {
       this.children = []
     }
@@ -47,14 +47,14 @@ export class TreeNode {
   }
 
   // remove self
-  remove() {
+  remove () {
     const parent = this.parent
     const index = parent.findChildIndex(this)
     parent.children.splice(index, 1)
   }
 
   // remove child
-  _removeChild(child) {
+  _removeChild (child) {
     for (var i = 0, len = this.children.length; i < len; i++) {
       if (this.children[i] === child) {
         this.children.splice(i, 1)
@@ -63,7 +63,7 @@ export class TreeNode {
     }
   }
 
-  isTargetChild(target) {
+  isTargetChild (target) {
     let parent = target.parent
     while (parent) {
       if (parent === this) {
@@ -74,7 +74,7 @@ export class TreeNode {
     return false
   }
 
-  moveInto(target) {
+  moveInto (target) {
     if (this.name === 'root' || this === target) {
       return
     }
@@ -98,7 +98,7 @@ export class TreeNode {
     target.children.unshift(this)
   }
 
-  findChildIndex(child) {
+  findChildIndex (child) {
     var index
     for (let i = 0, len = this.children.length; i < len; i++) {
       if (this.children[i] === child) {
@@ -109,7 +109,7 @@ export class TreeNode {
     return index
   }
 
-  _canInsert(target) {
+  _canInsert (target) {
     if (this.name === 'root' || this === target) {
       return false
     }
@@ -125,27 +125,27 @@ export class TreeNode {
     return true
   }
 
-  insertBefore(target) {
+  insertBefore (target) {
     if (!this._canInsert(target)) return
 
     const pos = target.parent.findChildIndex(target)
     target.parent.children.splice(pos, 0, this)
   }
 
-  insertAfter(target) {
+  insertAfter (target) {
     if (!this._canInsert(target)) return
 
     const pos = target.parent.findChildIndex(target)
     target.parent.children.splice(pos + 1, 0, this)
   }
 
-  toString() {
+  toString () {
     return JSON.stringify(traverseTree(this))
   }
 }
 
 export class Tree {
-  constructor(data) {
+  constructor (data) {
     this.root = new TreeNode({
       name: 'root',
       isLeaf: false,
@@ -156,7 +156,7 @@ export class Tree {
     return this.root
   }
 
-  initNode(node, data) {
+  initNode (node, data) {
     for (let i = 0, len = data.length; i < len; i++) {
       var _data = data[i]
 

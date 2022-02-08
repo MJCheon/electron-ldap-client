@@ -1,5 +1,5 @@
 <template>
-  <v-app id="inspire">
+  <v-app id='inspire'>
     <NavigationPage />
 
     <v-main>
@@ -12,9 +12,9 @@
 </template>
 
 <script>
-import TreePage from "./TreePage";
-import TreeEntryEditPage from "./entry/EditPage";
-import NavigationPage from "./NavigationPage";
+import TreePage from './TreePage'
+import TreeEntryEditPage from './entry/EditPage'
+import NavigationPage from './NavigationPage'
 
 export default {
   components: {
@@ -22,7 +22,7 @@ export default {
     TreeEntryEditPage,
     NavigationPage
   }
-};
+}
 </script>
 
 <style>
@@ -31,6 +31,6 @@ export default {
   margin: 5% 5% 10% 16px;
 }
 .v-subheader {
-  font-size: "10px";
+  font-size: '10px';
 }
 </style>
