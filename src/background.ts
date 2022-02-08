@@ -4,7 +4,8 @@ import {
   app,
   protocol,
   BrowserWindow,
-  ipcMain
+  ipcMain,
+  IpcMainEvent
 } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -12,7 +13,9 @@ import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
-import { SearchResult } from 'ldapts'
+import { SearchResult, Entry } from 'ldapts'
+import { TreeNode, LdapConfig } from './library/common'
+import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -157,8 +160,9 @@ app.on('ready', async () => {
   // createMenu()
 })
 
-ipcMain.on('serverBind', async (event, ldapConfig) => {
-  const ldapServer: LdapServer = LdapFactory.Instance(ldapConfig)
+ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
+  const ldapServer: LdapServer = LdapFactory.Instance()
+  ldapServer.ldapConfig = ldapConfig
   const isAuthenticated: boolean = await ldapServer.connect()
 
   if (isAuthenticated){
@@ -166,20 +170,17 @@ ipcMain.on('serverBind', async (event, ldapConfig) => {
     let ldapTree: LdapTree = new LdapTree()
     if (searchResult){
       ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
-      if (ldapTree.rootNode) {
-        ldapTree.rootNode.model.children.forEach((node: any) => {
-          console.log(node)
-        })
-      }
-        //event.reply('allSearchResponse', ldapTree.rootNode)
+      const searchResponse: Node<TreeNode>[] = [ ldapTree.rootNode.model ]
+      event.reply('allSearchResponse', searchResponse )
     }
   }
 })
 
-// ipcMain.on("attributeTree", (event, id, attributes) => {
-//   const attrTree = Tree.makeAttrTree(id, attributes);
-//   event.reply("attributeTreeResponse", attrTree);
-// });
+ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Entry) => {
+  let ldapTree: LdapTree = new LdapTree()
+  const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
+  event.reply("attributeTreeResponse", attrResponse);
+});
 
 // ipcMain.on("saveAttribute", async (event, attrTree, deleteNodeList) => {
 //   const changeData = Tree.getChangesFromData(attrTree, deleteNodeList);
@@ -187,12 +188,17 @@ ipcMain.on('serverBind', async (event, ldapConfig) => {
 //   event.reply("refreshRootTreeFromMain");
 // });
 
-// ipcMain.on("refreshRootTree", async (event) => {
-//   const isRefresh = true;
-//   const searchEntries = await Ldapjs.search(isRefresh);
-//   const rootTree = Tree.makeEntryTree(searchEntries);
-//   event.reply("allSearchResponse", rootTree);
-// });
+ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
+  const ldapServer: LdapServer = LdapFactory.Instance()
+  let searchResult: SearchResult | null = await ldapServer.search()
+  let ldapTree: LdapTree = new LdapTree()
+  if (searchResult){
+    ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
+    const searchResponse: Node<TreeNode>[] = [ ldapTree.rootNode.model ]
+      
+    event.reply('allSearchResponse', searchResponse )
+  }
+})
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

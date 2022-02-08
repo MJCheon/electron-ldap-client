@@ -2,33 +2,36 @@ import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
 import { LdapConfig, ChangeDataList, showError, LdapChange } from './common'
 
 export class LdapServer {
-  private ldapConfig: LdapConfig;
+  private config!: LdapConfig;
   private client!: Client;
 
-  constructor (ldapConfig: LdapConfig) {
-    this.ldapConfig = ldapConfig
+  constructor () {
+  }
+
+  set ldapConfig (ldapConfig : LdapConfig) {
+    this.config = ldapConfig
   }
 
   async connect (): Promise<boolean> {
-    const port = this.ldapConfig.port.toString()
+    const port = this.config.port.toString()
 
     let url: string
 
-    if (this.ldapConfig.ssl == 'tls') {
-      url = 'ldaps://' + this.ldapConfig.ip + ':' + port
+    if (this.config.ssl == 'tls') {
+      url = 'ldaps://' + this.config.ip + ':' + port
     } else {
-      url = 'ldap://' + this.ldapConfig.ip + ':' + port
+      url = 'ldap://' + this.config.ip + ':' + port
     }
 
     this.client = new Client({
       url: url,
-      connectTimeout: this.ldapConfig.connTimeout
+      connectTimeout: this.config.connTimeout
     })
 
     let isAuthenticated: boolean
 
     try {
-      await this.client.bind(this.ldapConfig.rootDn, this.ldapConfig.passwd)
+      await this.client.bind(this.config.rootDn, this.config.passwd)
       isAuthenticated = true
     } catch (ex) {
       isAuthenticated = false
@@ -44,7 +47,7 @@ export class LdapServer {
   }
 
   get baseDn (): string {
-    return this.ldapConfig.baseDn
+    return this.config.baseDn
   }
 
   async search (
@@ -52,7 +55,7 @@ export class LdapServer {
     searchOptions: SearchOptions = {}
   ): Promise<SearchResult | null> {
     if (searchDn === '') {
-      searchDn = this.ldapConfig.baseDn
+      searchDn = this.config.baseDn
     }
 
     if (searchOptions === {}) {

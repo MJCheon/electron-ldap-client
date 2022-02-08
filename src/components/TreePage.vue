@@ -58,7 +58,7 @@
   </v-card>
 </template>
 <script>
-import { VueTreeList, Tree, TreeNode } from './vue-tree-list'
+import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -78,7 +78,6 @@ export default {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
       this.isBinding = true
-      console.log(searchEntryTree)
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
   },

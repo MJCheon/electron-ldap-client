@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { VueTreeList, Tree } from "../vue-tree-list";
+import { VueTreeList, Tree } from "../lib/vue-tree-list";
 import { ipcRenderer } from "electron";
 
 export default {
@@ -62,13 +62,10 @@ export default {
     deleteNodeList: [],
     attrTree: new Tree([]),
     showEntryDialog: false,
-    server: {
-      name: ""
-    },
-    sslItems: []
   }),
   created() {
     ipcRenderer.on("attributeTreeResponse", (event, attrTree) => {
+      console.log(attrTree)
       this.attrTree = new Tree(attrTree);
       this.showEntryDialog = true;
     });

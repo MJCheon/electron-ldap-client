@@ -1,4 +1,4 @@
-import { Attribute, Entry, SearchEntry, SearchResult } from 'ldapts'
+import { Attribute, Entry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
 import { LdapChange, TreeNode, ChangeDataList } from './common'
 import { getEncryptPassword } from './LdapCrypto'
@@ -9,7 +9,7 @@ export class LdapTree {
 
   constructor() {
     this.tree = new TreeModel({
-      modelComparatorFn: (left, right) => {
+      modelComparatorFn: (left : Node<TreeNode>, right : Node<TreeNode>) => {
         return left.name > right.name
       }
     })
@@ -21,18 +21,14 @@ export class LdapTree {
   }
 
   get rootNode(): Node<TreeNode> | undefined {
-    return this.dummyRootNode.first((node: Node<TreeNode>) => {
-      if (node.isRoot() && node.hasChildren()) {
-        return node.children[0]
-      }
-    })
+    return this.dummyRootNode.children[0]
   }
 
   makeEntryTree(baseDn: string, searchResult: SearchResult): void {
     const baseDnList = baseDn.split(',')
     const entries = searchResult.searchEntries
 
-    entries.forEach((entry) => {
+    entries.forEach((entry : Entry) => {
       const realDn = entry.dn
         .split(',')
         .reverse()
@@ -61,7 +57,7 @@ export class LdapTree {
         this.dummyRootNode.addChild(rootNode)
       } else {
         realDn.forEach((nodeName: string) => {
-          const tmpNode: Node<TreeNode> | undefined = this.dummyRootNode.first(
+          const tmpNode: Node<TreeNode> | undefined = this.rootNode.first(
             (node: Node<TreeNode>) => node.model.name === nodeName
           )
 
@@ -96,7 +92,7 @@ export class LdapTree {
     })
   }
 
-  makeAttrTree(id: string, attrData: any): TreeNode {
+  makeAttrTree(id: string, attrData: Entry): TreeNode {
     const attrRootNode: TreeNode = {
       id: '',
       name: id,
@@ -109,7 +105,7 @@ export class LdapTree {
 
     Object.keys(attrData)
       .sort()
-      .forEach((key) => {
+      .forEach((key : string) => {
         if (Array.isArray(attrData[key])) {
           const attrChild: TreeNode[] = []
           attrData[key].forEach((attr: string) => {
@@ -203,7 +199,7 @@ export class LdapTree {
       })
     }
 
-    rootNode.walk((node) => {
+    rootNode.walk((node : Node<TreeNode>) => {
       let attrId = ''
       let data = ''
       let pwdAlgo = ''

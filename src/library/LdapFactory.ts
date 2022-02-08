@@ -3,9 +3,10 @@ import { LdapServer } from './LdapServer'
 
 export class LdapFactory {
   private static _instance: LdapServer | null = null;
-  static Instance (ldapConfig: LdapConfig): LdapServer {
+
+  static Instance (): LdapServer {
     if (LdapFactory._instance === null) {
-      LdapFactory._instance = new LdapServer(ldapConfig)
+      LdapFactory._instance = new LdapServer()
     }
 
     return LdapFactory._instance
