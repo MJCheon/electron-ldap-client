@@ -5,10 +5,7 @@ import {
   protocol,
   BrowserWindow,
   ipcMain,
-  IpcMainEvent,
-  MenuItemConstructorOptions,
-  Menu,
-  MenuItem
+  IpcMainEvent
 } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -23,6 +20,8 @@ import { Node } from 'tree-model'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const mainIcon = join(__dirname, './assets/icons/icon.png')
+
+let isLdapConnected: boolean = false
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -77,11 +76,16 @@ async function createWindow () {
 }
 
 // Quit when all windows are closed.
-app.on('window-all-closed', () => {
+app.on('window-all-closed', async () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+
+  if (isLdapConnected) {
+    let ldapServer: LdapServer = LdapFactory.Instance()
+    await ldapServer.disconnect()
   }
 })
 
@@ -108,6 +112,11 @@ app.on('ready', async () => {
 
 ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
+
+  if (isLdapConnected && ldapConfig !== ldapServer.ldapConfig) {
+    await ldapServer.disconnect()
+  }
+
   ldapServer.ldapConfig = ldapConfig
   const isAuthenticated: boolean = await ldapServer.connect()
 
@@ -122,6 +131,10 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
         event.reply('allSearchResponse', searchResponse )
       }
     }
+  }
+
+  if (!isLdapConnected) {
+    isLdapConnected = true
   }
 })
 
