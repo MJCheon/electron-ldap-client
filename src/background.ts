@@ -110,6 +110,7 @@ app.on('ready', async () => {
   createWindow()
 })
 
+// Ldap Connect and Get ldap entries
 ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
 
@@ -138,12 +139,14 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
   }
 })
 
+// Get Attribute of ldap entry
 ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Entry) => {
   let ldapTree: LdapTree = new LdapTree()
   const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
   event.reply("attributeTreeResponse", attrResponse);
 })
 
+// Save Attribute of ldap entry
 ipcMain.on("saveAttribute", async (event : IpcMainEvent, attrTree : TreeNode[], deleteNodeList : TreeNode[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
@@ -155,6 +158,7 @@ ipcMain.on("saveAttribute", async (event : IpcMainEvent, attrTree : TreeNode[], 
   }
 })
 
+// Refresh ldap Entries
 ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let searchResult: SearchResult | null = await ldapServer.search()
@@ -168,6 +172,9 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
       }
   }
 })
+
+// Modify DN of ldap entry
+
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

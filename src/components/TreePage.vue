@@ -24,6 +24,7 @@
         @change-name="onChangeName"
         @delete-node="onDel"
         @add-node="onAddNode"
+        @drop="onDragNode"
         :model="entryTree"
         :default-tree-node-name="defaultTreeNode"
         :default-leaf-node-name="defaultLeafNode"
@@ -104,6 +105,14 @@ export default {
       var node = new TreeNode({ name: 'new node', isLeaf: false })
       if (!this.data.children) this.data.children = []
       this.data.addChildren(node)
+    },
+    onDragNode (params) {
+      var dragNode = params.node
+      var originParent = params.src
+      var currentParent = params.target
+
+      console.log(dragNode)
+    //   ipcRenderer.send('modifyDn', dragNode, originParent, currentParent)
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
