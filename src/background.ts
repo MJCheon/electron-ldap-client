@@ -5,7 +5,10 @@ import {
   protocol,
   BrowserWindow,
   ipcMain,
-  IpcMainEvent
+  IpcMainEvent,
+  MenuItemConstructorOptions,
+  Menu,
+  MenuItem
 } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -73,62 +76,6 @@ async function createWindow () {
   })
 }
 
-// function createMenu () {
-//   const file = {
-//     label: 'File',
-//     submenu: [
-//       {
-//         label: 'Minimize',
-//         role: 'minimize'
-//       },
-//       {
-//         label: 'Quit',
-//         role: 'quit'
-//       }
-//     ]
-//   }
-
-//   const edit = {
-//     label: 'Edit',
-//     role: 'editMenu'
-//   }
-
-//   const help = {
-//     label: 'Help',
-//     submenu: [
-//       {
-//         label: 'Version',
-//         click: async () => {
-//           const { dialog } = require('electron')
-
-//           const message = 'Version : ' + app.getVersion()
-//           const option = {
-//             type: 'info',
-//             title: 'Version',
-//             icon: mainIcon,
-//             message: message
-//           }
-
-//           dialog.showMessageBox(option)
-//         }
-//       },
-//       {
-//         label: 'Help',
-//         click: async () => {
-//           const { shell } = require('electron')
-//           await shell.openExternal(
-//             'https://github.com/MJCheon/electron-ldap-client'
-//           )
-//         }
-//       }
-//     ]
-//   }
-
-//   const template = [file, edit, help]
-
-//   Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-// }
-
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
@@ -157,7 +104,6 @@ app.on('ready', async () => {
     }
   }
   createWindow()
-  // createMenu()
 })
 
 ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
