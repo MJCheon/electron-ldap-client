@@ -14,7 +14,7 @@ import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
 import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange } from './library/common'
+import { TreeNode, LdapConfig, LdapChange, modifyDnObject } from './library/common'
 import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -173,7 +173,14 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
   }
 })
 
-// Modify DN of ldap entry
+// Save All Changed Data
+ipcMain.on("saveAllData", async (event : IpcMainEvent, modifyDnList : any[]) => {
+  modifyDnList.forEach((entry: modifyDnObject) => {
+    console.log(entry.node)
+    console.log(entry.originParentNode)
+    console.log(entry.modifyParentNode)
+  })
+})
 
 
 // Exit cleanly on request from parent process in development mode.

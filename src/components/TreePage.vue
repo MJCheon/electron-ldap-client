@@ -14,6 +14,9 @@
     </v-sheet>
     <v-card-text>
       <div class="d-flex flex-row-reverse">
+        <v-btn elevation="2" icon color="blue darken-1" @click="saveAll()">
+          <v-icon>mdi-content-save-all</v-icon>
+        </v-btn>
         <v-btn elevation="2" icon color="blue darken-1" @click="refreshTree()">
           <v-icon>mdi-refresh</v-icon>
         </v-btn>
@@ -73,7 +76,8 @@ export default {
     newTree: {},
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
-    entryTree: new Tree([])
+    entryTree: new Tree([]),
+    modifyDnList: []
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
@@ -111,8 +115,16 @@ export default {
       var originParent = params.src
       var currentParent = params.target
 
-      console.log(dragNode)
+      this.modifyDnList.push({
+        node: dragNode,
+        orginParentNode: originParent,
+        modifyParentNode: currentParent
+      })
     //   ipcRenderer.send('modifyDn', dragNode, originParent, currentParent)
+    },
+    saveAll () {
+      ipcRenderer.send('saveAllData', this.modifyDnList)
+      this.modifyDnList = []
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
