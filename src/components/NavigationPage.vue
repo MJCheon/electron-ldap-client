@@ -1,13 +1,6 @@
 <template>
-  <v-navigation-drawer
-    v-model="drawer"
-    permanent
-    app
-  >
-    <v-sheet
-      color="grey lighten-4"
-      class="pa-4"
-    >
+  <v-navigation-drawer v-model="drawer" permanent app>
+    <v-sheet color="grey lighten-4" class="pa-4">
       <div class="pa-4">
         <center>
           <img src="https://img.icons8.com/dusk/64/000000/active-directory.png" />
@@ -25,23 +18,16 @@
         link
       >
         <v-list-item-icon>
-          <v-icon color='red lighten-2'>mdi-desktop-tower</v-icon>
+          <v-icon color="red lighten-2">mdi-desktop-tower</v-icon>
         </v-list-item-icon>
 
         <v-list-item-content>
           <v-list-item-title v-text="server.name"></v-list-item-title>
         </v-list-item-content>
 
-        <v-menu
-          bottom
-          left
-        >
+        <v-menu bottom left>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              icon
-              v-bind="attrs"
-              v-on="on"
-            >
+            <v-btn icon v-bind="attrs" v-on="on">
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
@@ -65,8 +51,8 @@
 
 <script>
 import ServerConfigPage from './server/ConfigPage'
-import EventBus from '../event-bus'
 import Store from '../store/index'
+import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -75,14 +61,11 @@ export default {
   },
   data: () => ({
     drawer: null,
-    menuList: [
-      { title: 'Delete' },
-      { title: 'Edit' }
-    ]
+    menuList: [{ title: 'Delete' }, { title: 'Edit' }]
   }),
   computed: {
     serverNameList: () => {
-      const serverNameList = Store.getters.getServerNameList
+      const serverNameList = Store.getters.GET_SERVER_NAME_LIST
       return serverNameList
     }
   },
@@ -94,14 +77,14 @@ export default {
         this.editServer(serverId)
       }
     },
-    deleteServer: (serverId) => {
+    deleteServer: serverId => {
       Store.dispatch('DELETE_SERVER', serverId)
     },
-    editServer: (serverId) => {
+    editServer: serverId => {
       EventBus.$emit('editServer', serverId)
     },
-    bindServer: (serverId) => {
-      const server = Store.getters.getServer(serverId)
+    bindServer: serverId => {
+      const server = Store.getters.GET_SERVER(serverId)
       ipcRenderer.send('serverBind', server)
     }
   }
@@ -114,6 +97,6 @@ export default {
   margin: 5% 5% 10% 16px;
 }
 .v-subheader {
-  font-size: '10px';
+  font-size: "10px";
 }
 </style>

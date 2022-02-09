@@ -1,10 +1,10 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-import MainPage from '../components/MainPage'
+import VueRouter, { RouteConfig } from 'vue-router'
+import MainPage from '@/components/MainPage.vue'
 
 Vue.use(VueRouter)
 
-const routes = [
+const routes: Array<RouteConfig> = [
   {
     path: '/',
     name: 'MainPage',

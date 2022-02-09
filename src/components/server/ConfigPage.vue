@@ -1,9 +1,6 @@
 <template>
   <v-row justify='center'>
-    <v-dialog
-      v-model='showServerDialog'
-      max-width='600px'
-    >
+    <v-dialog v-model='showServerDialog' max-width='600px'>
       <template v-slot:activator='{ on, attrs }'>
         <v-fab-transition>
           <v-btn
@@ -28,67 +25,50 @@
           <span class='headline'>Server Config</span>
         </v-card-title>
         <v-card-text>
-          <v-form
-            v-model="valid"
-          >
+          <v-form v-model='valid'>
             <v-row>
               <v-col cols='12'>
                 <v-text-field
                   label='Name'
-                  ref="name"
+                  ref='name'
                   v-model='server.name'
                   :rules='[rules.required]'
                   requried
                 ></v-text-field>
               </v-col>
-              <v-col
-                cols='auto'
-                sm='4'
-                md='6'
-              >
+              <v-col cols='auto' sm='4' md='6'>
                 <v-text-field
                   label='Server IP*'
-                  ref="ip"
+                  ref='ip'
                   v-model='server.ip'
                   hint='127.0.0.1 or example.com or host1'
                   :rules='[rules.required, rules.isIpOrDomainOrHost]'
                   required
                 ></v-text-field>
               </v-col>
-              <v-col
-                cols='auto'
-                sm='4'
-                md='3'
-              >
+              <v-col cols='auto' sm='4' md='3'>
                 <v-text-field
                   label='Server Port*'
-                  ref="port"
+                  ref='port'
                   v-model='server.port'
                   :rules='[rules.required, rules.isNumber, rules.isPort]'
                   required
                 ></v-text-field>
               </v-col>
-              <v-col
-                cols='auto'
-                sm='4'
-                md='3'
-              >
+              <v-col cols='auto' sm='4' md='3'>
                 <v-select
-                  :items=sslItems
-                  ref="ssl"
+                  :items='sslItems'
+                  ref='ssl'
                   label='SSL/TLS*'
                   v-model='server.ssl'
                   :rules='[rules.required]'
                   required
                 ></v-select>
               </v-col>
-              <v-col
-                cols='auto'
-                sm='6'
-              >
+              <v-col cols='auto' sm='6'>
                 <v-text-field
                   label='Base DN*'
-                  ref="baseDn"
+                  ref='baseDn'
                   v-model='server.baseDn'
                   hint='dc=example,dc=com'
                   :rules='[rules.required]'
@@ -99,7 +79,7 @@
                 <v-text-field
                   label='Root DN*'
                   v-model='server.rootDn'
-                  ref="rootDn"
+                  ref='rootDn'
                   hint='cn=root,dc=example,dc=com'
                   :rules='[rules.required]'
                   required
@@ -108,20 +88,17 @@
               <v-col cols='8'>
                 <v-text-field
                   label='Password*'
-                  ref="password"
-                  v-model='server.password'
+                  ref='passwd'
+                  v-model='server.passwd'
                   :rules='[rules.required]'
                   type='password'
                   required
                 ></v-text-field>
               </v-col>
-              <v-col
-                cols='auto'
-                sm='5'
-              >
+              <v-col cols='auto' sm='5'>
                 <v-text-field
                   label='ConnectTimeout(ms)'
-                  ref="connTimeout"
+                  ref='connTimeout'
                   v-model='server.connTimeout'
                   :rules='[rules.isNumber]'
                   hint='5000'
@@ -130,23 +107,15 @@
             </v-row>
             <small>*indicates required field</small>
             <v-spacer></v-spacer>
+            <v-btn color='blue darken-1' text @click='close()'>Close</v-btn>
             <v-btn
-              color='blue darken-1'
-              text
-              @click='close()'
-            >
-              Close
-            </v-btn>
-            <v-btn
-              :disabled="!valid"
+              :disabled='!valid'
               color='blue darken-1'
               absolute
               right
               text
               @click='saveServer(server); close()'
-            >
-              Save
-            </v-btn>
+            >Save</v-btn>
           </v-form>
         </v-card-text>
       </v-card>
@@ -155,7 +124,6 @@
 </template>
 
 <script>
-
 import Store from '../../store/index'
 import EventBus from '../../event-bus'
 
@@ -189,7 +157,7 @@ export default {
       ssl: '',
       baseDn: '',
       rootDn: '',
-      password: '',
+      passw: '',
       connTimeout: ''
     },
     sslItems: [
@@ -205,7 +173,7 @@ export default {
   }),
   created () {
     EventBus.$on('editServer', serverId => {
-      const editServer = Store.getters.getServer(serverId)
+      const editServer = Store.getters.GET_SERVER(serverId)
 
       if (editServer) {
         this.server = editServer
@@ -216,7 +184,7 @@ export default {
   },
   watch: {
     showServerDialog (value) {
-      if (value && !this.edit) {
+      if ((value && !this.edit) || !value) {
         this.server = {
           name: '',
           ip: '',
@@ -224,15 +192,15 @@ export default {
           ssl: '',
           baseDn: '',
           rootDn: '',
-          password: '',
+          passwd: '',
           connTimeout: ''
         }
       }
     }
   },
   methods: {
-    saveServer: (server) => {
-      Store.dispatch('SET_SERVER', server)
+    saveServer: server => {
+      Store.dispatch('SETTING_SERVER', server)
     },
     close () {
       this.showServerDialog = false

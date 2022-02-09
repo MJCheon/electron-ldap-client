@@ -1,7 +1,5 @@
 <template>
-  <v-card v-if='isBinding'
-    class="mx-auto"
-  >
+  <v-card v-if="isBinding" class="mx-auto">
     <v-sheet class="pa-4 primary lighten-2">
       <v-text-field
         v-model="search"
@@ -15,64 +13,52 @@
       ></v-text-field>
     </v-sheet>
     <v-card-text>
-      <div
-      class='d-flex flex-row-reverse'
-    >
-      <v-btn
-        elevation='2'
-        icon
-        color='blue darken-1'
-        @click='refreshTree()'
+      <div class="d-flex flex-row-reverse">
+        <v-btn elevation="2" icon color="blue darken-1" @click="refreshTree()">
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
+      </div>
+      <vue-tree-list
+        :search="search"
+        @click="onClick"
+        @change-name="onChangeName"
+        @delete-node="onDel"
+        @add-node="onAddNode"
+        :model="entryTree"
+        :default-tree-node-name="defaultTreeNode"
+        :default-leaf-node-name="defaultLeafNode"
+        v-bind:default-expanded="false"
       >
-        <v-icon>mdi-refresh</v-icon>
-      </v-btn>
-    </div>
-    <vue-tree-list
-      :search='search'
-      @click="onClick"
-      @change-name="onChangeName"
-      @delete-node="onDel"
-      @add-node="onAddNode"
-      :model="entryTree"
-      :default-tree-node-name="defaultTreeNode"
-      :default-leaf-node-name="defaultLeafNode"
-      v-bind:default-expanded="false"
-    >
-      <template v-slot:leafNameDisplay="slotProps">
-        <span>
-          {{ slotProps.model.name }} <span class="muted">#{{ slotProps.model.id }}</span>
+        <template v-slot:leafNameDisplay="slotProps">
+          <span>
+            {{ slotProps.model.name }}
+            <span class="muted">#{{ slotProps.model.id }}</span>
+          </span>
+        </template>
+        <span class="icon" slot="addTreeNodeIcon">
+          <v-icon dense color="purple lighten-2">mdi-folder-plus-outline</v-icon>
         </span>
-      </template>
-      <span
-        class="icon"
-        slot="addTreeNodeIcon"
-      ><v-icon dense color='purple lighten-2'>mdi-folder-plus-outline</v-icon></span>
-      <span
-        class="icon"
-        slot="addLeafNodeIcon"
-      ><v-icon dense color='blue lighten-2'>mdi-text-box-plus-outline</v-icon></span>
-      <span
-        class="icon"
-        slot="editNodeIcon"
-      ><v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon></span>
-      <span
-        class="icon"
-        slot="delNodeIcon"
-      ><v-icon dense color='red lighten-2'>mdi-trash-can-outline</v-icon></span>
-      <span
-        class="icon"
-        slot="leafNodeIcon"
-      ><v-icon color='green lighten-2'>mdi-file-document</v-icon></span>
-      <span
-        class="icon"
-        slot="treeNodeIcon"
-      ><v-icon color='yellow darken-2'>mdi-folder</v-icon></span>
-    </vue-tree-list>
+        <span class="icon" slot="addLeafNodeIcon">
+          <v-icon dense color="blue lighten-2">mdi-text-box-plus-outline</v-icon>
+        </span>
+        <span class="icon" slot="editNodeIcon">
+          <v-icon dense color="blue lighten-2">mdi-file-document-edit-outline</v-icon>
+        </span>
+        <span class="icon" slot="delNodeIcon">
+          <v-icon dense color="red lighten-2">mdi-trash-can-outline</v-icon>
+        </span>
+        <span class="icon" slot="leafNodeIcon">
+          <v-icon color="green lighten-2">mdi-file-document</v-icon>
+        </span>
+        <span class="icon" slot="treeNodeIcon">
+          <v-icon color="yellow darken-2" >mdi-folder</v-icon>
+        </span>
+      </vue-tree-list>
     </v-card-text>
   </v-card>
 </template>
 <script>
-import { VueTreeList, Tree, TreeNode } from './vue-tree-list'
+import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -101,10 +87,15 @@ export default {
       node.remove()
     },
     onChangeName (params) {
-      if (params.eventType && params.eventType === 'blur' && params.id !== params.newName) {
+      if (
+        params.eventType &&
+        params.eventType === 'blur' &&
+        params.id !== params.newName
+      ) {
       }
     },
     onAddNode (params) {
+      return true
     },
     onClick (params) {
       ipcRenderer.send('attributeTree', params.id, params.data)

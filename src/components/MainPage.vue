@@ -1,11 +1,9 @@
 <template>
-  <v-app id="inspire">
+  <v-app id='inspire'>
     <NavigationPage />
 
     <v-main>
-      <v-container
-        fluid
-      >
+      <v-container fluid>
         <TreePage />
         <TreeEntryEditPage />
       </v-container>
