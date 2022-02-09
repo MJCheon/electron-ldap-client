@@ -17,11 +17,11 @@ export enum ServerListActionsType {
 }
 
 export const serverListActions = {
-  [ServerListActionsType.SETTING_SERVER](context: ServerListActionContext, payload?: LdapServerConfig) {
-     context.commit(ServerListMutationType.SET_SERVER, payload)
+  [ServerListActionsType.SETTING_SERVER] (context: ServerListActionContext, payload?: LdapServerConfig) {
+    context.commit(ServerListMutationType.SET_SERVER, payload)
   },
-  [ServerListActionsType.DELETE_SERVER](context: ServerListActionContext, payload?: string) {
-      context.commit(ServerListMutationType.DEL_SERVER, payload)
+  [ServerListActionsType.DELETE_SERVER] (context: ServerListActionContext, payload?: string) {
+    context.commit(ServerListMutationType.DEL_SERVER, payload)
   }
 }
 

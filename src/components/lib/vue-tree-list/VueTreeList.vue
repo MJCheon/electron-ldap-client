@@ -215,11 +215,10 @@
 </template>
 
 <script>
+/* eslint-disable */
 import { TreeNode } from './Tree.js'
 import { addHandler, removeHandler, traverseFilteredTree } from './tools.js'
-
 let compInOperation = null
-
 export default {
   name: 'vue-tree-list',
   data: function () {
@@ -279,21 +278,17 @@ export default {
       }
       return node
     },
-
     caretClass () {
       return this.expanded ? 'vtl-icon-caret-down' : 'vtl-icon-caret-right'
     },
-
     isFolder () {
       return this.model.children && this.model.children.length
     },
-
     treeNodeClass () {
       const {
         model: { dragDisabled, disabled },
         isDragEnterNode
       } = this
-
       return {
         'vtl-node-main': true,
         'vtl-active': isDragEnterNode,
@@ -302,11 +297,15 @@ export default {
       }
     }
   },
+  beforeCreate () {
+    this.$options.components.item = require('./VueTreeList').default
+  },
   mounted () {
+    const vm = this
     addHandler(window, 'keyup', function (e) {
       // click enter
-      if (e.keyCode === 13 && this.editable) {
-        this.editable = false
+      if (e.keyCode === 13 && vm.editable) {
+        vm.editable = false
       }
     })
   },
@@ -324,11 +323,9 @@ export default {
         node: this.model
       })
     },
-
     delNode () {
       this.rootNode.$emit('delete-node', this.model)
     },
-
     setEditable () {
       this.editable = true
       this.$nextTick(() => {
@@ -337,7 +334,6 @@ export default {
         $input.setSelectionRange(0, $input.value.length)
       })
     },
-
     setUnEditable (e) {
       this.editable = false
       var oldName = this.model.name
@@ -349,29 +345,25 @@ export default {
         eventType: 'blur'
       })
     },
-
     toggle () {
       if (this.isFolder) {
+        this.model.isExpanded = !this.model.isExpanded
         this.expanded = !this.expanded
       }
     },
-
     mouseOver () {
       if (this.model.disabled) return
       this.isHover = true
     },
-
     mouseOut () {
       this.isHover = false
     },
-
     click () {
       this.rootNode.$emit('click', {
         toggle: this.toggle,
         ...this.model
       })
     },
-
     addChild (isLeaf) {
       const name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
       this.expanded = true
@@ -379,7 +371,6 @@ export default {
       this.model.addChildren(node, true)
       this.rootNode.$emit('add-node', node)
     },
-
     dragStart (e) {
       if (!(this.model.dragDisabled || this.model.disabled)) {
         compInOperation = this
@@ -416,7 +407,6 @@ export default {
         src: oldParent
       })
     },
-
     dragEnterUp () {
       if (!compInOperation) return
       this.isDragEnterUp = true
@@ -440,7 +430,6 @@ export default {
         src: oldParent
       })
     },
-
     dragEnterBottom () {
       if (!compInOperation) return
       this.isDragEnterBottom = true
