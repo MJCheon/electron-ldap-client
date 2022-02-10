@@ -156,7 +156,7 @@ export class LdapTree {
     return attrRootNode
   }
 
-  getChangesFromData(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
+  getAttributeChanges(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
     let attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
     let allChangeDataList: ChangeDataList[] = []
@@ -342,5 +342,11 @@ export class LdapTree {
       changeDataList: allChangeDataList
     }
     return returnData
+  }
+
+  getModifyDn(node: TreeNode, originParentNode: TreeNode, modifyParentNode: TreeNode) {
+    console.log(node.id)
+    console.log(originParentNode.id)
+    console.log(modifyParentNode.id)
   }
 }

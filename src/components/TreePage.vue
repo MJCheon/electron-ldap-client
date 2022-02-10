@@ -63,6 +63,7 @@
 </template>
 <script>
 import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
+import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -70,6 +71,7 @@ export default {
     VueTreeList
   },
   data: () => ({
+    showEntryDialog: false,
     search: null,
     isBinding: false,
     deleteEntryList: [],
@@ -77,13 +79,24 @@ export default {
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
     entryTree: new Tree([]),
-    modifyDnList: []
+    modifyDnList: [],
+    saveAttributeList: []
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
       this.isBinding = true
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
+    })
+    ipcRenderer.on('saveFromShortcut', event => {
+      this.saveAll()
+    })
+    EventBus.$on('saveAttribute', (attrTree, deleteList, showEntryDialog) => {
+      this.showEntryDialog = showEntryDialog
+      this.saveAttributeList.push({
+        tree: attrTree,
+        deleteList: deleteList
+      })
     })
   },
   methods: {
@@ -120,11 +133,13 @@ export default {
         orginParentNode: originParent,
         modifyParentNode: currentParent
       })
-    //   ipcRenderer.send('modifyDn', dragNode, originParent, currentParent)
     },
     saveAll () {
-      ipcRenderer.send('saveAllData', this.modifyDnList)
-      this.modifyDnList = []
+      if (!this.showEntryDialog && (this.modifyDnList.length > 0 || this.saveAttributeList.length > 0)) {
+        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
+        this.modifyDnList = []
+        this.saveAttributeList = []
+      }
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')

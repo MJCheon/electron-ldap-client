@@ -50,6 +50,7 @@
 
 <script>
 import { VueTreeList, Tree } from '../lib/vue-tree-list'
+import EventBus from '../../event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
@@ -71,8 +72,10 @@ export default {
     ipcRenderer.on('refreshRootTreeFromMain', event => {
       ipcRenderer.send('refreshRootTree')
     })
-    ipcRenderer.on('saveAttributeFromShortcut', event => {
-      this.save(this.attrTree)
+    ipcRenderer.on('saveFromShortcut', event => {
+      if (this.showEntryDialog) {
+        this.save(this.attrTree)
+      }
     })
   },
   methods: {
@@ -90,9 +93,9 @@ export default {
       return true
     },
     save (attrTree) {
-      ipcRenderer.send('saveAttribute', attrTree, this.deleteNodeList)
-      this.deleteNodeList = []
       this.close()
+      EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList, this.showEntryDialog)
+      this.deleteNodeList = []
     },
     close () {
       this.showEntryDialog = false

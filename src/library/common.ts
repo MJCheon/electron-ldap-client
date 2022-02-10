@@ -34,10 +34,15 @@ export type TreeNode = {
   children: TreeNode[];
 };
 
-export type modifyDnObject = {
+export type ModifyDnTreeNodeObject = {
   node: TreeNode;
   originParentNode: TreeNode;
   modifyParentNode: TreeNode;
+}
+
+export type ModifyAttributeTreeNodeObject = {
+  tree: TreeNode[],
+  deleteList: TreeNode[]
 }
 
 export type ChangeDataList = {
