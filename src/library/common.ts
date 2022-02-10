@@ -34,10 +34,11 @@ export type TreeNode = {
   children: TreeNode[];
 };
 
-export type ModifyDnTreeNodeObject = {
-  node: TreeNode;
-  originParentNode: TreeNode;
-  modifyParentNode: TreeNode;
+export type ModifyDnObject = {
+  nodeName: string;
+  nodeDn: string;
+  originParentNodeDn?: string;
+  modifyParentNodeDn?: string;
 }
 
 export type ModifyAttributeTreeNodeObject = {

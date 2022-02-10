@@ -343,10 +343,4 @@ export class LdapTree {
     }
     return returnData
   }
-
-  getModifyDn(node: TreeNode, originParentNode: TreeNode, modifyParentNode: TreeNode) {
-    console.log(node.id)
-    console.log(originParentNode.id)
-    console.log(modifyParentNode.id)
-  }
 }

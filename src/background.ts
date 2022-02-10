@@ -13,8 +13,8 @@ import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
-import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange, ModifyDnTreeNodeObject, ModifyAttributeTreeNodeObject } from './library/common'
+import { SearchResult, Entry, ModifyDNResponse } from 'ldapts'
+import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnObject } from './library/common'
 import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -73,6 +73,8 @@ async function createWindow () {
       }
     }
   })
+
+  win.setMenu(null)
 }
 
 // Quit when all windows are closed.
@@ -162,13 +164,26 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
 })
 
 // Save All Changed Data
-ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDnTreeNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
+ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDnObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
 
-  modifyDnList.forEach((modifyDn: ModifyDnTreeNodeObject) => {
-    ldapTree.getModifyDn(modifyDn.node, modifyDn.originParentNode, modifyDn.modifyParentNode)
-  })
+  console.log('saveAllChange Start')
+  if (modifyDnList.length > 0 ){
+    console.log('modifyDnList length : ' + modifyDnList.length)
+    modifyDnList.forEach((modifyDn: ModifyDnObject) => {
+      
+      if (modifyDn.nodeName && modifyDn.nodeDn) {
+        if (typeof modifyDn.originParentNodeDn !== 'undefined' && typeof modifyDn.modifyParentNodeDn !== 'undefined') {
+          console.log('ModifyDn Start')
+          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, modifyDn.originParentNodeDn, modifyDn.modifyParentNodeDn)
+        } else {
+          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, '', '')
+        }
+        
+      }
+    })
+  }
 
   if (saveAttributeList.length > 0) {
     saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
@@ -181,6 +196,8 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDn
       }
     })
   }
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
   event.reply("refreshRootTreeFromMain");
 })
 

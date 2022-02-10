@@ -110,6 +110,23 @@ export default {
         params.eventType === 'blur' &&
         params.id !== params.newName
       ) {
+        var isChange = false
+        var nodeName = params.newName
+        var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
+
+        this.modifyDnList.forEach((modifyDn) => {
+          if (modifyDn.nodeDn === nodeDn) {
+            modifyDn.nodeName = nodeName
+            isChange = true
+          }
+        })
+
+        if (!isChange) {
+          this.modifyDnList.push({
+            nodeName: nodeName,
+            nodeDn: nodeDn
+          })
+        }
       }
     },
     onAddNode (params) {
@@ -124,15 +141,31 @@ export default {
       this.data.addChildren(node)
     },
     onDragNode (params) {
-      var dragNode = params.node
-      var originParent = params.src
-      var currentParent = params.target
+      var isChange = false
+      var dragNodeName = params.node.name
+      var dragNodeDn = params.node.data.dn ? params.node.data.dn : params.node.id
+      var originParentNodeDn = params.src.data.dn ? params.src.data.dn : params.src.id
+      var modifyParentNodeDn = params.target.data.dn ? params.target.data.dn : params.target.id
 
-      this.modifyDnList.push({
-        node: dragNode,
-        orginParentNode: originParent,
-        modifyParentNode: currentParent
-      })
+      if (originParentNodeDn !== modifyParentNodeDn) {
+        this.modifyDnList.forEach((modifyDn) => {
+          if (modifyDn.nodeDn === dragNodeDn) {
+            modifyDn.nodeName = dragNodeName
+            modifyDn.originParentNodeDn = originParentNodeDn
+            modifyDn.modifyParentNodeDn = modifyParentNodeDn
+            isChange = true
+          }
+        })
+
+        if (!isChange) {
+          this.modifyDnList.push({
+            nodeName: dragNodeName,
+            nodeDn: dragNodeDn,
+            originParentNodeDn: originParentNodeDn,
+            modifyParentNodeDn: modifyParentNodeDn
+          })
+        }
+      }
     },
     saveAll () {
       if (!this.showEntryDialog && (this.modifyDnList.length > 0 || this.saveAttributeList.length > 0)) {
