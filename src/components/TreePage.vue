@@ -12,6 +12,17 @@
         clear-icon="mdi-close-circle-outline"
       ></v-text-field>
     </v-sheet>
+    <v-alert
+      v-show="modifyDnList.length + saveAttributeList.length > 0"
+      class="text-sm-right"
+      text
+      light
+      dense
+      color="deep-orange"
+      type="warning"
+    >
+      <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
+    </v-alert>
     <v-card-text>
       <div class="d-flex flex-row-reverse">
         <v-btn elevation="2" icon color="blue darken-1" @click="saveAll()">
@@ -71,7 +82,6 @@ export default {
     VueTreeList
   },
   data: () => ({
-    showEntryDialog: false,
     search: null,
     isBinding: false,
     deleteEntryList: [],
@@ -80,7 +90,8 @@ export default {
     defaultLeafNode: 'New Leaf',
     entryTree: new Tree([]),
     modifyDnList: [],
-    saveAttributeList: []
+    saveAttributeList: [],
+    isAttrSave: false
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
@@ -89,14 +100,19 @@ export default {
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
     })
     ipcRenderer.on('saveFromShortcut', event => {
-      this.saveAll()
+      if (!this.isAttrSave && (this.modifyDnList.length > 0 || this.saveAttributeList.length > 0)) {
+        this.saveAll()
+      }
     })
-    EventBus.$on('saveAttribute', (attrTree, deleteList, showEntryDialog) => {
-      this.showEntryDialog = showEntryDialog
+    ipcRenderer.on('refreshRootTreeFromMain', event => {
+      this.refreshTree()
+    })
+    EventBus.$on('saveAttribute', (attrTree, deleteList) => {
       this.saveAttributeList.push({
         tree: attrTree,
         deleteList: deleteList
       })
+      this.isAttrSave = false
     })
   },
   methods: {
@@ -133,6 +149,7 @@ export default {
       return true
     },
     onClick (params) {
+      this.isAttrSave = true
       ipcRenderer.send('attributeTree', params.id, params.data)
     },
     addNode () {
@@ -167,15 +184,17 @@ export default {
         }
       }
     },
+    clearChangeList () {
+      this.modifyDnList = []
+      this.saveAttributeList = []
+    },
     saveAll () {
-      if (!this.showEntryDialog && (this.modifyDnList.length > 0 || this.saveAttributeList.length > 0)) {
-        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
-        this.modifyDnList = []
-        this.saveAttributeList = []
-      }
+      ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
+      this.clearChangeList()
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
+      this.clearChangeList()
     }
   }
 }

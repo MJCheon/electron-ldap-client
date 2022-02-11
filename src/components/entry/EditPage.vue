@@ -69,9 +69,6 @@ export default {
       this.attrTree = new Tree(attrTree)
       this.showEntryDialog = true
     })
-    ipcRenderer.on('refreshRootTreeFromMain', event => {
-      ipcRenderer.send('refreshRootTree')
-    })
     ipcRenderer.on('saveFromShortcut', event => {
       if (this.showEntryDialog) {
         this.save(this.attrTree)
@@ -94,7 +91,7 @@ export default {
     },
     save (attrTree) {
       this.close()
-      EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList, this.showEntryDialog)
+      EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList)
       this.deleteNodeList = []
     },
     close () {

@@ -168,14 +168,12 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDn
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
 
-  console.log('saveAllChange Start')
   if (modifyDnList.length > 0 ){
     console.log('modifyDnList length : ' + modifyDnList.length)
     modifyDnList.forEach((modifyDn: ModifyDnObject) => {
       
       if (modifyDn.nodeName && modifyDn.nodeDn) {
         if (typeof modifyDn.originParentNodeDn !== 'undefined' && typeof modifyDn.modifyParentNodeDn !== 'undefined') {
-          console.log('ModifyDn Start')
           ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, modifyDn.originParentNodeDn, modifyDn.modifyParentNodeDn)
         } else {
           ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, '', '')
