@@ -119,7 +119,6 @@ export class LdapServer {
 
     try {
       if (nodeDn !== modifyDn) {
-        console.log(modifyDn)
         await this.client.modifyDN(nodeDn, modifyDn)
       }
     }

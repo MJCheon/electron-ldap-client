@@ -165,28 +165,43 @@ export default {
       var modifyParentNodeDn = params.target.data.dn ? params.target.data.dn : params.target.id
 
       if (originParentNodeDn !== modifyParentNodeDn) {
-        this.modifyDnList.forEach((modifyDn) => {
-          if (modifyDn.nodeDn === dragNodeDn) {
-            modifyDn.nodeName = dragNodeName
-            modifyDn.originParentNodeDn = originParentNodeDn
-            modifyDn.modifyParentNodeDn = modifyParentNodeDn
-            isChange = true
+        if (this.modifyDnList.length > 0) {
+          if (this.checkModifyDn(dragNodeDn, originParentNodeDn, modifyParentNodeDn)) {
+            console.log('recover modifyDn')
+            this.deleteModifyDn(dragNodeDn)
           }
-        })
-
-        if (!isChange) {
-          this.modifyDnList.push({
-            nodeName: dragNodeName,
-            nodeDn: dragNodeDn,
-            originParentNodeDn: originParentNodeDn,
-            modifyParentNodeDn: modifyParentNodeDn
+        } else {
+          this.modifyDnList.forEach((modifyDn) => {
+            if (modifyDn.nodeDn !== dragNodeDn) {
+              modifyDn.nodeName = dragNodeName
+              modifyDn.originParentNodeDn = originParentNodeDn
+              modifyDn.modifyParentNodeDn = modifyParentNodeDn
+              isChange = true
+            }
           })
+
+          if (!isChange) {
+            this.modifyDnList.push({
+              nodeName: dragNodeName,
+              nodeDn: dragNodeDn,
+              originParentNodeDn: originParentNodeDn,
+              modifyParentNodeDn: modifyParentNodeDn
+            })
+          }
         }
       }
     },
     clearChangeList () {
       this.modifyDnList = []
       this.saveAttributeList = []
+    },
+    deleteModifyDn (deleteNodeDn) {
+      this.modifyDnList = this.modifyDnList.filter(modifyDn => {
+        if (modifyDn.nodeDn === deleteNodeDn) return true
+      })
+    },
+    checkModifyDn (nodeDn, originParentNodeDn, modifyParentNodeDn) {
+      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn && modifyDn.originParentNodeDn === modifyParentNodeDn && modifyDn.modifyParentNodeDn === originParentNodeDn))
     },
     saveAll () {
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
