@@ -109,10 +109,10 @@ export class LdapServer {
     }
 
     if (originParentNodeDn !== modifyParentNodeDn) {
-      if (modifyDn !== '') {
+      if (modifyDn === '') {
         modifyDn = nodeDn.replace(originParentNodeDn, modifyParentNodeDn)
       } else {
-        let tmpDn: string = modifyDn
+        let tmpDn: string = nodeDn
         modifyDn = tmpDn.replace(originParentNodeDn, modifyParentNodeDn)
       }
     }

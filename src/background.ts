@@ -57,7 +57,9 @@ async function createWindow () {
       if (input.key.toLowerCase() === 'r' && input.meta) {
         win.webContents.send('refreshRootTreeFromMain')
         event.preventDefault()
-      } else if (input.key.toLowerCase() === 's' && input.meta) {
+      }
+
+      if (input.key.toLowerCase() === 's' && input.meta) {
         win.webContents.send('saveFromShortcut')
         event.preventDefault()
       }
@@ -67,7 +69,9 @@ async function createWindow () {
       if (input.key.toLowerCase() === 'f5') {
         win.webContents.send('refreshRootTreeFromMain')
         event.preventDefault()
-      } else if (input.key.toLowerCase() === 's' && input.control) {
+      }
+      
+      if (input.key.toLowerCase() === 's' && input.control) {
         win.webContents.send('saveFromShortcut')
         event.preventDefault()
       }
@@ -169,7 +173,6 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDn
   let ldapTree: LdapTree = new LdapTree()
 
   if (modifyDnList.length > 0 ){
-    console.log('modifyDnList length : ' + modifyDnList.length)
     modifyDnList.forEach((modifyDn: ModifyDnObject) => {
       
       if (modifyDn.nodeName && modifyDn.nodeDn) {
