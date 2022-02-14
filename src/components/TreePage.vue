@@ -158,36 +158,31 @@ export default {
       this.data.addChildren(node)
     },
     onDragNode (params) {
-      var isChange = false
       var dragNodeName = params.node.name
       var dragNodeDn = params.node.data.dn ? params.node.data.dn : params.node.id
       var originParentNodeDn = params.src.data.dn ? params.src.data.dn : params.src.id
       var modifyParentNodeDn = params.target.data.dn ? params.target.data.dn : params.target.id
 
       if (originParentNodeDn !== modifyParentNodeDn) {
-        if (this.modifyDnList.length > 0) {
+        if (this.alreadyInModifyDn(dragNodeDn)) {
           if (this.checkModifyDn(dragNodeDn, originParentNodeDn, modifyParentNodeDn)) {
-            console.log('recover modifyDn')
             this.deleteModifyDn(dragNodeDn)
-          }
-        } else {
-          this.modifyDnList.forEach((modifyDn) => {
-            if (modifyDn.nodeDn !== dragNodeDn) {
-              modifyDn.nodeName = dragNodeName
-              modifyDn.originParentNodeDn = originParentNodeDn
-              modifyDn.modifyParentNodeDn = modifyParentNodeDn
-              isChange = true
-            }
-          })
-
-          if (!isChange) {
-            this.modifyDnList.push({
-              nodeName: dragNodeName,
-              nodeDn: dragNodeDn,
-              originParentNodeDn: originParentNodeDn,
-              modifyParentNodeDn: modifyParentNodeDn
+          } else {
+            this.modifyDnList.forEach((modifyDn) => {
+              if (modifyDn.nodeDn !== dragNodeDn) {
+                modifyDn.nodeName = dragNodeName
+                modifyDn.originParentNodeDn = originParentNodeDn
+                modifyDn.modifyParentNodeDn = modifyParentNodeDn
+              }
             })
           }
+        } else {
+          this.modifyDnList.push({
+            nodeName: dragNodeName,
+            nodeDn: dragNodeDn,
+            originParentNodeDn: originParentNodeDn,
+            modifyParentNodeDn: modifyParentNodeDn
+          })
         }
       }
     },
@@ -197,13 +192,19 @@ export default {
     },
     deleteModifyDn (deleteNodeDn) {
       this.modifyDnList = this.modifyDnList.filter(modifyDn => {
-        if (modifyDn.nodeDn === deleteNodeDn) return true
+        if (modifyDn.nodeDn !== deleteNodeDn) {
+          return true
+        }
       })
     },
     checkModifyDn (nodeDn, originParentNodeDn, modifyParentNodeDn) {
       return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn && modifyDn.originParentNodeDn === modifyParentNodeDn && modifyDn.modifyParentNodeDn === originParentNodeDn))
     },
+    alreadyInModifyDn (nodeDn) {
+      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn))
+    },
     saveAll () {
+      console.log(this.modifyDnList)
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
       this.clearChangeList()
     },
