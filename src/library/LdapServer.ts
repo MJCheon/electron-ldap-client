@@ -71,7 +71,6 @@ export class LdapServer {
       return searchResult
     } catch (ex) {
       showError('LDAP Error', String(ex))
-      await this.client.unbind()
     }
 
     return null
@@ -97,6 +96,33 @@ export class LdapServer {
         await this.client.modify(dn, changeList)
       }
     } catch (ex) {
+      showError('LDAP Error', String(ex))
+    }
+  }
+  
+  async modifyDn (nodeName: string, nodeDn: string, originParentNodeDn: string, modifyParentNodeDn: string) {
+    let modifyDn: string = ''
+    let originName = nodeDn.replace(',' + this.config.baseDn, '')
+
+    if (nodeName !== originName) {
+      modifyDn = nodeDn.replace(originName, nodeName)
+    }
+
+    if (originParentNodeDn !== modifyParentNodeDn) {
+      if (modifyDn === '') {
+        modifyDn = nodeDn.replace(originParentNodeDn, modifyParentNodeDn)
+      } else {
+        let tmpDn: string = nodeDn
+        modifyDn = tmpDn.replace(originParentNodeDn, modifyParentNodeDn)
+      }
+    }
+
+    try {
+      if (nodeDn !== modifyDn) {
+        await this.client.modifyDN(nodeDn, modifyDn)
+      }
+    }
+    catch (ex) {
       showError('LDAP Error', String(ex))
     }
   }

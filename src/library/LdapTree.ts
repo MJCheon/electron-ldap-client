@@ -49,7 +49,7 @@ export class LdapTree {
           isLeaf: true,
           isVisible: true,
           isExpanded: true,
-          dragDisabled: true,
+          dragDisabled: false,
           data: entry,
           children: []
         })
@@ -76,7 +76,7 @@ export class LdapTree {
             name: dn,
             isLeaf: true,
             isVisible: true,
-            dragDisabled: true,
+            dragDisabled: false,
             data: (entry as unknown as string),
             children: []
           }
@@ -156,7 +156,7 @@ export class LdapTree {
     return attrRootNode
   }
 
-  getChangesFromData(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
+  getAttributeChanges(attrTree: TreeNode[], deleteNodeList: TreeNode[]): LdapChange {
     let attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
     let allChangeDataList: ChangeDataList[] = []

@@ -13,8 +13,8 @@ import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
-import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange } from './library/common'
+import { SearchResult, Entry, ModifyDNResponse } from 'ldapts'
+import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnObject } from './library/common'
 import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -57,8 +57,10 @@ async function createWindow () {
       if (input.key.toLowerCase() === 'r' && input.meta) {
         win.webContents.send('refreshRootTreeFromMain')
         event.preventDefault()
-      } else if (input.key.toLowerCase() === 's' && input.meta) {
-        win.webContents.send('saveAttributeFromShortcut')
+      }
+
+      if (input.key.toLowerCase() === 's' && input.meta) {
+        win.webContents.send('saveFromShortcut')
         event.preventDefault()
       }
     }
@@ -67,12 +69,16 @@ async function createWindow () {
       if (input.key.toLowerCase() === 'f5') {
         win.webContents.send('refreshRootTreeFromMain')
         event.preventDefault()
-      } else if (input.key.toLowerCase() === 's' && input.control) {
-        win.webContents.send('saveAttributeFromShortcut')
+      }
+      
+      if (input.key.toLowerCase() === 's' && input.control) {
+        win.webContents.send('saveFromShortcut')
         event.preventDefault()
       }
     }
   })
+
+  win.setMenu(null)
 }
 
 // Quit when all windows are closed.
@@ -110,6 +116,7 @@ app.on('ready', async () => {
   createWindow()
 })
 
+// Ldap Connect and Get ldap entries
 ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
 
@@ -138,23 +145,14 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
   }
 })
 
+// Get Attribute of ldap entry
 ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Entry) => {
   let ldapTree: LdapTree = new LdapTree()
   const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
   event.reply("attributeTreeResponse", attrResponse);
 })
 
-ipcMain.on("saveAttribute", async (event : IpcMainEvent, attrTree : TreeNode[], deleteNodeList : TreeNode[]) => {
-  const ldapServer: LdapServer = LdapFactory.Instance()
-  let ldapTree: LdapTree = new LdapTree()
-  let changeData: LdapChange = ldapTree.getChangesFromData(attrTree, deleteNodeList)
-
-  if (ldapServer.isConnected()) {
-    await ldapServer.modify(changeData)
-    event.reply("refreshRootTreeFromMain");
-  }
-})
-
+// Refresh ldap Entries
 ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let searchResult: SearchResult | null = await ldapServer.search()
@@ -168,6 +166,42 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
       }
   }
 })
+
+// Save All Changed Data
+ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDnObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
+  const ldapServer: LdapServer = LdapFactory.Instance()
+  let ldapTree: LdapTree = new LdapTree()
+
+  if (modifyDnList.length > 0 ){
+    modifyDnList.forEach((modifyDn: ModifyDnObject) => {
+      
+      if (modifyDn.nodeName && modifyDn.nodeDn) {
+        if (typeof modifyDn.originParentNodeDn !== 'undefined' && typeof modifyDn.modifyParentNodeDn !== 'undefined') {
+          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, modifyDn.originParentNodeDn, modifyDn.modifyParentNodeDn)
+        } else {
+          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, '', '')
+        }
+        
+      }
+    })
+  }
+
+  if (saveAttributeList.length > 0) {
+    saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
+      let attrTree: TreeNode[] = attribute.tree
+      let deleteList: TreeNode[] = attribute.deleteList
+      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
+
+      if (ldapServer.isConnected()) {
+        await ldapServer.modify(changeData);
+      }
+    })
+  }
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  event.reply("refreshRootTreeFromMain");
+})
+
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {
