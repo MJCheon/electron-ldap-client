@@ -1,72 +1,73 @@
 <template>
-  <v-card v-if="isBinding" class="mx-auto">
-    <v-sheet class="pa-4 primary lighten-2">
+  <v-card v-if='isBinding' class='mx-auto'>
+    <v-sheet class='pa-4 primary lighten-2'>
       <v-text-field
-        v-model="search"
-        label="Search"
+        v-model='search'
+        label='Search'
         dark
         flat
         solo-inverted
         hide-details
         clearable
-        clear-icon="mdi-close-circle-outline"
+        clear-icon='mdi-close-circle-outline'
       ></v-text-field>
     </v-sheet>
     <v-alert
-      v-show="modifyDnList.length + saveAttributeList.length > 0"
-      class="text-sm-right"
+      v-show='modifyDnList.length + saveAttributeList.length > 0'
+      @click='showSaveDialog()'
+      class='text-sm-right'
       text
       light
       dense
-      color="deep-orange"
-      type="warning"
+      color='deep-orange'
+      type='warning'
     >
       <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
     <v-card-text>
-      <div class="d-flex flex-row-reverse">
-        <v-btn elevation="2" icon color="blue darken-1" @click="saveAll()">
+      <div class='d-flex flex-row-reverse'>
+        <v-btn elevation='2' icon color='blue darken-1' @click='saveAll()'>
           <v-icon>mdi-content-save-all</v-icon>
         </v-btn>
-        <v-btn elevation="2" icon color="blue darken-1" @click="refreshTree()">
+        <v-btn elevation='2' icon color='blue darken-1' @click='refreshTree()'>
           <v-icon>mdi-refresh</v-icon>
         </v-btn>
       </div>
       <vue-tree-list
-        :search="search"
-        @click="onClick"
-        @change-name="onChangeName"
-        @delete-node="onDel"
-        @add-node="onAddNode"
-        @drop="onDragNode"
-        :model="entryTree"
-        :default-tree-node-name="defaultTreeNode"
-        :default-leaf-node-name="defaultLeafNode"
-        v-bind:default-expanded="false"
+        :search='search'
+        @click='onClick'
+        @change-name='onChangeName'
+        @delete-node='onDel'
+        @add-node='onAddNode'
+        @drop='onDragNode'
+        :model='entryTree'
+        :default-tree-node-name='defaultTreeNode'
+        :default-leaf-node-name='defaultLeafNode'
+        v-bind:default-expanded='false'
       >
-        <template v-slot:leafNameDisplay="slotProps">
+        <template v-slot:leafNameDisplay='slotProps'>
           <span>
             {{ slotProps.model.name }}
-            <span class="muted">#{{ slotProps.model.id }}</span>
+            <span class='muted'>#{{ slotProps.model.id }}</span>
           </span>
         </template>
-        <span class="icon" slot="addTreeNodeIcon">
-          <v-icon dense color="purple lighten-2">mdi-folder-plus-outline</v-icon>
+        <span class='icon' slot='addTreeNodeIcon'>
+          <v-icon dense color='purple lighten-2'>mdi-folder-plus-outline</v-icon>
         </span>
-        <span class="icon" slot="addLeafNodeIcon">
-          <v-icon dense color="blue lighten-2">mdi-text-box-plus-outline</v-icon>
+        <span class='icon' slot='addLeafNodeIcon'>
+          <v-icon dense color='blue lighten-2'>mdi-text-box-plus-outline</v-icon>
         </span>
-        <span class="icon" slot="editNodeIcon">
-          <v-icon dense color="blue lighten-2">mdi-file-document-edit-outline</v-icon>
+        <span class='icon' slot='editNodeIcon'>
+          <v-icon dense color='blue lighten-2'>mdi-file-document-edit-outline</v-icon>
         </span>
-        <span class="icon" slot="delNodeIcon">
-          <v-icon dense color="red lighten-2">mdi-trash-can-outline</v-icon>
+        <span class='icon' slot='delNodeIcon'>
+          <v-icon dense color='red lighten-2'>mdi-trash-can-outline</v-icon>
         </span>
-        <span class="icon" slot="leafNodeIcon">
-          <v-icon color="green lighten-2">mdi-file-document</v-icon>
+        <span class='icon' slot='leafNodeIcon'>
+          <v-icon color='green lighten-2'>mdi-file-document</v-icon>
         </span>
-        <span class="icon" slot="treeNodeIcon">
-          <v-icon color="yellow darken-2" >mdi-folder</v-icon>
+        <span class='icon' slot='treeNodeIcon'>
+          <v-icon color='yellow darken-2' >mdi-folder</v-icon>
         </span>
       </vue-tree-list>
     </v-card-text>
@@ -207,6 +208,9 @@ export default {
       console.log(this.modifyDnList)
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
       this.clearChangeList()
+    },
+    showSaveDialog () {
+      EventBus.$emit('showSaveDialog')
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')

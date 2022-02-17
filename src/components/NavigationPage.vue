@@ -64,7 +64,7 @@ export default {
     menuList: [{ title: 'Delete' }, { title: 'Edit' }]
   }),
   computed: {
-    serverNameList: () => {
+    serverNameList () {
       const serverNameList = Store.getters.GET_SERVER_NAME_LIST
       return serverNameList
     }
@@ -77,13 +77,13 @@ export default {
         this.editServer(serverId)
       }
     },
-    deleteServer: serverId => {
+    deleteServer (serverId) {
       Store.dispatch('DELETE_SERVER', serverId)
     },
-    editServer: serverId => {
+    editServer (serverId) {
       EventBus.$emit('editServer', serverId)
     },
-    bindServer: serverId => {
+    bindServer (serverId) {
       const server = Store.getters.GET_SERVER(serverId)
       ipcRenderer.send('serverBind', server)
     }
