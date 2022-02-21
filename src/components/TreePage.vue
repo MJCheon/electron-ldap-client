@@ -14,7 +14,7 @@
     </v-sheet>
     <v-alert
       v-show='modifyDnList.length + saveAttributeList.length > 0'
-      @click='showSaveDialog()'
+      @click='toggleShowSaveDialog()'
       class='text-sm-right'
       text
       light
@@ -22,16 +22,27 @@
       color='deep-orange'
       type='warning'
     >
+    <SaveDialog v-model='showSaveDialog' />
       <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
     <v-card-text>
       <div class='d-flex flex-row-reverse'>
-        <v-btn elevation='2' icon color='blue darken-1' @click='saveAll()'>
-          <v-icon>mdi-content-save-all</v-icon>
-        </v-btn>
-        <v-btn elevation='2' icon color='blue darken-1' @click='refreshTree()'>
-          <v-icon>mdi-refresh</v-icon>
-        </v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator='{ on, attrs }'>
+            <v-btn elevation='2' icon color='blue darken-1' v-bind='attrs' v-on='on' @click='saveAll()'>
+              <v-icon>mdi-content-save-all</v-icon>
+            </v-btn>
+          </template>
+          <span>Save All</span>
+        </v-tooltip>
+        <v-tooltip bottom>
+          <template v-slot:activator='{ on, attrs }'>
+            <v-btn elevation='2' icon color='blue darken-1' v-bind='attrs' v-on='on' @click='refreshTree()'>
+              <v-icon>mdi-refresh</v-icon>
+            </v-btn>
+          </template>
+          <span>Refresh</span>
+        </v-tooltip>
       </div>
       <vue-tree-list
         :search='search'
@@ -75,12 +86,14 @@
 </template>
 <script>
 import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
+import SaveDialog from './SaveDialog'
 import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
   components: {
-    VueTreeList
+    VueTreeList,
+    SaveDialog
   },
   data: () => ({
     search: null,
@@ -92,7 +105,8 @@ export default {
     entryTree: new Tree([]),
     modifyDnList: [],
     saveAttributeList: [],
-    isAttrSave: false
+    isAttrSave: false,
+    showSaveDialog: false
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
@@ -209,8 +223,8 @@ export default {
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
       this.clearChangeList()
     },
-    showSaveDialog () {
-      EventBus.$emit('showSaveDialog')
+    toggleShowSaveDialog () {
+      this.showSaveDialog = !this.showSaveDialog
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
