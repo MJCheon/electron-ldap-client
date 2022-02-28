@@ -22,7 +22,9 @@
       color='deep-orange'
       type='warning'
     >
-    <SaveDialog v-model='showSaveDialog' />
+    <SaveDialog
+      v-model='showSaveDialog'
+    />
       <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
     <v-card-text>
@@ -98,7 +100,6 @@ export default {
   data: () => ({
     search: null,
     isBinding: false,
-    deleteEntryList: [],
     newTree: {},
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
@@ -132,7 +133,6 @@ export default {
   },
   methods: {
     onDel (node) {
-      this.deleteEntryList.push(node)
       node.remove()
     },
     onChangeName (params) {
@@ -224,6 +224,9 @@ export default {
       this.clearChangeList()
     },
     toggleShowSaveDialog () {
+      if (!this.showSaveDialog) {
+        ipcRenderer.send('showSaveDialog', this.modifyDnList, this.saveAttributeList)
+      }
       this.showSaveDialog = !this.showSaveDialog
     },
     refreshTree () {

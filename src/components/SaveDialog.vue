@@ -17,9 +17,17 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
+
 export default {
   props: {
     value: Boolean
+  },
+  created () {
+    ipcRenderer.on('returnShowSaveDialog', (event, modifyDnList, changeAttrList) => {
+      console.log(modifyDnList)
+      console.log(changeAttrList)
+    })
   },
   computed: {
     showDialog: {

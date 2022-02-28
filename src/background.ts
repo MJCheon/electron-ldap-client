@@ -13,8 +13,8 @@ import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
-import { SearchResult, Entry, ModifyDNResponse } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnObject } from './library/common'
+import { SearchResult, Entry } from 'ldapts'
+import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject } from './library/common'
 import { Node } from 'tree-model'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -168,20 +168,15 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
 })
 
 // Save All Changed Data
-ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDnObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
+ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
 
-  if (modifyDnList.length > 0 ){
-    modifyDnList.forEach((modifyDn: ModifyDnObject) => {
-      
-      if (modifyDn.nodeName && modifyDn.nodeDn) {
-        if (typeof modifyDn.originParentNodeDn !== 'undefined' && typeof modifyDn.modifyParentNodeDn !== 'undefined') {
-          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, modifyDn.originParentNodeDn, modifyDn.modifyParentNodeDn)
-        } else {
-          ldapServer.modifyDn(modifyDn.nodeName, modifyDn.nodeDn, '', '')
-        }
-        
+  if (modifyDnNodeList.length > 0 ){
+    modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
+      let [nodeDn, modifyDn] = ldapTree.getModifyDn(modifyDnNodeObject, ldapServer.baseDn)
+      if (ldapServer.isConnected()) {
+        ldapServer.modifyDn(nodeDn, modifyDn)
       }
     })
   }
@@ -202,6 +197,36 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnList : ModifyDn
   event.reply("refreshRootTreeFromMain");
 })
 
+ipcMain.on("showSaveDialog", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
+  const ldapServer: LdapServer = LdapFactory.Instance()
+  let ldapTree: LdapTree = new LdapTree()
+
+  let modifyDnList: ModifyDnObject[] = []
+  let changeAttrList: LdapChange[] = []
+
+  if (modifyDnNodeList.length > 0 ){
+    modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
+      let [originDn, modifyDn]: [string, string] = ldapTree.getModifyDn(modifyDnNodeObject, ldapServer.baseDn)
+
+      modifyDnList.push({
+        originDn: originDn,
+        modifyDn: modifyDn
+      })
+
+    })
+  }
+
+  if (saveAttributeList.length > 0) {
+    saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
+      let attrTree: TreeNode[] = attribute.tree
+      let deleteList: TreeNode[] = attribute.deleteList
+      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
+      changeAttrList.push(changeData)
+    })
+  }
+  
+  event.reply("returnShowSaveDialog", modifyDnList, changeAttrList);
+})
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

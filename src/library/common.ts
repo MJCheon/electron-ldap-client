@@ -11,16 +11,6 @@ export interface LdapConfig {
   connTimeout?: number;
 }
 
-export function showError (title: string, message: string) {
-  const option = {
-    type: 'error',
-    title: title,
-    message: message
-  }
-
-  dialog.showMessageBox(option)
-}
-
 export type TreeNode = {
   id: string;
   name?: string;
@@ -32,13 +22,18 @@ export type TreeNode = {
   parent?: TreeNode;
   addTreeNodeDisabled?: boolean;
   children: TreeNode[];
-};
+}
 
-export type ModifyDnObject = {
+export type ModifyDnNodeObject = {
   nodeName: string;
   nodeDn: string;
   originParentNodeDn?: string;
   modifyParentNodeDn?: string;
+}
+
+export type ModifyDnObject = {
+  originDn: string;
+  modifyDn: string;
 }
 
 export type ModifyAttributeTreeNodeObject = {
@@ -49,9 +44,19 @@ export type ModifyAttributeTreeNodeObject = {
 export type ChangeDataList = {
   operation: 'add' | 'replace' | 'delete';
   modificationList: Attribute[];
-};
+}
 
 export type LdapChange = {
   dn: string;
   changeDataList: ChangeDataList[];
-};
+}
+
+export function showError (title: string, message: string) {
+  const option = {
+    type: 'error',
+    title: title,
+    message: message
+  }
+
+  dialog.showMessageBox(option)
+}

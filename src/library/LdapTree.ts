@@ -1,6 +1,6 @@
 import { Attribute, Entry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { LdapChange, TreeNode, ChangeDataList } from './common'
+import { LdapChange, TreeNode, ChangeDataList, ModifyDnNodeObject } from './common'
 import { getEncryptPassword } from './LdapCrypto'
 
 export class LdapTree {
@@ -342,5 +342,31 @@ export class LdapTree {
       changeDataList: allChangeDataList
     }
     return returnData
+  }
+
+  getModifyDn(modifyDnNodeObject: ModifyDnNodeObject, baseDn: string): [string, string] {
+    let nodeDn: string  = modifyDnNodeObject.nodeDn
+    let nodeName: string = modifyDnNodeObject.nodeName
+    let originParentNodeDn: string | undefined = modifyDnNodeObject.originParentNodeDn
+    let modifyParentNodeDn: string | undefined = modifyDnNodeObject.modifyParentNodeDn
+    let modifyDn: string = ''
+    let originName = nodeDn.replace(',' + baseDn, '')
+  
+    if (nodeName !== originName) {
+      modifyDn = nodeDn.replace(originName, nodeName)
+    }
+    
+    if (typeof originParentNodeDn !== 'undefined' && typeof modifyParentNodeDn !== 'undefined') {
+      if (originParentNodeDn !== modifyParentNodeDn) {
+        if (modifyDn === '') {
+          modifyDn = nodeDn.replace(originParentNodeDn, modifyParentNodeDn)
+        } else {
+          let tmpDn: string = nodeDn
+          modifyDn = tmpDn.replace(originParentNodeDn, modifyParentNodeDn)
+        }
+      }
+    }
+  
+    return [nodeDn, modifyDn]
   }
 }
