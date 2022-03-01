@@ -33,8 +33,8 @@
               v-for='child in item.changeDataList'
             >
               <v-list-group
-                v-for='(changeData, index) in child.modificationList'
-                :key='index'
+                v-for='changeData in child.modificationList'
+                :key='changeData.type'
                 append-icon=''
                 prepend-icon=''
                 no-action
@@ -122,10 +122,9 @@ export default {
     changeAttrList: []
   }),
   created () {
-    ipcRenderer.on('returnShowSaveDialog', (event, modifyDnList, changeAttrList) => {
+    ipcRenderer.on('returnShowChangePage', (event, modifyDnList, changeAttrList) => {
       this.modifyDnList = modifyDnList
       this.changeAttrList = changeAttrList
-      console.log(modifyDnList)
     })
   },
   computed: {

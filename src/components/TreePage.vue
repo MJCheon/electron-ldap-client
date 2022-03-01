@@ -219,7 +219,6 @@ export default {
       return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn))
     },
     saveAll () {
-      console.log(this.modifyDnList)
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
       this.clearChangeList()
     },
