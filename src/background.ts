@@ -174,7 +174,7 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnNodeList : Modi
 
   if (modifyDnNodeList.length > 0 ){
     modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [nodeDn, modifyDn] = ldapTree.getModifyDn(modifyDnNodeObject, ldapServer.baseDn)
+      let [nodeDn, modifyDn] = ldapTree.getModifyDn(modifyDnNodeObject)
       if (ldapServer.isConnected()) {
         ldapServer.modifyDn(nodeDn, modifyDn)
       }
@@ -206,7 +206,7 @@ ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : Mod
 
   if (modifyDnNodeList.length > 0 ){
     modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [originDn, modifyDn]: [string, string] = ldapTree.getModifyDn(modifyDnNodeObject, ldapServer.baseDn)
+      let [originDn, modifyDn]: [string, string] = ldapTree.getModifyDn(modifyDnNodeObject)
 
       modifyDnList.push({
         originDn: originDn,

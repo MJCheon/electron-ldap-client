@@ -141,21 +141,23 @@ export default {
         params.eventType === 'blur' &&
         params.id !== params.newName
       ) {
-        var isChange = false
         var nodeName = params.newName
         var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
+        var parentNode = params.node.parent
+        var parentNodeDn = parentNode.data.dn ? parentNode.data.dn : parentNode.node.name
 
-        this.modifyDnList.forEach((modifyDn) => {
-          if (modifyDn.nodeDn === nodeDn) {
-            modifyDn.nodeName = nodeName
-            isChange = true
-          }
-        })
-
-        if (!isChange) {
+        if (this.alreadyInModifyDn(nodeDn)) {
+          this.modifyDnList.forEach((modifyDn) => {
+            if (modifyDn.nodeDn === nodeDn) {
+              modifyDn.nodeName = nodeName
+            }
+          })
+        } else {
           this.modifyDnList.push({
             nodeName: nodeName,
-            nodeDn: nodeDn
+            nodeDn: nodeDn,
+            originParentNodeDn: parentNodeDn,
+            modifyParentNodeDn: parentNodeDn
           })
         }
       }
@@ -180,7 +182,7 @@ export default {
 
       if (originParentNodeDn !== modifyParentNodeDn) {
         if (this.alreadyInModifyDn(dragNodeDn)) {
-          if (this.checkModifyDn(dragNodeDn, originParentNodeDn, modifyParentNodeDn)) {
+          if (this.checkModifyDn(dragNodeDn, dragNodeName, originParentNodeDn, modifyParentNodeDn)) {
             this.deleteModifyDn(dragNodeDn)
           } else {
             this.modifyDnList.forEach((modifyDn) => {
@@ -212,11 +214,19 @@ export default {
         }
       })
     },
-    checkModifyDn (nodeDn, originParentNodeDn, modifyParentNodeDn) {
-      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn && modifyDn.originParentNodeDn === modifyParentNodeDn && modifyDn.modifyParentNodeDn === originParentNodeDn))
+    checkModifyDn (nodeDn, nodeName, originParentNodeDn, modifyParentNodeDn) {
+      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn && modifyDn.nodeName === nodeName && modifyDn.originParentNodeDn === modifyParentNodeDn && modifyDn.modifyParentNodeDn === originParentNodeDn)) !== 'undefined') {
+        return true
+      } else {
+        return false
+      }
     },
     alreadyInModifyDn (nodeDn) {
-      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn))
+      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn)) !== 'undefined') {
+        return true
+      } else {
+        return false
+      }
     },
     saveAll () {
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
