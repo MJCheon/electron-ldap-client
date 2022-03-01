@@ -100,26 +100,10 @@ export class LdapServer {
     }
   }
   
-  async modifyDn (nodeName: string, nodeDn: string, originParentNodeDn: string, modifyParentNodeDn: string) {
-    let modifyDn: string = ''
-    let originName = nodeDn.replace(',' + this.config.baseDn, '')
-
-    if (nodeName !== originName) {
-      modifyDn = nodeDn.replace(originName, nodeName)
-    }
-
-    if (originParentNodeDn !== modifyParentNodeDn) {
-      if (modifyDn === '') {
-        modifyDn = nodeDn.replace(originParentNodeDn, modifyParentNodeDn)
-      } else {
-        let tmpDn: string = nodeDn
-        modifyDn = tmpDn.replace(originParentNodeDn, modifyParentNodeDn)
-      }
-    }
-
+  async modifyDn (originDn: string, modifyDn: string): Promise<void> {
     try {
-      if (nodeDn !== modifyDn) {
-        await this.client.modifyDN(nodeDn, modifyDn)
+      if (originDn !== modifyDn) {
+        await this.client.modifyDN(originDn, modifyDn)
       }
     }
     catch (ex) {

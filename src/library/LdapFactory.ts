@@ -1,4 +1,3 @@
-import { LdapConfig } from './common'
 import { LdapServer } from './LdapServer'
 
 export class LdapFactory {
