@@ -350,7 +350,7 @@ export class LdapTree {
     let originParentNodeDn: string | undefined = modifyDnNodeObject.originParentNodeDn
     let modifyParentNodeDn: string | undefined = modifyDnNodeObject.modifyParentNodeDn
     let modifyDn: string = ''
-    let originName = nodeDn.replace(',' + originParentNodeDn, '')
+    let originName = nodeDn.split(',')[0]
   
     if (nodeName !== originName) {
       modifyDn = nodeDn.replace(originName, nodeName)
