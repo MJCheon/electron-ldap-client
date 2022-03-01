@@ -197,7 +197,7 @@ ipcMain.on("saveAllChange", async (event : IpcMainEvent, modifyDnNodeList : Modi
   event.reply("refreshRootTreeFromMain");
 })
 
-ipcMain.on("showSaveDialog", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
+ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
 
@@ -225,7 +225,7 @@ ipcMain.on("showSaveDialog", async (event : IpcMainEvent, modifyDnNodeList : Mod
     })
   }
   
-  event.reply("returnShowSaveDialog", modifyDnList, changeAttrList);
+  event.reply("returnShowChangePage", modifyDnList, changeAttrList);
 })
 
 // Exit cleanly on request from parent process in development mode.

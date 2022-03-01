@@ -14,7 +14,7 @@
     </v-sheet>
     <v-alert
       v-show='modifyDnList.length + saveAttributeList.length > 0'
-      @click='toggleShowSaveDialog()'
+      @click='toggleShowChangePage()'
       class='text-sm-right'
       text
       light
@@ -22,8 +22,8 @@
       color='deep-orange'
       type='warning'
     >
-    <SaveDialog
-      v-model='showSaveDialog'
+    <ChangePage
+      v-model='showChangePage'
     />
       <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
@@ -88,14 +88,14 @@
 </template>
 <script>
 import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
-import SaveDialog from './SaveDialog'
+import ChangePage from './ChangePage'
 import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
   components: {
     VueTreeList,
-    SaveDialog
+    ChangePage
   },
   data: () => ({
     search: null,
@@ -107,7 +107,7 @@ export default {
     modifyDnList: [],
     saveAttributeList: [],
     isAttrSave: false,
-    showSaveDialog: false
+    showChangePage: false
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
@@ -223,11 +223,11 @@ export default {
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
       this.clearChangeList()
     },
-    toggleShowSaveDialog () {
-      if (!this.showSaveDialog) {
-        ipcRenderer.send('showSaveDialog', this.modifyDnList, this.saveAttributeList)
+    toggleShowChangePage () {
+      if (!this.showChangePage) {
+        ipcRenderer.send('showChangePage', this.modifyDnList, this.saveAttributeList)
       }
-      this.showSaveDialog = !this.showSaveDialog
+      this.showChangePage = !this.showChangePage
     },
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
