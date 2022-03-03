@@ -5,7 +5,9 @@ import {
   protocol,
   BrowserWindow,
   ipcMain,
-  IpcMainEvent
+  IpcMainEvent,
+  MenuItem,
+  Menu
 } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
@@ -51,34 +53,60 @@ async function createWindow () {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+}
 
-  win.webContents.on('before-input-event', (event, input) => {
-    if (process.platform === 'darwin') {
-      if (input.key.toLowerCase() === 'r' && input.meta) {
-        win.webContents.send('refreshRootTreeFromMain')
-        event.preventDefault()
+function createMenu() {
+  const file: MenuItem = new MenuItem({
+    label: 'File',
+    submenu: [
+      {
+        label: 'Minimize',
+        role: 'minimize'
+      },
+      {
+        label: 'Quit',
+        role: 'quit'
       }
-
-      if (input.key.toLowerCase() === 's' && input.meta) {
-        win.webContents.send('saveFromShortcut')
-        event.preventDefault()
-      }
-    }
-
-    if (process.platform === 'win32') {
-      if (input.key.toLowerCase() === 'f5') {
-        win.webContents.send('refreshRootTreeFromMain')
-        event.preventDefault()
-      }
-      
-      if (input.key.toLowerCase() === 's' && input.control) {
-        win.webContents.send('saveFromShortcut')
-        event.preventDefault()
-      }
-    }
+    ]
+  })
+  
+  const edit: MenuItem = new MenuItem({
+    label: 'Edit',
+    role: 'editMenu'
   })
 
-  win.setMenu(null)
+  const help: MenuItem = new MenuItem({
+    label: 'Help',
+    submenu: [
+      {
+        label: 'Version',
+        click: async () => {
+          const { dialog } = require('electron')
+
+          const message = 'Version : ' + app.getVersion()
+          const option = {
+            type: 'info',
+            title: 'Version',
+            icon: mainIcon,
+            message: message
+          }
+      
+          dialog.showMessageBox(option)
+        }
+      },
+      {
+        label: 'Help',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client/wiki')
+        }
+      }
+    ]
+  })
+
+  const template: MenuItem[] = [file, edit, help]
+  
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // Quit when all windows are closed.
@@ -114,6 +142,7 @@ app.on('ready', async () => {
     }
   }
   createWindow()
+  createMenu()
 })
 
 // Ldap Connect and Get ldap entries
