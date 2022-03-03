@@ -98,7 +98,7 @@ function createMenu() {
         label: 'Help',
         click: async () => {
           const { shell } = require('electron')
-          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client')
+          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client/wiki')
         }
       }
     ]
