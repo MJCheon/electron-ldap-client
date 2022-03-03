@@ -344,13 +344,13 @@ export class LdapTree {
     return returnData
   }
 
-  getModifyDn(modifyDnNodeObject: ModifyDnNodeObject, baseDn: string): [string, string] {
+  getModifyDn(modifyDnNodeObject: ModifyDnNodeObject): [string, string] {
     let nodeDn: string  = modifyDnNodeObject.nodeDn
     let nodeName: string = modifyDnNodeObject.nodeName
     let originParentNodeDn: string | undefined = modifyDnNodeObject.originParentNodeDn
     let modifyParentNodeDn: string | undefined = modifyDnNodeObject.modifyParentNodeDn
     let modifyDn: string = ''
-    let originName = nodeDn.replace(',' + baseDn, '')
+    let originName = nodeDn.split(',')[0]
   
     if (nodeName !== originName) {
       modifyDn = nodeDn.replace(originName, nodeName)
@@ -361,7 +361,7 @@ export class LdapTree {
         if (modifyDn === '') {
           modifyDn = nodeDn.replace(originParentNodeDn, modifyParentNodeDn)
         } else {
-          let tmpDn: string = nodeDn
+          let tmpDn: string = modifyDn
           modifyDn = tmpDn.replace(originParentNodeDn, modifyParentNodeDn)
         }
       }

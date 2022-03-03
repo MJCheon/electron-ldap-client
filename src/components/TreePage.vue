@@ -138,25 +138,30 @@ export default {
     onChangeName (params) {
       if (
         params.eventType &&
-        params.eventType === 'blur' &&
-        params.id !== params.newName
+        params.eventType === 'blur'
       ) {
-        var isChange = false
         var nodeName = params.newName
         var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
+        var parentNode = params.node.parent
+        var parentNodeDn = parentNode.data.dn ? parentNode.data.dn : parentNode.node.name
 
-        this.modifyDnList.forEach((modifyDn) => {
-          if (modifyDn.nodeDn === nodeDn) {
-            modifyDn.nodeName = nodeName
-            isChange = true
+        if (params.id !== params.newName) {
+          if (this.alreadyInModifyDn(nodeDn)) {
+            this.modifyDnList.forEach((modifyDn) => {
+              if (modifyDn.nodeDn === nodeDn) {
+                modifyDn.nodeName = nodeName
+              }
+            })
+          } else {
+            this.modifyDnList.push({
+              nodeName: nodeName,
+              nodeDn: nodeDn,
+              originParentNodeDn: parentNodeDn,
+              modifyParentNodeDn: parentNodeDn
+            })
           }
-        })
-
-        if (!isChange) {
-          this.modifyDnList.push({
-            nodeName: nodeName,
-            nodeDn: nodeDn
-          })
+        } else if (params.id === params.newName) {
+          this.deleteModifyDn(nodeName + ',' + parentNodeDn)
         }
       }
     },
@@ -180,11 +185,11 @@ export default {
 
       if (originParentNodeDn !== modifyParentNodeDn) {
         if (this.alreadyInModifyDn(dragNodeDn)) {
-          if (this.checkModifyDn(dragNodeDn, originParentNodeDn, modifyParentNodeDn)) {
+          if (this.checkDrag(dragNodeName, modifyParentNodeDn)) {
             this.deleteModifyDn(dragNodeDn)
           } else {
             this.modifyDnList.forEach((modifyDn) => {
-              if (modifyDn.nodeDn !== dragNodeDn) {
+              if (modifyDn.nodeDn === dragNodeDn) {
                 modifyDn.nodeName = dragNodeName
                 modifyDn.originParentNodeDn = originParentNodeDn
                 modifyDn.modifyParentNodeDn = modifyParentNodeDn
@@ -212,11 +217,19 @@ export default {
         }
       })
     },
-    checkModifyDn (nodeDn, originParentNodeDn, modifyParentNodeDn) {
-      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn && modifyDn.originParentNodeDn === modifyParentNodeDn && modifyDn.modifyParentNodeDn === originParentNodeDn))
+    checkDrag (nodeName, modifyParentNodeDn) {
+      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeName + ',' + modifyParentNodeDn)) !== 'undefined') {
+        return true
+      } else {
+        return false
+      }
     },
     alreadyInModifyDn (nodeDn) {
-      return this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn))
+      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn)) !== 'undefined') {
+        return true
+      } else {
+        return false
+      }
     },
     saveAll () {
       ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
