@@ -41,8 +41,13 @@
           </span>
         </vue-tree-list>
         <v-spacer></v-spacer>
-        <v-btn color='blue darken-1' text @click='close()'>Close</v-btn>
-        <v-btn color='blue darken-1' absolute right text @click='save(attrTree)'>Save</v-btn>
+        <v-btn color='blue darken-1' text @click.stop='close()'>Close</v-btn>
+        <v-btn color='blue darken-1' absolute right text @click.stop='save(attrTree)'>Save</v-btn>
+        <Keypress
+          key-event='keydown'
+          :multiple-keys='multipleKeys'
+          @success='save(attrTree)'
+        />
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -55,24 +60,32 @@ import { ipcRenderer } from 'electron'
 
 export default {
   components: {
-    VueTreeList
+    VueTreeList,
+    Keypress: () => import('vue-keypress')
   },
   data: () => ({
+    multipleKeys: [
+      {
+        keyCode: 83,
+        modifiers: ['ctrlKey'],
+        preventDefault: true
+      },
+      {
+        keyCode: 83,
+        modifiers: ['metaKey'],
+        preventDefault: true
+      }
+    ],
     defaultTreeNode: 'New Tree',
     defaultLeafNode: 'New Leaf',
     deleteNodeList: [],
-    attrTree: new Tree([]),
+    attrTree: null,
     showEntryDialog: false
   }),
   created () {
     ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
       this.attrTree = new Tree(attrTree)
       this.showEntryDialog = true
-    })
-    ipcRenderer.on('saveFromShortcut', event => {
-      if (this.showEntryDialog) {
-        this.save(this.attrTree)
-      }
     })
   },
   methods: {
@@ -90,9 +103,12 @@ export default {
       return true
     },
     save (attrTree) {
-      this.close()
-      EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList)
-      this.deleteNodeList = []
+      if (attrTree !== null) {
+        EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList)
+        this.attrTree = null
+        this.deleteNodeList = []
+        this.close()
+      }
     },
     close () {
       this.showEntryDialog = false

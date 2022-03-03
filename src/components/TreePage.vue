@@ -84,6 +84,11 @@
         </span>
       </vue-tree-list>
     </v-card-text>
+    <Keypress
+      key-event='keydown'
+      :multiple-keys='multipleKeys'
+      @success='refreshTree()'
+    />
   </v-card>
 </template>
 <script>
@@ -95,9 +100,22 @@ import { ipcRenderer } from 'electron'
 export default {
   components: {
     VueTreeList,
-    ChangePage
+    ChangePage,
+    Keypress: () => import('vue-keypress')
   },
   data: () => ({
+    multipleKeys: [
+      {
+        keyCode: 82,
+        modifiers: ['metaKey'],
+        preventDefault: true
+      },
+      {
+        keyCode: 116,
+        modifiers: [],
+        preventDefault: true
+      }
+    ],
     search: null,
     isBinding: false,
     newTree: {},
@@ -114,14 +132,6 @@ export default {
       this.entryTree = null
       this.isBinding = true
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
-    })
-    ipcRenderer.on('saveFromShortcut', event => {
-      if (!this.isAttrSave && (this.modifyDnList.length > 0 || this.saveAttributeList.length > 0)) {
-        this.saveAll()
-      }
-    })
-    ipcRenderer.on('refreshRootTreeFromMain', event => {
-      this.refreshTree()
     })
     EventBus.$on('saveAttribute', (attrTree, deleteList) => {
       this.saveAttributeList.push({
@@ -210,6 +220,9 @@ export default {
       this.modifyDnList = []
       this.saveAttributeList = []
     },
+    clearSearch () {
+      this.search = null
+    },
     deleteModifyDn (deleteNodeDn) {
       this.modifyDnList = this.modifyDnList.filter(modifyDn => {
         if (modifyDn.nodeDn !== deleteNodeDn) {
@@ -244,6 +257,7 @@ export default {
     refreshTree () {
       ipcRenderer.send('refreshRootTree')
       this.clearChangeList()
+      this.search = null
     }
   }
 }
