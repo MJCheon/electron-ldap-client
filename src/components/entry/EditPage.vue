@@ -6,10 +6,8 @@
       </v-card-title>
       <v-card-text>
         <vue-tree-list
-          @click='onClick'
           @change-name='onChangeName'
           @delete-node='onDel'
-          @add-node='onAddNode'
           :model='attrTree'
           :default-tree-node-name='defaultTreeNode'
           :default-leaf-node-name='defaultLeafNode'
@@ -76,9 +74,10 @@ export default {
         preventDefault: true
       }
     ],
-    defaultTreeNode: 'New Tree',
-    defaultLeafNode: 'New Leaf',
+    defaultTreeNode: 'New Directory',
+    defaultLeafNode: 'New File',
     deleteNodeList: [],
+    isChanged: false,
     attrTree: null,
     showEntryDialog: false
   }),
@@ -92,18 +91,26 @@ export default {
     onDel (node) {
       this.deleteNodeList.push(node)
       node.remove()
+      this.isChanged = true
     },
     onChangeName (params) {
-      return true
-    },
-    onAddNode (params) {
-      return true
-    },
-    onClick (params) {
-      return true
+      if (params.eventType && params.eventType === 'blur') {
+        if (params.node.isLeaf) {
+          var originData = params.node.data.split(':')[1].trim()
+          if (params.newName !== originData) {
+            console.log(params.newName)
+            console.log(originData)
+            this.isChanged = true
+          }
+        } else {
+          if (params.id !== params.newName) {
+            this.isChanged = true
+          }
+        }
+      }
     },
     save (attrTree) {
-      if (attrTree !== null) {
+      if (this.isChanged) {
         EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList)
         this.attrTree = null
         this.deleteNodeList = []
@@ -111,6 +118,7 @@ export default {
       }
     },
     close () {
+      this.isChanged = false
       this.showEntryDialog = false
     }
   }
