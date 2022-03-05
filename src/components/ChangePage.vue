@@ -104,6 +104,7 @@
           color='blue darken-1'
           text
           @click='close()'>Close</v-btn>
+        <v-btn color='blue darken-1' absolute right text @click.stop='save()'>Save</v-btn>
       </v-card-text>
     </v-card>
   </v-dialog>
@@ -111,6 +112,7 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import EventBus from '../event-bus'
 
 export default {
   props: {
@@ -142,6 +144,10 @@ export default {
       this.showDialog = false
       this.modifyDnList = []
       this.changeAttrList = []
+    },
+    save () {
+      EventBus.$emit('saveFromChagePage')
+      this.close()
     }
   }
 }

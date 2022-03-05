@@ -1,6 +1,6 @@
 <template>
   <v-dialog max-width='60%' v-model='showEntryDialog'>
-    <v-card>
+    <v-card v-if='this.attrTree !== null'>
       <v-card-title>
         <span class='headline'>Edit Attribute</span>
       </v-card-title>
@@ -98,8 +98,6 @@ export default {
         if (params.node.isLeaf) {
           var originData = params.node.data.split(':')[1].trim()
           if (params.newName !== originData) {
-            console.log(params.newName)
-            console.log(originData)
             this.isChanged = true
           }
         } else {

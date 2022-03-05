@@ -12,6 +12,14 @@
         clear-icon='mdi-close-circle-outline'
       ></v-text-field>
     </v-sheet>
+    <v-progress-linear
+      :active="loading"
+      :indeterminate="loading"
+      height='25'
+      color='amber'
+    >
+      <strong>loading...</strong>
+    </v-progress-linear>
     <v-alert
       v-show='modifyDnList.length + saveAttributeList.length > 0'
       @click='toggleShowChangePage()'
@@ -86,8 +94,13 @@
     </v-card-text>
     <Keypress
       key-event='keydown'
-      :multiple-keys='multipleKeys'
+      :multiple-keys='refreshMultipleKeys'
       @success='refreshTree()'
+    />
+    <Keypress
+      key-event='keydown'
+      :multiple-keys='saveMultipleKeys'
+      @success='saveAll()'
     />
   </v-card>
 </template>
@@ -104,7 +117,7 @@ export default {
     Keypress: () => import('vue-keypress')
   },
   data: () => ({
-    multipleKeys: [
+    refreshMultipleKeys: [
       {
         keyCode: 82,
         modifiers: ['metaKey'],
@@ -113,6 +126,18 @@ export default {
       {
         keyCode: 116,
         modifiers: [],
+        preventDefault: true
+      }
+    ],
+    saveMultipleKeys: [
+      {
+        keyCode: 83,
+        modifiers: ['metaKey'],
+        preventDefault: true
+      },
+      {
+        keyCode: 83,
+        modifiers: ['ctrlKey'],
         preventDefault: true
       }
     ],
@@ -125,13 +150,18 @@ export default {
     modifyDnList: [],
     saveAttributeList: [],
     isAttrSave: false,
-    showChangePage: false
+    showChangePage: false,
+    loading: false
   }),
   created () {
     ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
       this.entryTree = null
       this.isBinding = true
+      this.loading = false
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
+    })
+    ipcRenderer.on('refreshRootTreeFromMain', () => {
+      this.refreshTree()
     })
     EventBus.$on('saveAttribute', (attrTree, deleteList) => {
       this.saveAttributeList.push({
@@ -140,6 +170,15 @@ export default {
       })
       this.isAttrSave = false
     })
+    EventBus.$on('saveFromChagePage', () => {
+      this.saveAll()
+    })
+  },
+  watch: {
+    loading (val) {
+      if (!val) return
+      setTimeout(() => (this.loading = false), 1000)
+    }
   },
   methods: {
     onDel (node) {
@@ -242,8 +281,11 @@ export default {
       }
     },
     saveAll () {
-      ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
-      this.clearChangeList()
+      if (!this.isAttrSave) {
+        this.loading = true
+        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
+        this.clearChangeList()
+      }
     },
     toggleShowChangePage () {
       if (!this.showChangePage) {
@@ -252,9 +294,12 @@ export default {
       this.showChangePage = !this.showChangePage
     },
     refreshTree () {
+      this.loading = true
       ipcRenderer.send('refreshRootTree')
       this.clearChangeList()
       this.search = null
+      this.isAttrSave = false
+      this.showChangePage = false
     }
   }
 }
