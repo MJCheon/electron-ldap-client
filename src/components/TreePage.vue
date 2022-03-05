@@ -119,8 +119,8 @@ export default {
     search: null,
     isBinding: false,
     newTree: {},
-    defaultTreeNode: 'New Tree',
-    defaultLeafNode: 'New Leaf',
+    defaultTreeNode: 'New Directory',
+    defaultLeafNode: 'New File',
     entryTree: new Tree([]),
     modifyDnList: [],
     saveAttributeList: [],
@@ -146,10 +146,7 @@ export default {
       node.remove()
     },
     onChangeName (params) {
-      if (
-        params.eventType &&
-        params.eventType === 'blur'
-      ) {
+      if (params.eventType && params.eventType === 'blur') {
         var nodeName = params.newName
         var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
         var parentNode = params.node.parent
