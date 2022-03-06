@@ -369,4 +369,18 @@ export class LdapTree {
   
     return [nodeDn, modifyDn]
   }
+
+  getDeleteDn(deleteDnNode: TreeNode): [string, string] {
+    let originDn: string = '';
+    let parentDn: string = '';
+    if (typeof deleteDnNode.data !== 'undefined') {
+      let dataObject = JSON.parse(JSON.stringify(deleteDnNode.data))
+      originDn = dataObject.dn
+      if (typeof deleteDnNode.parent !== 'undefined') {
+        parentDn = deleteDnNode.parent.id
+      }
+    }
+
+    return [originDn,parentDn]
+  }
 }

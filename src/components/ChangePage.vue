@@ -10,94 +10,136 @@
             <v-icon small>mdi-circle-small</v-icon>
             Attribute Changes
           </v-card-subtitle>
-        </template>
-        <v-list expand>
-          <v-list-group
-            v-for='(item, index) in changeAttrList'
-            append-icon=''
-            prepend-icon=''
-            no-action
-            :key='index'
-            value='true'
-          >
-            <template v-slot:activator>
-              <v-list-item-icon>
-                <v-icon color='yellow darken-2'>mdi-folder</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title v-text="item.dn"></v-list-item-title>
-              </v-list-item-content>
-            </template>
-
-            <template
-              v-for='child in item.changeDataList'
+          <v-list expand>
+            <v-list-group
+              v-for='(item, index) in changeAttrList'
+              append-icon=''
+              prepend-icon=''
+              no-action
+              :key='index'
+              value='true'
             >
-              <v-list-group
-                v-for='changeData in child.modificationList'
-                :key='changeData.type'
-                append-icon=''
-                prepend-icon=''
-                no-action
-                sub-group
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon color='yellow darken-2'>mdi-folder</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.dn"></v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <template
+                v-for='child in item.changeDataList'
               >
-                <template v-slot:activator>
-                  <v-list-item-icon >
-                    <v-icon color='green lighten-2'>mdi-file-document</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      {{ changeData.type + ' : ' + changeData.values[0] }}
-                      <span class='font-weight-bold red--text'>{{' (' + child.operation + ')'}}</span>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </template>
-              </v-list-group>
-            </template>
-          </v-list-group>
-        </v-list>
+                <v-list-group
+                  v-for='changeData in child.modificationList'
+                  :key='changeData.type'
+                  append-icon=''
+                  prepend-icon=''
+                  no-action
+                  sub-group
+                >
+                  <template v-slot:activator>
+                    <v-list-item-icon >
+                      <v-icon color='green lighten-2'>mdi-file-document</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ changeData.type + ' : ' + changeData.values[0] }}
+                        <span class='font-weight-bold red--text'>{{' (' + child.operation + ')'}}</span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+                </v-list-group>
+              </template>
+            </v-list-group>
+          </v-list>
+        </template>
         <template v-if='modifyDnList.length > 0'>
           <v-divider v-if='changeAttrList.length > 0'></v-divider>
           <v-card-subtitle>
             <v-icon small>mdi-circle-small</v-icon>
-            modifyDn Changes
+            Modify Dn Changes
           </v-card-subtitle>
-        </template>
-        <v-list expand>
-          <v-list-group
-            v-for='(item, index) in modifyDnList'
-            append-icon=''
-            prepend-icon=''
-            :key='index'
-            value='true'
-          >
-            <template v-slot:activator>
-              <v-list-item-icon>
-                <v-icon color='yellow darken-2'>mdi-folder</v-icon>
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>{{ item.originDn }}</v-list-item-title>
-              </v-list-item-content>
-            </template>
+          <v-list expand>
             <v-list-group
-                append-icon=''
-                prepend-icon=''
-                no-action
-                sub-group
-              >
-                <template v-slot:activator>
-                  <v-list-item-icon >
-                    <v-icon color='yellow darken-2' >mdi-folder</v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      {{ item.modifyDn }}
-                      <span class='font-weight-bold red--text'>{{' (replace)'}}</span>
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </template>
-              </v-list-group>
-          </v-list-group>
-        </v-list>
+              v-for='(item, index) in modifyDnList'
+              append-icon=''
+              prepend-icon=''
+              :key='index'
+              value='true'
+            >
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon color='yellow darken-2'>mdi-folder</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ item.originDn }}</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-group
+                  append-icon=''
+                  prepend-icon=''
+                  no-action
+                  sub-group
+                >
+                  <template v-slot:activator>
+                    <v-list-item-icon >
+                      <v-icon color='yellow darken-2' >mdi-folder</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ item.modifyDn }}
+                        <span class='font-weight-bold red--text'>{{' (replace)'}}</span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+                </v-list-group>
+            </v-list-group>
+          </v-list>
+        </template>
+        <template v-if='deleteDnList.length > 0'>
+          <v-divider v-if='modifyDnList.length > 0'></v-divider>
+          <v-card-subtitle>
+            <v-icon small>mdi-circle-small</v-icon>
+            Delete Dn Changes
+          </v-card-subtitle>
+          <v-list expand>
+            <v-list-group
+              v-for='(item, index) in deleteDnList'
+              append-icon=''
+              prepend-icon=''
+              :key='index'
+              value='true'
+            >
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon color='yellow darken-2'>mdi-folder</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ item.parentDn }}</v-list-item-title>
+                </v-list-item-content>
+              </template>
+              <v-list-group
+                  append-icon=''
+                  prepend-icon=''
+                  no-action
+                  sub-group
+                >
+                  <template v-slot:activator>
+                    <v-list-item-icon >
+                      <v-icon color='green lighten-2'>mdi-file-document</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ item.originDn }}
+                        <span class='font-weight-bold red--text'>{{' (delete)'}}</span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+                </v-list-group>
+            </v-list-group>
+          </v-list>
+        </template>
         <v-spacer></v-spacer>
         <v-btn
           right
@@ -121,12 +163,14 @@ export default {
   data: () => ({
     activeGroup: true,
     modifyDnList: [],
+    deleteDnList: [],
     changeAttrList: []
   }),
   created () {
-    ipcRenderer.on('returnShowChangePage', (event, modifyDnList, changeAttrList) => {
+    ipcRenderer.on('returnShowChangePage', (event, modifyDnList, changeAttrList, deleteDnList) => {
       this.modifyDnList = modifyDnList
       this.changeAttrList = changeAttrList
+      this.deleteDnList = deleteDnList
     })
   },
   computed: {
@@ -141,9 +185,13 @@ export default {
   },
   methods: {
     close () {
+      this.clearList()
       this.showDialog = false
+    },
+    clearList () {
       this.modifyDnList = []
       this.changeAttrList = []
+      this.deleteDnList = []
     },
     save () {
       EventBus.$emit('saveFromChagePage')

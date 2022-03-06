@@ -111,6 +111,17 @@ export class LdapServer {
     }
   }
 
+  async delete (originDn: string): Promise<void> {
+    try{
+      if (originDn !== '') {
+        await this.client.del(originDn)
+      }
+    }
+    catch (ex) {
+      showError('LDAP Error', String(ex))
+    }
+  }
+
   async disconnect (): Promise<void> {
     try {
       await this.client.unbind()

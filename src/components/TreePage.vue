@@ -21,7 +21,7 @@
       <strong>loading...</strong>
     </v-progress-linear>
     <v-alert
-      v-show='modifyDnList.length + saveAttributeList.length > 0'
+      v-show='modifyDnList.length + deleteDnNodeList.length + saveAttributeList.length > 0'
       @click='toggleShowChangePage()'
       class='text-sm-right'
       text
@@ -33,7 +33,7 @@
     <ChangePage
       v-model='showChangePage'
     />
-      <strong> {{ modifyDnList.length + saveAttributeList.length }} </strong> unsaved changes.
+      <strong> {{ modifyDnList.length + deleteDnNodeList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
     <v-card-text>
       <div class='d-flex flex-row-reverse'>
@@ -105,7 +105,7 @@
   </v-card>
 </template>
 <script>
-import { VueTreeList, Tree, TreeNode } from './lib/vue-tree-list'
+import { VueTreeList, Tree } from './lib/vue-tree-list'
 import ChangePage from './ChangePage'
 import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
@@ -148,6 +148,7 @@ export default {
     defaultLeafNode: 'New File',
     entryTree: new Tree([]),
     modifyDnList: [],
+    deleteDnNodeList: [],
     saveAttributeList: [],
     isAttrSave: false,
     showChangePage: false,
@@ -182,6 +183,9 @@ export default {
   },
   methods: {
     onDel (node) {
+      if (!this.isNewNode(node.id)) {
+        this.deleteDnNodeList.push(node)
+      }
       node.remove()
     },
     onChangeName (params) {
@@ -218,11 +222,6 @@ export default {
       this.isAttrSave = true
       ipcRenderer.send('attributeTree', params.id, params.data)
     },
-    addNode () {
-      var node = new TreeNode({ name: 'new node', isLeaf: false })
-      if (!this.data.children) this.data.children = []
-      this.data.addChildren(node)
-    },
     onDragNode (params) {
       var dragNodeName = params.node.name
       var dragNodeDn = params.node.data.dn ? params.node.data.dn : params.node.id
@@ -252,12 +251,25 @@ export default {
         }
       }
     },
+    isNewNode (nodeId) {
+      const timestampRegex = new RegExp('[0-9]{13}')
+
+      if (timestampRegex.test(nodeId)) {
+        return true
+      } else {
+        return false
+      }
+    },
+    clearAll () {
+      this.clearChangeList()
+      this.search = null
+      this.isAttrSave = false
+      this.showChangePage = false
+    },
     clearChangeList () {
       this.modifyDnList = []
       this.saveAttributeList = []
-    },
-    clearSearch () {
-      this.search = null
+      this.deleteDnNodeList = []
     },
     deleteModifyDn (deleteNodeDn) {
       this.modifyDnList = this.modifyDnList.filter(modifyDn => {
@@ -283,23 +295,20 @@ export default {
     saveAll () {
       if (!this.isAttrSave) {
         this.loading = true
-        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList)
+        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList, this.deleteDnNodeList)
         this.clearChangeList()
       }
     },
     toggleShowChangePage () {
       if (!this.showChangePage) {
-        ipcRenderer.send('showChangePage', this.modifyDnList, this.saveAttributeList)
+        ipcRenderer.send('showChangePage', this.modifyDnList, this.saveAttributeList, this.deleteDnNodeList)
       }
       this.showChangePage = !this.showChangePage
     },
     refreshTree () {
       this.loading = true
       ipcRenderer.send('refreshRootTree')
-      this.clearChangeList()
-      this.search = null
-      this.isAttrSave = false
-      this.showChangePage = false
+      this.clearAll()
     }
   }
 }
