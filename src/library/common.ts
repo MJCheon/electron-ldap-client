@@ -36,6 +36,11 @@ export type ModifyDnObject = {
   modifyDn: string;
 }
 
+export type DeleteDnObject = {
+  originDn: string;
+  parentDn: string;
+}
+
 export type ModifyAttributeTreeNodeObject = {
   tree: TreeNode[],
   deleteList: TreeNode[]
