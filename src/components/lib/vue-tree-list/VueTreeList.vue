@@ -360,10 +360,12 @@ export default {
       this.isHover = false
     },
     click () {
-      this.rootNode.$emit('click', {
-        toggle: this.toggle,
-        ...this.model
-      })
+      if (!this.editable) {
+        this.rootNode.$emit('click', {
+          toggle: this.toggle,
+          ...this.model
+        })
+      }
     },
     addChild (isLeaf) {
       const name = isLeaf ? this.defaultLeafNodeName : this.defaultTreeNodeName
