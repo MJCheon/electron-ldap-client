@@ -21,7 +21,7 @@
       <strong>loading...</strong>
     </v-progress-linear>
     <v-alert
-      v-show='modifyDnList.length + deleteDnNodeList.length + saveAttributeList.length > 0'
+      v-show='addDnNodeList.length + modifyDnNodeList.length + deleteDnNodeList.length + saveAttributeList.length > 0'
       @click='toggleShowChangePage()'
       class='text-sm-right'
       text
@@ -33,7 +33,7 @@
     <ChangePage
       v-model='showChangePage'
     />
-      <strong> {{ modifyDnList.length + deleteDnNodeList.length + saveAttributeList.length }} </strong> unsaved changes.
+      <strong> {{ addDnNodeList.length + modifyDnNodeList.length + deleteDnNodeList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
     <v-card-text>
       <div class='d-flex flex-row-reverse'>
@@ -147,7 +147,8 @@ export default {
     defaultTreeNode: 'New Directory',
     defaultLeafNode: 'New File',
     entryTree: new Tree([]),
-    modifyDnList: [],
+    addDnNodeList: [],
+    modifyDnNodeList: [],
     deleteDnNodeList: [],
     saveAttributeList: [],
     isAttrSave: false,
@@ -164,11 +165,19 @@ export default {
     ipcRenderer.on('refreshRootTreeFromMain', () => {
       this.refreshTree()
     })
-    EventBus.$on('saveAttribute', (attrTree, deleteList) => {
-      this.saveAttributeList.push({
-        tree: attrTree,
-        deleteList: deleteList
-      })
+    EventBus.$on('saveAttribute', (attrTree, deleteList, isAddDn) => {
+      if (!isAddDn) {
+        this.saveAttributeList.push({
+          tree: attrTree,
+          deleteList: deleteList
+        })
+      } else {
+        this.addDnNodeList.forEach(addDnNode => {
+          if (addDnNode.nodeName === attrTree.children[0].name) {
+            addDnNode.attrTree = attrTree
+          }
+        })
+      }
       this.isAttrSave = false
     })
     EventBus.$on('saveFromChagePage', () => {
@@ -185,70 +194,97 @@ export default {
     onDel (node) {
       if (!this.isNewNode(node.id)) {
         this.deleteDnNodeList.push(node)
+      } else {
+        this.addDnNodeList = this.addDnNodeList.filter(addDnNode => {
+          if (addDnNode.nodeName !== node.name) {
+            return true
+          }
+        })
       }
       node.remove()
     },
     onChangeName (params) {
       if (params.eventType && params.eventType === 'blur') {
-        var nodeName = params.newName
-        var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
-        var parentNode = params.node.parent
-        var parentNodeDn = parentNode.data.dn ? parentNode.data.dn : parentNode.node.name
+        if (!this.isNewNode(params.node.id)) {
+          var nodeName = params.newName
+          var nodeDn = params.node.data.dn ? params.node.data.dn : params.node.name
+          var parentNode = params.node.parent
+          var parentNodeDn = parentNode.data.dn ? parentNode.data.dn : parentNode.node.name
 
-        if (params.id !== params.newName) {
-          if (this.alreadyInModifyDn(nodeDn)) {
-            this.modifyDnList.forEach((modifyDn) => {
-              if (modifyDn.nodeDn === nodeDn) {
-                modifyDn.nodeName = nodeName
-              }
-            })
-          } else {
-            this.modifyDnList.push({
-              nodeName: nodeName,
-              nodeDn: nodeDn,
-              originParentNodeDn: parentNodeDn,
-              modifyParentNodeDn: parentNodeDn
-            })
+          if (params.id !== params.newName) {
+            if (this.alreadyInModifyDn(nodeDn)) {
+              this.modifyDnNodeList.forEach((modifyDn) => {
+                if (modifyDn.nodeDn === nodeDn) {
+                  modifyDn.nodeName = nodeName
+                }
+              })
+            } else {
+              this.modifyDnNodeList.push({
+                nodeName: nodeName,
+                nodeDn: nodeDn,
+                originParentNodeDn: parentNodeDn,
+                modifyParentNodeDn: parentNodeDn
+              })
+            }
+          } else if (params.id === params.newName) {
+            this.deleteModifyDn(nodeName + ',' + parentNodeDn)
           }
-        } else if (params.id === params.newName) {
-          this.deleteModifyDn(nodeName + ',' + parentNodeDn)
+        } else {
+          this.addDnNodeList.forEach(addDnNode => {
+            if (addDnNode.nodeId === params.id) {
+              addDnNode.nodeName = params.newName
+            }
+          })
         }
       }
     },
-    onAddNode (params) {
-      return true
+    onAddNode (node) {
+      this.addDnNodeList.push({
+        nodeId: node.id,
+        nodeName: node.name,
+        attrTree: null
+      })
     },
     onClick (params) {
       this.isAttrSave = true
-      ipcRenderer.send('attributeTree', params.id, params.data)
+      if (this.isNewNode(params.id)) {
+        ipcRenderer.send('attributeTree', params.name, params.parent, this.isNewNode(params.id))
+      } else {
+        ipcRenderer.send('attributeTree', params.id, params.parent, this.isNewNode(params.id), params.data)
+      }
     },
     onDragNode (params) {
-      var dragNodeName = params.node.name
-      var dragNodeDn = params.node.data.dn ? params.node.data.dn : params.node.id
-      var originParentNodeDn = params.src.data.dn ? params.src.data.dn : params.src.id
-      var modifyParentNodeDn = params.target.data.dn ? params.target.data.dn : params.target.id
+      if (!this.isNewNode(params.node.id)) {
+        var dragNodeName = params.node.name
+        var dragNodeDn = params.node.data.dn ? params.node.data.dn : params.node.id
+        var originParentNodeDn = params.src.data.dn ? params.src.data.dn : params.src.id
+        var modifyParentNodeDn = params.target.data.dn ? params.target.data.dn : params.target.id
 
-      if (originParentNodeDn !== modifyParentNodeDn) {
-        if (this.alreadyInModifyDn(dragNodeDn)) {
-          if (this.checkDrag(dragNodeName, modifyParentNodeDn)) {
-            this.deleteModifyDn(dragNodeDn)
+        if (originParentNodeDn !== modifyParentNodeDn) {
+          if (this.alreadyInModifyDn(dragNodeDn)) {
+            if (this.checkDrag(dragNodeName, modifyParentNodeDn)) {
+              this.deleteModifyDn(dragNodeDn)
+            } else {
+              this.modifyDnNodeList.forEach((modifyDn) => {
+                if (modifyDn.nodeDn === dragNodeDn) {
+                  modifyDn.nodeName = dragNodeName
+                  modifyDn.originParentNodeDn = originParentNodeDn
+                  modifyDn.modifyParentNodeDn = modifyParentNodeDn
+                }
+              })
+            }
           } else {
-            this.modifyDnList.forEach((modifyDn) => {
-              if (modifyDn.nodeDn === dragNodeDn) {
-                modifyDn.nodeName = dragNodeName
-                modifyDn.originParentNodeDn = originParentNodeDn
-                modifyDn.modifyParentNodeDn = modifyParentNodeDn
-              }
+            this.modifyDnNodeList.push({
+              nodeName: dragNodeName,
+              nodeDn: dragNodeDn,
+              originParentNodeDn: originParentNodeDn,
+              modifyParentNodeDn: modifyParentNodeDn
             })
           }
-        } else {
-          this.modifyDnList.push({
-            nodeName: dragNodeName,
-            nodeDn: dragNodeDn,
-            originParentNodeDn: originParentNodeDn,
-            modifyParentNodeDn: modifyParentNodeDn
-          })
         }
+      } else {
+        console.log(params.target)
+        console.log(this.addDnNodeList[0])
       }
     },
     isNewNode (nodeId) {
@@ -267,26 +303,27 @@ export default {
       this.showChangePage = false
     },
     clearChangeList () {
-      this.modifyDnList = []
+      this.addDnNodeList = []
+      this.modifyDnNodeList = []
       this.saveAttributeList = []
       this.deleteDnNodeList = []
     },
     deleteModifyDn (deleteNodeDn) {
-      this.modifyDnList = this.modifyDnList.filter(modifyDn => {
+      this.modifyDnNodeList = this.modifyDnNodeList.filter(modifyDn => {
         if (modifyDn.nodeDn !== deleteNodeDn) {
           return true
         }
       })
     },
     checkDrag (nodeName, modifyParentNodeDn) {
-      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeName + ',' + modifyParentNodeDn)) !== 'undefined') {
+      if (typeof this.modifyDnNodeList.find(modifyDn => (modifyDn.nodeDn === nodeName + ',' + modifyParentNodeDn)) !== 'undefined') {
         return true
       } else {
         return false
       }
     },
     alreadyInModifyDn (nodeDn) {
-      if (typeof this.modifyDnList.find(modifyDn => (modifyDn.nodeDn === nodeDn)) !== 'undefined') {
+      if (typeof this.modifyDnNodeList.find(modifyDn => (modifyDn.nodeDn === nodeDn)) !== 'undefined') {
         return true
       } else {
         return false
@@ -295,13 +332,13 @@ export default {
     saveAll () {
       if (!this.isAttrSave) {
         this.loading = true
-        ipcRenderer.send('saveAllChange', this.modifyDnList, this.saveAttributeList, this.deleteDnNodeList)
+        ipcRenderer.send('saveAllChange', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
         this.clearChangeList()
       }
     },
     toggleShowChangePage () {
       if (!this.showChangePage) {
-        ipcRenderer.send('showChangePage', this.modifyDnList, this.saveAttributeList, this.deleteDnNodeList)
+        ipcRenderer.send('showChangePage', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
       }
       this.showChangePage = !this.showChangePage
     },

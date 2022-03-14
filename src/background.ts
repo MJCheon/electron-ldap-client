@@ -16,8 +16,9 @@ import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
 import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, DeleteDnObject } from './library/common'
+import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, DeleteDnObject, AddDnNodeObject } from './library/common'
 import { Node } from 'tree-model'
+import { getAttributeChanges, getDeleteDn, getModifyDn } from './library/LdapUtil'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -175,10 +176,10 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
 })
 
 // Get Attribute of ldap entry
-ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Entry) => {
+ipcMain.on("attributeTree", (event : IpcMainEvent, nodeName: string, isAddDn: Boolean, attributes?: Entry) => {
   let ldapTree: LdapTree = new LdapTree()
-  const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
-  event.reply("attributeTreeResponse", attrResponse);
+  const attrResponse: TreeNode[] = ldapTree.makeAttrTree(nodeName, attributes)
+  event.reply("attributeTreeResponse", attrResponse, isAddDn);
 })
 
 // Refresh ldap Entries
@@ -197,13 +198,13 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
 })
 
 // Save All Changed Data
-ipcMain.on("saveAllChange", async (event: IpcMainEvent, modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]) => {
+ipcMain.on("saveAllChange", async (event: IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let ldapTree: LdapTree = new LdapTree()
 
   if (modifyDnNodeList.length > 0 ){
     modifyDnNodeList.forEach(async (modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [nodeDn, modifyDn] = ldapTree.getModifyDn(modifyDnNodeObject)
+      let [nodeDn, modifyDn] = getModifyDn(modifyDnNodeObject)
       if (ldapServer.isConnected()) {
         await ldapServer.modifyDn(nodeDn, modifyDn)
       }
@@ -214,7 +215,7 @@ ipcMain.on("saveAllChange", async (event: IpcMainEvent, modifyDnNodeList: Modify
     saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
       let attrTree: TreeNode[] = attribute.tree
       let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
+      let changeData: LdapChange = getAttributeChanges(attrTree, deleteList)
 
       if (ldapServer.isConnected()) {
         await ldapServer.modify(changeData);
@@ -224,7 +225,7 @@ ipcMain.on("saveAllChange", async (event: IpcMainEvent, modifyDnNodeList: Modify
 
   if (deletDnNodeList.length > 0) {
     deletDnNodeList.forEach(async (deleteDnNode: TreeNode) => {
-      let [originDn, parentDn] = ldapTree.getDeleteDn(deleteDnNode)
+      let [originDn, parentDn] = getDeleteDn(deleteDnNode)
 
       if (ldapServer.isConnected()) {
         await ldapServer.delete(originDn)
@@ -236,9 +237,8 @@ ipcMain.on("saveAllChange", async (event: IpcMainEvent, modifyDnNodeList: Modify
   event.reply("refreshRootTreeFromMain");
 })
 
-ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]) => {
+ipcMain.on("showChangePage", async (event : IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
-  let ldapTree: LdapTree = new LdapTree()
 
   let modifyDnList: ModifyDnObject[] = []
   let changeAttrList: LdapChange[] = []
@@ -246,7 +246,7 @@ ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : Mod
 
   if (modifyDnNodeList.length > 0 ){
     modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [originDn, modifyDn]: [string, string] = ldapTree.getModifyDn(modifyDnNodeObject)
+      let [originDn, modifyDn]: [string, string] = getModifyDn(modifyDnNodeObject)
 
       modifyDnList.push({
         originDn: originDn,
@@ -260,14 +260,14 @@ ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : Mod
     saveAttributeList.forEach((attribute: ModifyAttributeTreeNodeObject) => {
       let attrTree: TreeNode[] = attribute.tree
       let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
+      let changeData: LdapChange = getAttributeChanges(attrTree, deleteList)
       changeAttrList.push(changeData)
     })
   }
 
   if (deleteDnNodeList.length > 0) {
     deleteDnNodeList.forEach((deleteDnNode: TreeNode) => {
-      let [originDn, parentDn]: [string, string] = ldapTree.getDeleteDn(deleteDnNode)
+      let [originDn, parentDn]: [string, string] = getDeleteDn(deleteDnNode)
 
       if (originDn !== '' && parentDn !== '') {
         deleteDnList.push({

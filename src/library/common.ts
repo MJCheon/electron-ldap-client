@@ -24,6 +24,12 @@ export type TreeNode = {
   children: TreeNode[];
 }
 
+export type AddDnNodeObject = {
+  nodeId: string;
+  nodeName: string;
+  attrTree: TreeNode;
+}
+
 export type ModifyDnNodeObject = {
   nodeName: string;
   nodeDn: string;

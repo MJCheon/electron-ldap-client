@@ -79,11 +79,13 @@ export default {
     deleteNodeList: [],
     isChanged: false,
     attrTree: null,
-    showEntryDialog: false
+    showEntryDialog: false,
+    isAddDn: false
   }),
   created () {
-    ipcRenderer.on('attributeTreeResponse', (event, attrTree) => {
+    ipcRenderer.on('attributeTreeResponse', (event, attrTree, isAddDn) => {
       this.attrTree = new Tree(attrTree)
+      this.isAddDn = isAddDn
       this.showEntryDialog = true
     })
   },
@@ -96,8 +98,12 @@ export default {
     onChangeName (params) {
       if (params.eventType && params.eventType === 'blur') {
         if (params.node.isLeaf) {
-          var originData = params.node.data.split(':')[1].trim()
-          if (params.newName !== originData) {
+          if (!this.isAddDn) {
+            var originData = params.node.data.split(':')[1].trim()
+            if (params.newName !== originData) {
+              this.isChanged = true
+            }
+          } else {
             this.isChanged = true
           }
         } else {
@@ -109,7 +115,7 @@ export default {
     },
     save (attrTree) {
       if (this.isChanged) {
-        EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList)
+        EventBus.$emit('saveAttribute', attrTree, this.deleteNodeList, this.isAddDn)
         this.attrTree = null
         this.deleteNodeList = []
         this.close()
