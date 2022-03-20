@@ -1,19 +1,13 @@
 'use strict'
 
-import {
-  app,
-  protocol,
-  BrowserWindow,
-  ipcMain,
-  MenuItem,
-  Menu
-} from 'electron'
+import { app, protocol, BrowserWindow, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
 import { LdapServer } from './library/ldap/LdapServer'
 import { LdapFactory } from './library/ldap/LdapFactory'
 import { getAttributeTree, refreshRootTree, saveAllToLdap, serverBind, showAllChange } from './library/electron/IpcMainListener'
+import { createMenu } from './library/electron/Menu'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -47,60 +41,6 @@ async function createWindow () {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
-}
-
-function createMenu() {
-  const file: MenuItem = new MenuItem({
-    label: 'File',
-    submenu: [
-      {
-        label: 'Minimize',
-        role: 'minimize'
-      },
-      {
-        label: 'Quit',
-        role: 'quit'
-      }
-    ]
-  })
-  
-  const edit: MenuItem = new MenuItem({
-    label: 'Edit',
-    role: 'editMenu'
-  })
-
-  const help: MenuItem = new MenuItem({
-    label: 'Help',
-    submenu: [
-      {
-        label: 'Version',
-        click: async () => {
-          const { dialog } = require('electron')
-
-          const message = 'Version : ' + app.getVersion()
-          const option = {
-            type: 'info',
-            title: 'Version',
-            icon: mainIcon,
-            message: message
-          }
-      
-          dialog.showMessageBox(option)
-        }
-      },
-      {
-        label: 'Help',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client/wiki')
-        }
-      }
-    ]
-  })
-
-  const template: MenuItem[] = [file, edit, help]
-  
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 // Quit when all windows are closed.
@@ -137,7 +77,7 @@ app.on('ready', async () => {
     }
   }
   createWindow()
-  createMenu()
+  createMenu(mainIcon)
 })
 
 // Ldap Connect and Get ldap entries
