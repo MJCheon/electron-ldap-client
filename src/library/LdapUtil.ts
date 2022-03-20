@@ -68,10 +68,8 @@ export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeN
           }
         }
       }
-    
-      const newIdPattern = /\d{13}/
 
-      if (newIdPattern.test(node.model.id)) {
+      if (isNewNode(node.model.id)) {
         // 신규 Node
         if (typeof node.model.name !== 'undefined' && node.model.name.includes('=')) {
           // key=value 형식일 때, add
@@ -100,7 +98,7 @@ export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeN
 
           attrId = parentNode.id
 
-          if (!newIdPattern.test(attrId)) {
+          if (!isNewNode(attrId)) {
             parentNode.children.forEach((childNode: TreeNode) => {
               if (childNode.name) {
                 replaceDataList.push(childNode.name.trim())
@@ -210,9 +208,7 @@ export function getAddAttributeList(nodeName: string, attrTree: TreeNode[]): [st
     let pwd = ''
 
     if (!node.isRoot() && node.model.id !== '') {
-      const newIdPattern = /\d{13}/
-
-      if (newIdPattern.test(node.model.id)) {
+      if (isNewNode(node.model.id)) {
         // 신규 Node
         if (typeof node.model.name !== 'undefined') {
           if (node.model.name.includes('=')) {
