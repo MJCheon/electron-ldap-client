@@ -1,6 +1,6 @@
 import { Entry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { TreeNode } from './common'
+import { TreeNode } from '../Common'
 
 export class LdapTree {
   private dummyRootNode: Node<TreeNode>;

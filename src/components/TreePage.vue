@@ -31,7 +31,7 @@
       type='warning'
     >
     <ChangePage
-      v-model='showChangePage'
+      v-model='showAllChange'
     />
       <strong> {{ addDnNodeList.length + modifyDnNodeList.length + deleteDnNodeList.length + saveAttributeList.length }} </strong> unsaved changes.
     </v-alert>
@@ -152,7 +152,7 @@ export default {
     deleteDnNodeList: [],
     saveAttributeList: [],
     isAttrSave: false,
-    showChangePage: false,
+    showAllChange: false,
     loading: false
   }),
   created () {
@@ -248,9 +248,9 @@ export default {
     onClick (params) {
       this.isAttrSave = true
       if (this.isNewNode(params.id)) {
-        ipcRenderer.send('attributeTree', params.name, params.parent, this.isNewNode(params.id))
+        ipcRenderer.send('getAttributeTree', params.name, params.parent, this.isNewNode(params.id))
       } else {
-        ipcRenderer.send('attributeTree', params.id, params.parent, this.isNewNode(params.id), params.data)
+        ipcRenderer.send('getAttributeTree', params.id, params.parent, this.isNewNode(params.id), params.data)
       }
     },
     onDragNode (params) {
@@ -300,7 +300,7 @@ export default {
       this.clearChangeList()
       this.search = null
       this.isAttrSave = false
-      this.showChangePage = false
+      this.showAllChange = false
     },
     clearChangeList () {
       this.addDnNodeList = []
@@ -332,15 +332,15 @@ export default {
     saveAll () {
       if (!this.isAttrSave) {
         this.loading = true
-        ipcRenderer.send('saveAllChange', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
+        ipcRenderer.send('saveAllToLdap', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
         this.clearChangeList()
       }
     },
     toggleShowChangePage () {
-      if (!this.showChangePage) {
-        ipcRenderer.send('showChangePage', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
+      if (!this.showAllChange) {
+        ipcRenderer.send('showAllChange', this.addDnNodeList, this.modifyDnNodeList, this.saveAttributeList, this.deleteDnNodeList)
       }
-      this.showChangePage = !this.showChangePage
+      this.showAllChange = !this.showAllChange
     },
     refreshTree () {
       this.loading = true

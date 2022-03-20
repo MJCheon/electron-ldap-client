@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from 'crypto'
-import { showError } from './common'
+import { showError } from '../Common'
 
 function saltedMD5 (pw: string): string {
   const magic = '$1$'

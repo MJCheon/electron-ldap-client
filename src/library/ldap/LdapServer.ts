@@ -1,5 +1,5 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
-import { LdapConfig, ChangeDataList, showError, LdapChange } from './common'
+import { LdapConfig, ChangeDataList, showError, LdapChange } from '../Common'
 
 export class LdapServer {
   private config!: LdapConfig;
@@ -43,7 +43,11 @@ export class LdapServer {
   }
 
   isConnected (): boolean {
-    return this.client.isConnected
+    if (typeof this.client !== 'undefined' && typeof this.client.isConnected !== 'undefined') {
+      return this.client.isConnected
+    } else {
+      return false
+    }
   }
 
   get baseDn (): string {

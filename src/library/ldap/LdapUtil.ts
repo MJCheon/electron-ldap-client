@@ -1,6 +1,6 @@
 import { Attribute } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode } from "./common"
+import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode } from "../Common"
 import { getEncryptPassword } from './LdapCrypto'
 
 export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange {
