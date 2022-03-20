@@ -4,6 +4,6 @@ export function getServerUuid (): string {
   return uuidv4()
 }
 
-export function getParsedUuid (uuid: string): any {
-  return parse(uuid)
+export function getParsedUuid (uuid: string): Buffer {
+  return Buffer.from(new Uint8Array(parse(uuid)))
 }
