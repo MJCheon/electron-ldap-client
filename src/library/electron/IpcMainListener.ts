@@ -7,9 +7,9 @@ import { LdapServer } from "../ldap/LdapServer"
 import { LdapTree } from "../ldap/LdapTree"
 import { getAddAttributeList, getAttributeChanges, getDeleteDn, getModifyDn, getParentDn } from "../ldap/LdapUtil"
 
-export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig) {
+export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig): Promise<void> {
   const ldapServer: LdapServer = LdapFactory.Instance()
-  
+
   if (typeof ldapServer !== 'undefined' && ldapServer.isConnected() && ldapConfig !== ldapServer.ldapConfig) {
     await ldapServer.disconnect()
   }
@@ -31,14 +31,14 @@ export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig
   }
 }
 
-export function getAttributeTree (event : IpcMainEvent, nodeName: string, nodeParent: TreeNode, isAddDn: Boolean, attributes?: Entry) {
+export function getAttributeTree (event : IpcMainEvent, nodeName: string, nodeParent: TreeNode, isAddDn: Boolean, attributes?: Entry): void {
   let ldapTree: LdapTree = new LdapTree()
   let parentDn: string = getParentDn(nodeParent)
   const attrResponse: TreeNode[] = ldapTree.makeAttrTree(nodeName, parentDn, attributes)
   event.reply("attributeTreeResponse", attrResponse, isAddDn)
 }
 
-export async function refreshRootTree (event : IpcMainEvent) {
+export async function refreshRootTree (event : IpcMainEvent): Promise<void> {
   const ldapServer: LdapServer = LdapFactory.Instance()
   let searchResult: SearchResult | null = await ldapServer.search()
   let ldapTree: LdapTree = new LdapTree()
@@ -52,7 +52,7 @@ export async function refreshRootTree (event : IpcMainEvent) {
   }
 }
 
-export async function saveAllToLdap (event: IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]) {
+export async function saveAllToLdap (event: IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]): Promise<void> {
   const ldapServer: LdapServer = LdapFactory.Instance()
 
   if (addDnNodeList.length > 0) {
@@ -99,7 +99,7 @@ export async function saveAllToLdap (event: IpcMainEvent, addDnNodeList: AddDnNo
   event.reply("refreshRootTreeFromMain")
 }
 
-export async function showAllChange(event : IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]) {
+export async function showAllChange(event : IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]): Promise<void> {
   const ldapServer: LdapServer = LdapFactory.Instance()
 
   let addDnList: AddDnObject[] = []

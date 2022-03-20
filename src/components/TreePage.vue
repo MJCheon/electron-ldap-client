@@ -18,7 +18,7 @@
       height='25'
       color='amber'
     >
-      <strong>loading...</strong>
+      <span v-if='loading'><strong>loading...</strong></span>
     </v-progress-linear>
     <v-alert
       v-show='addDnNodeList.length + modifyDnNodeList.length + deleteDnNodeList.length + saveAttributeList.length > 0'
