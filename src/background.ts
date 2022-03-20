@@ -1,29 +1,17 @@
 'use strict'
 
-import {
-  app,
-  protocol,
-  BrowserWindow,
-  ipcMain,
-  IpcMainEvent,
-  MenuItem,
-  Menu
-} from 'electron'
+import { app, protocol, BrowserWindow, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
-import { LdapServer } from './library/LdapServer'
-import { LdapFactory } from './library/LdapFactory'
-import { LdapTree } from './library/LdapTree'
-import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, DeleteDnObject } from './library/common'
-import { Node } from 'tree-model'
+import { LdapServer } from './library/ldap/LdapServer'
+import { LdapFactory } from './library/ldap/LdapFactory'
+import { getAttributeTree, refreshRootTree, saveAllToLdap, serverBind, showAllChange } from './library/electron/IpcMainListener'
+import { createMenu } from './library/electron/Menu'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const mainIcon = join(__dirname, './assets/icons/icon.png')
-
-let isLdapConnected: boolean = false
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -55,60 +43,6 @@ async function createWindow () {
   }
 }
 
-function createMenu() {
-  const file: MenuItem = new MenuItem({
-    label: 'File',
-    submenu: [
-      {
-        label: 'Minimize',
-        role: 'minimize'
-      },
-      {
-        label: 'Quit',
-        role: 'quit'
-      }
-    ]
-  })
-  
-  const edit: MenuItem = new MenuItem({
-    label: 'Edit',
-    role: 'editMenu'
-  })
-
-  const help: MenuItem = new MenuItem({
-    label: 'Help',
-    submenu: [
-      {
-        label: 'Version',
-        click: async () => {
-          const { dialog } = require('electron')
-
-          const message = 'Version : ' + app.getVersion()
-          const option = {
-            type: 'info',
-            title: 'Version',
-            icon: mainIcon,
-            message: message
-          }
-      
-          dialog.showMessageBox(option)
-        }
-      },
-      {
-        label: 'Help',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://github.com/MJCheon/electron-ldap-client/wiki')
-        }
-      }
-    ]
-  })
-
-  const template: MenuItem[] = [file, edit, help]
-  
-  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-}
-
 // Quit when all windows are closed.
 app.on('window-all-closed', async () => {
   // On macOS it is common for applications and their menu bar
@@ -117,8 +51,9 @@ app.on('window-all-closed', async () => {
     app.quit()
   }
 
-  if (isLdapConnected) {
-    let ldapServer: LdapServer = LdapFactory.Instance()
+  let ldapServer: LdapServer = LdapFactory.Instance()
+
+  if (ldapServer.isConnected()) {  
     await ldapServer.disconnect()
   }
 })
@@ -142,144 +77,23 @@ app.on('ready', async () => {
     }
   }
   createWindow()
-  createMenu()
+  createMenu(mainIcon)
 })
 
 // Ldap Connect and Get ldap entries
-ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) => {
-  const ldapServer: LdapServer = LdapFactory.Instance()
-
-  if (isLdapConnected && ldapConfig !== ldapServer.ldapConfig) {
-    await ldapServer.disconnect()
-  }
-
-  ldapServer.ldapConfig = ldapConfig
-  const isAuthenticated: boolean = await ldapServer.connect()
-
-  if (isAuthenticated){
-    let searchResult: SearchResult | null = await ldapServer.search()
-    let ldapTree: LdapTree = new LdapTree()
-    if (searchResult){
-      ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
-      let rootNode : Node<TreeNode> | undefined = ldapTree.rootNode
-      if (rootNode) {
-        const searchResponse: Node<TreeNode>[] = [ rootNode.model ]
-        event.reply('allSearchResponse', searchResponse )
-      }
-    }
-  }
-
-  if (!isLdapConnected) {
-    isLdapConnected = true
-  }
-})
+ipcMain.addListener('serverBind', serverBind)
 
 // Get Attribute of ldap entry
-ipcMain.on("attributeTree", (event : IpcMainEvent, id : string, attributes : Entry) => {
-  let ldapTree: LdapTree = new LdapTree()
-  const attrResponse: TreeNode[] = [ ldapTree.makeAttrTree(id, attributes) ]
-  event.reply("attributeTreeResponse", attrResponse);
-})
+ipcMain.addListener('getAttributeTree', getAttributeTree )
 
-// Refresh ldap Entries
-ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
-  const ldapServer: LdapServer = LdapFactory.Instance()
-  let searchResult: SearchResult | null = await ldapServer.search()
-  let ldapTree: LdapTree = new LdapTree()
-  if (searchResult){
-    ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
-    let rootNode : Node<TreeNode> | undefined = ldapTree.rootNode
-      if (rootNode) {
-        const searchResponse: Node<TreeNode>[] = [ rootNode.model ]
-        event.reply('allSearchResponse', searchResponse )
-      }
-  }
-})
+// Refresh All ldap Entries
+ipcMain.on("refreshRootTree", refreshRootTree)
 
-// Save All Changed Data
-ipcMain.on("saveAllChange", async (event: IpcMainEvent, modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]) => {
-  const ldapServer: LdapServer = LdapFactory.Instance()
-  let ldapTree: LdapTree = new LdapTree()
+// Save All Changed Data To Ldap
+ipcMain.on("saveAllToLdap", saveAllToLdap)
 
-  if (modifyDnNodeList.length > 0 ){
-    modifyDnNodeList.forEach(async (modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [nodeDn, modifyDn] = ldapTree.getModifyDn(modifyDnNodeObject)
-      if (ldapServer.isConnected()) {
-        await ldapServer.modifyDn(nodeDn, modifyDn)
-      }
-    })
-  }
-
-  if (saveAttributeList.length > 0) {
-    saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
-      let attrTree: TreeNode[] = attribute.tree
-      let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
-
-      if (ldapServer.isConnected()) {
-        await ldapServer.modify(changeData);
-      }
-    })
-  }
-
-  if (deletDnNodeList.length > 0) {
-    deletDnNodeList.forEach(async (deleteDnNode: TreeNode) => {
-      let [originDn, parentDn] = ldapTree.getDeleteDn(deleteDnNode)
-
-      if (ldapServer.isConnected()) {
-        await ldapServer.delete(originDn)
-      }
-    })
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  event.reply("refreshRootTreeFromMain");
-})
-
-ipcMain.on("showChangePage", async (event : IpcMainEvent, modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]) => {
-  const ldapServer: LdapServer = LdapFactory.Instance()
-  let ldapTree: LdapTree = new LdapTree()
-
-  let modifyDnList: ModifyDnObject[] = []
-  let changeAttrList: LdapChange[] = []
-  let deleteDnList: DeleteDnObject[] = []
-
-  if (modifyDnNodeList.length > 0 ){
-    modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
-      let [originDn, modifyDn]: [string, string] = ldapTree.getModifyDn(modifyDnNodeObject)
-
-      modifyDnList.push({
-        originDn: originDn,
-        modifyDn: modifyDn
-      })
-
-    })
-  }
-
-  if (saveAttributeList.length > 0) {
-    saveAttributeList.forEach((attribute: ModifyAttributeTreeNodeObject) => {
-      let attrTree: TreeNode[] = attribute.tree
-      let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = ldapTree.getAttributeChanges(attrTree, deleteList)
-      changeAttrList.push(changeData)
-    })
-  }
-
-  if (deleteDnNodeList.length > 0) {
-    deleteDnNodeList.forEach((deleteDnNode: TreeNode) => {
-      let [originDn, parentDn]: [string, string] = ldapTree.getDeleteDn(deleteDnNode)
-
-      if (originDn !== '' && parentDn !== '') {
-        deleteDnList.push({
-          originDn: originDn,
-          parentDn: parentDn
-        })
-      }
-    })
-  }
-  
-  event.reply("returnShowChangePage", modifyDnList, changeAttrList, deleteDnList);
-})
+// Show All Change
+ipcMain.on("showAllChange", showAllChange )
 
 // Exit cleanly on request from parent process in development mode.
 if (isDevelopment) {

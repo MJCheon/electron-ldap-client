@@ -1,5 +1,5 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
-import { LdapConfig, ChangeDataList, showError, LdapChange } from './common'
+import { LdapConfig, ChangeDataList, showError, LdapChange } from '../Common'
 
 export class LdapServer {
   private config!: LdapConfig;
@@ -43,17 +43,18 @@ export class LdapServer {
   }
 
   isConnected (): boolean {
-    return this.client.isConnected
+    if (typeof this.client !== 'undefined' && typeof this.client.isConnected !== 'undefined') {
+      return this.client.isConnected
+    } else {
+      return false
+    }
   }
 
   get baseDn (): string {
     return this.config.baseDn
   }
 
-  async search (
-    searchDn = '',
-    searchOptions: SearchOptions = {}
-  ): Promise<SearchResult | null> {
+  async search (searchDn = '', searchOptions: SearchOptions = {}): Promise<SearchResult | null> {
     if (searchDn === '') {
       searchDn = this.config.baseDn
     }
@@ -74,6 +75,14 @@ export class LdapServer {
     }
 
     return null
+  }
+
+  async add (dn: string, attrList: Attribute[]): Promise<void> {
+    try {
+      await this.client.add(dn, attrList)
+    } catch (ex) {
+      showError('LDAP Error', String(ex))
+    }
   }
 
   async modify (ldapChange: LdapChange): Promise<void> {
