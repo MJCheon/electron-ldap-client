@@ -50,10 +50,7 @@ export class LdapServer {
     return this.config.baseDn
   }
 
-  async search (
-    searchDn = '',
-    searchOptions: SearchOptions = {}
-  ): Promise<SearchResult | null> {
+  async search (searchDn = '', searchOptions: SearchOptions = {}): Promise<SearchResult | null> {
     if (searchDn === '') {
       searchDn = this.config.baseDn
     }
@@ -74,6 +71,14 @@ export class LdapServer {
     }
 
     return null
+  }
+
+  async add (dn: string, attrList: Attribute[]): Promise<void> {
+    try {
+      await this.client.add(dn, attrList)
+    } catch (ex) {
+      showError('LDAP Error', String(ex))
+    }
   }
 
   async modify (ldapChange: LdapChange): Promise<void> {

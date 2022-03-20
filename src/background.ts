@@ -15,10 +15,10 @@ import { join } from 'path'
 import { LdapServer } from './library/LdapServer'
 import { LdapFactory } from './library/LdapFactory'
 import { LdapTree } from './library/LdapTree'
-import { SearchResult, Entry } from 'ldapts'
-import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, DeleteDnObject, AddDnNodeObject } from './library/common'
+import { SearchResult, Entry, Attribute } from 'ldapts'
+import { TreeNode, LdapConfig, LdapChange, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, DeleteDnObject, AddDnNodeObject, AddDnObject } from './library/common'
 import { Node } from 'tree-model'
-import { getAttributeChanges, getDeleteDn, getModifyDn } from './library/LdapUtil'
+import { getAddAttributeList, getAttributeChanges, getDeleteDn, getModifyDn, getParentDn } from './library/LdapUtil'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -176,9 +176,10 @@ ipcMain.on('serverBind', async (event : IpcMainEvent , ldapConfig : LdapConfig) 
 })
 
 // Get Attribute of ldap entry
-ipcMain.on("attributeTree", (event : IpcMainEvent, nodeName: string, isAddDn: Boolean, attributes?: Entry) => {
+ipcMain.on("attributeTree", (event : IpcMainEvent, nodeName: string, nodeParent: TreeNode, isAddDn: Boolean, attributes?: Entry) => {
   let ldapTree: LdapTree = new LdapTree()
-  const attrResponse: TreeNode[] = ldapTree.makeAttrTree(nodeName, attributes)
+  let parentDn: string = getParentDn(nodeParent)
+  const attrResponse: TreeNode[] = ldapTree.makeAttrTree(nodeName, parentDn, attributes)
   event.reply("attributeTreeResponse", attrResponse, isAddDn);
 })
 
@@ -200,9 +201,17 @@ ipcMain.on("refreshRootTree", async (event : IpcMainEvent) => {
 // Save All Changed Data
 ipcMain.on("saveAllChange", async (event: IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList: ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deletDnNodeList: TreeNode[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
-  let ldapTree: LdapTree = new LdapTree()
 
-  if (modifyDnNodeList.length > 0 ){
+  if (addDnNodeList.length > 0) {
+    addDnNodeList.forEach(async (addDnNodeObject: AddDnNodeObject) => {
+      let [dn, attrList] = getAddAttributeList(addDnNodeObject.nodeName, addDnNodeObject.attrTree)
+      if (ldapServer.isConnected()) {
+        await ldapServer.add(dn, attrList)
+      }
+    })
+  }
+
+  if (modifyDnNodeList.length > 0) {
     modifyDnNodeList.forEach(async (modifyDnNodeObject: ModifyDnNodeObject) => {
       let [nodeDn, modifyDn] = getModifyDn(modifyDnNodeObject)
       if (ldapServer.isConnected()) {
@@ -240,11 +249,23 @@ ipcMain.on("saveAllChange", async (event: IpcMainEvent, addDnNodeList: AddDnNode
 ipcMain.on("showChangePage", async (event : IpcMainEvent, addDnNodeList: AddDnNodeObject[], modifyDnNodeList : ModifyDnNodeObject[], saveAttributeList: ModifyAttributeTreeNodeObject[], deleteDnNodeList: TreeNode[]) => {
   const ldapServer: LdapServer = LdapFactory.Instance()
 
+  let addDnList: AddDnObject[] = []
   let modifyDnList: ModifyDnObject[] = []
   let changeAttrList: LdapChange[] = []
   let deleteDnList: DeleteDnObject[] = []
 
-  if (modifyDnNodeList.length > 0 ){
+  if (addDnNodeList.length > 0) {
+    addDnNodeList.forEach((addDnNode: AddDnNodeObject) => {
+      let [dn, attrList]: [string, Attribute[]] = getAddAttributeList(addDnNode.nodeName, addDnNode.attrTree)
+
+      addDnList.push({
+        dn: dn,
+        attrList: attrList
+      })
+    })
+  }
+
+  if (modifyDnNodeList.length > 0) {
     modifyDnNodeList.forEach((modifyDnNodeObject: ModifyDnNodeObject) => {
       let [originDn, modifyDn]: [string, string] = getModifyDn(modifyDnNodeObject)
 
@@ -252,7 +273,6 @@ ipcMain.on("showChangePage", async (event : IpcMainEvent, addDnNodeList: AddDnNo
         originDn: originDn,
         modifyDn: modifyDn
       })
-
     })
   }
 
@@ -278,7 +298,7 @@ ipcMain.on("showChangePage", async (event : IpcMainEvent, addDnNodeList: AddDnNo
     })
   }
   
-  event.reply("returnShowChangePage", modifyDnList, changeAttrList, deleteDnList);
+  event.reply("returnShowChangePage", addDnList, modifyDnList, changeAttrList, deleteDnList);
 })
 
 // Exit cleanly on request from parent process in development mode.

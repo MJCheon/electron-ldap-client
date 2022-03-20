@@ -5,7 +5,54 @@
         <span class='headline'>Show Changes</span>
       </v-card-title>
       <v-card-text>
+        <template v-if='addDnList.length > 0'>
+          <v-card-subtitle>
+            <v-icon small>mdi-circle-small</v-icon>
+            Add Dn Changes
+          </v-card-subtitle>
+          <v-list expand>
+            <v-list-group
+              v-for='(item, index) in addDnList'
+              append-icon=''
+              prepend-icon=''
+              :key='index'
+              value='true'
+            >
+              <template v-slot:activator>
+                <v-list-item-icon>
+                  <v-icon color='yellow darken-2'>mdi-folder</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>
+                    {{ item.dn }}
+                    <span class='font-weight-bold red--text'>{{' (add)'}}</span>
+                  </v-list-item-title>
+                </v-list-item-content>
+              </template>
+                <v-list-group
+                  v-for='(attr, index) in item.attrList'
+                  :key='index'
+                  append-icon=''
+                  prepend-icon=''
+                  no-action
+                  sub-group
+                >
+                  <template v-slot:activator>
+                    <v-list-item-icon >
+                      <v-icon color='green lighten-2'>mdi-file-document</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content>
+                      <v-list-item-title>
+                        {{ attr.type + ' : ' + attr.values}}
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+                </v-list-group>
+            </v-list-group>
+          </v-list>
+        </template>
         <template v-if='changeAttrList.length > 0'>
+          <v-divider v-if='addDnList.length > 0'></v-divider>
           <v-card-subtitle>
             <v-icon small>mdi-circle-small</v-icon>
             Attribute Changes
@@ -162,12 +209,15 @@ export default {
   },
   data: () => ({
     activeGroup: true,
+    addDnList: [],
     modifyDnList: [],
     deleteDnList: [],
     changeAttrList: []
   }),
   created () {
-    ipcRenderer.on('returnShowChangePage', (event, modifyDnList, changeAttrList, deleteDnList) => {
+    ipcRenderer.on('returnShowChangePage', (event, addDnList, modifyDnList, changeAttrList, deleteDnList) => {
+      console.log(addDnList)
+      this.addDnList = addDnList
       this.modifyDnList = modifyDnList
       this.changeAttrList = changeAttrList
       this.deleteDnList = deleteDnList

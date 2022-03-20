@@ -27,7 +27,7 @@ export type TreeNode = {
 export type AddDnNodeObject = {
   nodeId: string;
   nodeName: string;
-  attrTree: TreeNode;
+  attrTree: TreeNode[];
 }
 
 export type ModifyDnNodeObject = {
@@ -35,6 +35,11 @@ export type ModifyDnNodeObject = {
   nodeDn: string;
   originParentNodeDn?: string;
   modifyParentNodeDn?: string;
+}
+
+export type AddDnObject = {
+  dn: string;
+  attrList: Attribute[];
 }
 
 export type ModifyDnObject = {

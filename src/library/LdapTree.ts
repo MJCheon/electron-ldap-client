@@ -1,7 +1,6 @@
 import { Entry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
 import { TreeNode } from './common'
-import { getParentDn } from './LdapUtil';
 
 export class LdapTree {
   private dummyRootNode: Node<TreeNode>;
@@ -97,7 +96,7 @@ export class LdapTree {
     })
   }
 
-  makeAttrTree(nodeName: string, attributes?: Entry): TreeNode[] {
+  makeAttrTree(nodeName: string, parentDn: string, attributes?: Entry): TreeNode[] {
     const attrRootNode: TreeNode = {
       id: '',
       name: nodeName,
@@ -152,14 +151,28 @@ export class LdapTree {
         }
       })
     } else {
+      let timestampId = Date.now()
+      // dn 추가
+      let realDn: string = nodeName + ',' + parentDn
+
+      attrRootNode.children.push({
+        id: timestampId.toString(),
+        name: 'dn=' + realDn,
+        children: [],
+        isExpanded: false,
+        isVisible: true,
+        isLeaf: true,
+        dragDisabled: true
+      })
+
       // cn, uid, 등 기본 추가
       if (nodeName.includes('=')) {
         let id = nodeName.split('=')[0]
         let name = nodeName.split('=')[1]
 
         attrRootNode.children.push({
-          id: id,
-          name: name,
+          id: (timestampId + 1).toString(),
+          name: id+'='+name,
           children: [],
           isExpanded: false,
           isVisible: true,

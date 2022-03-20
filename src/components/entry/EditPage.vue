@@ -122,6 +122,7 @@ export default {
       }
     },
     close () {
+      this.isAddDn = false
       this.isChanged = false
       this.showEntryDialog = false
     }
