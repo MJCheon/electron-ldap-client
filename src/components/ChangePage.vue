@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width='600px' class='mx-auto' v-model='showDialog'>
+  <v-dialog max-width='70%' class='mx-auto' v-model='showDialog'>
     <v-card>
       <v-card-title>
         <span class='headline'>Show Changes</span>
@@ -90,10 +90,23 @@
                       <v-icon color='green lighten-2'>mdi-file-document</v-icon>
                     </v-list-item-icon>
                     <v-list-item-content>
-                      <v-list-item-title>
+                      <v-list-item-title v-if='changeData.values.length == 1'>
                         {{ changeData.type + ' : ' + changeData.values[0] }}
                         <span class='font-weight-bold red--text'>{{' (' + child.operation + ')'}}</span>
                       </v-list-item-title>
+                      <v-tooltip
+                        bottom
+                        max-width='60%'
+                        v-if='changeData.values.length > 1'
+                      >
+                        <template v-slot:activator='{ on, attrs }'>
+                          <v-list-item-title v-bind='attrs' v-on='on'>
+                            {{ changeData.type + ' : ' + changeData.values.slice(0,4) + '...' }}
+                            <span class='font-weight-bold red--text'>{{' (' + child.operation + ')'}}</span>
+                          </v-list-item-title>
+                        </template>
+                        <span>{{ changeData.values }}</span>
+                      </v-tooltip>
                     </v-list-item-content>
                   </template>
                 </v-list-group>
