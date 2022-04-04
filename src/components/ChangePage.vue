@@ -229,7 +229,6 @@ export default {
   }),
   created () {
     ipcRenderer.on('returnShowChangePage', (event, addDnList, modifyDnList, changeAttrList, deleteDnList) => {
-      console.log(addDnList)
       this.addDnList = addDnList
       this.modifyDnList = modifyDnList
       this.changeAttrList = changeAttrList

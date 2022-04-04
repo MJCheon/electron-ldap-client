@@ -282,9 +282,6 @@ export default {
             })
           }
         }
-      } else {
-        console.log(params.target)
-        console.log(this.addDnNodeList[0])
       }
     },
     isNewNode (nodeId) {

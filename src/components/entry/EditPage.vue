@@ -114,7 +114,6 @@ export default {
           }
         } else {
           if (params.id !== params.newName) {
-            console.log(params.newName)
             this.isChanged = true
           }
         }
