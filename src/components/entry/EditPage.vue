@@ -6,6 +6,7 @@
       </v-card-title>
       <v-card-text>
         <vue-tree-list
+          @add-node='onAddNode'
           @change-name='onChangeName'
           @delete-node='onDel'
           :model='attrTree'
@@ -95,22 +96,37 @@ export default {
       node.remove()
       this.isChanged = true
     },
+    onAddNode (node) {
+      this.isChanged = true
+    },
     onChangeName (params) {
       if (params.eventType && params.eventType === 'blur') {
         if (params.node.isLeaf) {
           if (!this.isAddDn) {
-            var originData = params.node.data.split(':')[1].trim()
-            if (params.newName !== originData) {
-              this.isChanged = true
+            if (!this.isNewNode(params.node.id)) {
+              var originData = params.node.data.split(':')[1].trim()
+              if (params.newName !== originData) {
+                this.isChanged = true
+              }
             }
           } else {
             this.isChanged = true
           }
         } else {
           if (params.id !== params.newName) {
+            console.log(params.newName)
             this.isChanged = true
           }
         }
+      }
+    },
+    isNewNode (nodeId) {
+      const timestampRegex = new RegExp('[0-9]{13}')
+
+      if (timestampRegex.test(nodeId)) {
+        return true
+      } else {
+        return false
       }
     },
     save (attrTree) {
