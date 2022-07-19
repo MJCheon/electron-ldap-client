@@ -59,8 +59,8 @@ export class LdapServer {
       searchDn = this.config.baseDn
     }
 
-    if (searchOptions === {}) {
-      searchOptions = { scope: 'sub' }
+    if (Object.keys(searchOptions).length === 0) {
+      searchOptions.scope = 'sub'
     }
 
     try {
