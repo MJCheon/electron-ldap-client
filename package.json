@@ -1,6 +1,6 @@
 {
   "name": "electron-ldap-client",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "license": "MIT License",
   "author": {
     "name": "MJCheon",
@@ -23,7 +23,7 @@
     "@types/node": "^17.0.15",
     "@types/uuid": "^8.3.4",
     "core-js": "^3.6.5",
-    "ldapts": "^3.2.1",
+    "ldapts": "3.2.4",
     "tree-model": "^1.0.7",
     "uuid": "^8.3.2",
     "vue": "^2.6.11",
