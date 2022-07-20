@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { VueTreeList, Tree } from '../lib/vue-tree-list'
+import { VueTreeList, Tree, TreeNode } from '../lib/vue-tree-list'
 import EventBus from '../../event-bus'
 import { ipcRenderer } from 'electron'
 
@@ -97,6 +97,9 @@ export default {
       this.isChanged = true
     },
     onAddNode (node) {
+      if (node.parent.isLeaf === false && node.pid !== '' && node.parent.children.length === 1) {
+        node.parent.addChildren(new TreeNode({ name: this.defaultLeafNode, id: node.id + 1, isLeaf: true }))
+      }
       this.isChanged = true
     },
     onChangeName (params) {
