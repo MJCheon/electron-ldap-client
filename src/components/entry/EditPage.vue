@@ -95,7 +95,7 @@ export default {
   methods: {
     highlight (content) {
       if (!this.search) {
-        return content
+        return '<span>' + content + '</span>'
       }
       return content.replace(new RegExp(this.search, 'gi'), match => {
         return '<span class="highlightText">' + match + '</span>'
