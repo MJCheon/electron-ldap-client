@@ -3,7 +3,7 @@
     <v-sheet color="grey lighten-4" class="pa-4">
       <div class="pa-4">
         <center>
-          <img src="https://img.icons8.com/dusk/64/000000/active-directory.png" />
+          <img :src='mainIcon' />
         </center>
       </div>
     </v-sheet>
@@ -60,6 +60,7 @@ export default {
     ServerConfigPage
   },
   data: () => ({
+    mainIcon: require('@/assets/icons/png/small/main-icon.png'),
     drawer: null,
     menuList: [{ title: 'Delete' }, { title: 'Edit' }]
   }),

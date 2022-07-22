@@ -11,7 +11,7 @@ import { createMenu } from './library/electron/Menu'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const mainIcon = join(__dirname, './assets/icons/icon.png')
+const mainIcon = join(__dirname, 'assets/icons/png/large/main-icon.png')
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
