@@ -1,11 +1,11 @@
 {
   "mac": {
-    "icon": "src/assets/icons/icon.png"
+    "icon": "src/assets/icons/png/large/main-icon.png"
   },
   "dmg": {
     "sign": false
   },
   "win": {
-    "icon": "src/assets/icons/icon.png"
+    "icon": "src/assets/icons/png/large/main-icon.png"
   }
 }
