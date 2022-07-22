@@ -247,10 +247,14 @@ export default {
     },
     onClick (params) {
       this.isAttrSave = true
+
       if (this.isNewNode(params.id)) {
         ipcRenderer.send('getAttributeTree', params.name, params.parent, this.isNewNode(params.id))
       } else {
         ipcRenderer.send('getAttributeTree', params.id, params.parent, this.isNewNode(params.id), params.data)
+      }
+      if (this.search) {
+        EventBus.$emit('sendSearchWord', this.search)
       }
     },
     onDragNode (params) {

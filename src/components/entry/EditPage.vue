@@ -15,10 +15,8 @@
           v-bind:default-expanded='true'
         >
           <template v-slot:leafNameDisplay='slotProps'>
-            <span>
-              {{ slotProps.model.name }}
-              <span class='muted'>#{{ slotProps.model.id }}</span>
-            </span>
+            <span v-html='highlight(slotProps.model.name)'/>
+            <span class='muted'>   #{{ slotProps.model.id }}</span>
           </template>
           <span class='icon' slot='addTreeNodeIcon'>
             <v-icon dense color='purple lighten-2'>mdi-folder-plus-outline</v-icon>
@@ -53,9 +51,9 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import { VueTreeList, Tree, TreeNode } from '../lib/vue-tree-list'
 import EventBus from '../../event-bus'
-import { ipcRenderer } from 'electron'
 
 export default {
   components: {
@@ -75,6 +73,7 @@ export default {
         preventDefault: true
       }
     ],
+    search: null,
     defaultTreeNode: 'New Directory',
     defaultLeafNode: 'New File',
     deleteNodeList: [],
@@ -89,8 +88,19 @@ export default {
       this.isAddDn = isAddDn
       this.showEntryDialog = true
     })
+    EventBus.$on('sendSearchWord', (searchWord) => {
+      this.search = searchWord
+    })
   },
   methods: {
+    highlight (content) {
+      if (!this.search) {
+        return content
+      }
+      return content.replace(new RegExp(this.search, 'gi'), match => {
+        return '<span class="highlightText">' + match + '</span>'
+      })
+    },
     onDel (node) {
       this.deleteNodeList.push(node)
       node.remove()
@@ -153,6 +163,9 @@ export default {
 }
 .muted {
   color: gray;
-  font-size: 80%
+  font-size: 75%
+}
+.highlightText {
+  background: yellow;
 }
 </style>
