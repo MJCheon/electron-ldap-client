@@ -1,4 +1,3 @@
-import { dialog } from 'electron'
 import { Attribute } from 'ldapts'
 
 export interface LdapConfig {
@@ -65,14 +64,4 @@ export type ChangeDataList = {
 export type LdapChange = {
   dn: string;
   changeDataList: ChangeDataList[];
-}
-
-export function showError (title: string, message: string) {
-  const option = {
-    type: 'error',
-    title: title,
-    message: message
-  }
-
-  dialog.showMessageBox(option)
 }
