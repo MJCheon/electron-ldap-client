@@ -77,11 +77,13 @@ export async function saveAllToLdap (event: IpcMainEvent, addDnNodeList: AddDnNo
     saveAttributeList.forEach(async (attribute: ModifyAttributeTreeNodeObject) => {
       let attrTree: TreeNode[] = attribute.tree
       let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = getAttributeChanges(attrTree, deleteList)
+      let changeDataList: LdapChange[] = getAttributeChanges(attrTree, deleteList)
 
-      if (ldapServer.isConnected()) {
-        await ldapServer.modify(changeData)
-      }
+      changeDataList.forEach(async (changeData) => {
+        if (ldapServer.isConnected()) {
+          await ldapServer.modify(changeData)
+        }
+      })
     })
   }
 
@@ -133,8 +135,11 @@ export async function showAllChange(event : IpcMainEvent, addDnNodeList: AddDnNo
     saveAttributeList.forEach((attribute: ModifyAttributeTreeNodeObject) => {
       let attrTree: TreeNode[] = attribute.tree
       let deleteList: TreeNode[] = attribute.deleteList
-      let changeData: LdapChange = getAttributeChanges(attrTree, deleteList)
-      changeAttrList.push(changeData)
+      let changeDataList: LdapChange[] = getAttributeChanges(attrTree, deleteList)
+
+      changeDataList.forEach(async (changeData) => {
+        changeAttrList.push(changeData)
+      })
     })
   }
 

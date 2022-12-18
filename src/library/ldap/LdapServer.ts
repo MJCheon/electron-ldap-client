@@ -1,5 +1,6 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
-import { LdapConfig, ChangeDataList, showError, LdapChange } from '../Common'
+import { LdapConfig, ChangeDataList, LdapChange } from '../Common'
+import { LdapError, ErrorData, makeErrorData, showError } from '../Error'
 
 export class LdapServer {
   private config!: LdapConfig;
@@ -35,7 +36,16 @@ export class LdapServer {
       isAuthenticated = true
     } catch (ex) {
       isAuthenticated = false
-      showError('LDAP Error', String(ex))
+    
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('dn', this.config.rootDn)
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP Connect Error', ldapError)
       await this.client.unbind()
     }
 
@@ -71,41 +81,66 @@ export class LdapServer {
 
       return searchResult
     } catch (ex) {
-      showError('LDAP Error', String(ex))
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('search', searchDn)
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP Search Error', ldapError)
     }
 
     return null
   }
 
   async add (dn: string, attrList: Attribute[]): Promise<void> {
-    try {
-      await this.client.add(dn, attrList)
-    } catch (ex) {
-      showError('LDAP Error', String(ex))
-    }
+    attrList.forEach(async (attr) => {
+      try {
+        await this.client.add(dn, [attr])
+      } catch (ex) {
+        let errMsg: string = String(ex)
+        let data: ErrorData = makeErrorData(attr.type, attr.values)
+
+        let ldapError: LdapError = {
+          msg: errMsg,
+          data: data
+        }
+  
+        showError('LDAP Add Error', ldapError)
+      }
+    })
   }
 
   async modify (ldapChange: LdapChange): Promise<void> {
-    try {
-      const changeList: Change[] = []
-      const dn: string = ldapChange.dn
 
-      if (ldapChange.changeDataList.length > 0) {
-        ldapChange.changeDataList.forEach((changeDataList: ChangeDataList) => {
-          changeDataList.modificationList.forEach((modification: Attribute) => {
-            changeList.push(
-              new Change({
-                operation: changeDataList.operation,
-                modification: modification
-              })
-            )
+    const changeList: Change[] = []
+    const dn: string = ldapChange.dn
+
+    if (ldapChange.changeDataList.length > 0) {
+      ldapChange.changeDataList.forEach((changeDataList: ChangeDataList) => {
+        changeDataList.modificationList.forEach(async (modification: Attribute) => {
+          let changeData = new Change({
+            operation: changeDataList.operation,
+            modification: modification
           })
+
+          try {
+            await this.client.modify(dn, [changeData])
+          }
+          catch (ex) {
+            let errMsg: string = String(ex)
+            let data: ErrorData = makeErrorData(changeData.modification.type, changeData.modification.values)
+            let ldapError: LdapError = {
+              msg: errMsg,
+              data: data
+            }
+
+            showError('LDAP ' + changeData.operation +' Error', ldapError)
+          }
         })
-        
-        await this.client.modify(dn, changeList)
-      }
-    } catch (ex) {
-      showError('LDAP Error', String(ex))
+      })
     }
   }
   
@@ -116,7 +151,14 @@ export class LdapServer {
       }
     }
     catch (ex) {
-      showError('LDAP Error', String(ex))
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('modifyDn', modifyDn)
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP ModifyDn Error', ldapError)
     }
   }
 
@@ -127,7 +169,15 @@ export class LdapServer {
       }
     }
     catch (ex) {
-      showError('LDAP Error', String(ex))
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('delete', originDn)
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP Delete Error', ldapError)
     }
   }
 
@@ -135,7 +185,15 @@ export class LdapServer {
     try {
       await this.client.unbind()
     } catch (ex) {
-      showError('LDAP Error', String(ex))
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('disconnect', 'null')
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP Disconnect Error', ldapError)
     }
   }
 }
