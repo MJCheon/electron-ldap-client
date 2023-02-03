@@ -3,7 +3,7 @@ import TreeModel, { Node } from 'tree-model'
 import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode } from "../Common"
 import { getEncryptPassword } from './LdapCrypto'
 
-export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange {
+export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange[] {
   let attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
   let allChangeDataList: ChangeDataList[] = []
@@ -171,28 +171,40 @@ export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeN
   })
 
   if (deleteChangeData.length > 0) {
-    allChangeDataList.push({
-      operation: 'delete',
-      modificationList: deleteChangeData
+    deleteChangeData.forEach((data) => {
+      allChangeDataList.push({
+        operation: 'delete',
+        modificationList: [data]
+      })
     })
   }
   if (replaceChangeData.length > 0) {
-    allChangeDataList.push({
-      operation: 'replace',
-      modificationList: replaceChangeData
+    replaceChangeData.forEach((data) => {
+      allChangeDataList.push({
+        operation: 'replace',
+        modificationList: [data]
+      })
     })
+   
   }
   if (addChangeData.length > 0) {
-    allChangeDataList.push({
-      operation: 'add',
-      modificationList: addChangeData
-    })
+    addChangeData.forEach((data) => {
+      allChangeDataList.push({
+        operation: 'add',
+        modificationList: [data]
+      })
+    })    
   }
 
-  const returnData: LdapChange = {
-    dn: rootId,
-    changeDataList: allChangeDataList
-  }
+  let returnData: LdapChange[] = [];
+
+  allChangeDataList.forEach((changeData) => {
+    returnData.push({
+      dn: rootId,
+      changeDataList: [changeData]
+    })
+  })
+
   return returnData
 }
 

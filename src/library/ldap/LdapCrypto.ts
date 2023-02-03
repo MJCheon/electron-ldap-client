@@ -1,5 +1,5 @@
 import { randomBytes, createHash } from 'crypto'
-import { showError } from '../Common'
+import { makeErrorData, ErrorData, showError, LdapError } from '../Error'
 
 function saltedMD5 (pw: string): string {
   const magic = '$1$'
@@ -222,15 +222,14 @@ export function getEncryptPassword (password: string, pwdAlgo: string): string {
   encryptPwd = createHashedPwd(pwdAlgo, password)
 
   if (encryptPwd === '') {
-    const errorMsg =
-      'Possible Password Algorithm\n' +
-      '- ssha\n' +
-      '- smd5\n' +
-      '- sha\n' +
-      '- md5\n' +
-      '- crypt (md5 crypt)'
+    let data: ErrorData = makeErrorData('Password Algorithm', pwdAlgo)
 
-    showError('Unavailable Algorithm', errorMsg)
+    let ldapError: LdapError = {
+      msg: 'Not support Algorithm',
+      data: data
+    }
+
+    showError('Unavailable Algorithm', ldapError)
     return ''
   }
 
