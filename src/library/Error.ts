@@ -11,16 +11,10 @@ export type ErrorData = {
 }
 
 export function showError (title: string, ldapError: LdapError) {
-  let message: string = JSON.stringify(ldapError.data, null, 2) + '\n\n' + ldapError.msg
+  let regex: RegExp = /\{|\}/g
+  let content: string = JSON.stringify(ldapError.data, null, ' ').replace(regex, '') + '\n\n' + ldapError.msg
   
-  const option = {
-    type: 'error',
-    title: title,
-    textWidth: 2,
-    message: message
-  }
-  
-  dialog.showMessageBox(option)
+  dialog.showErrorBox(title, content)
 }
 
 export function makeErrorData (type: string, values: string|string[]|Buffer[]): ErrorData {
