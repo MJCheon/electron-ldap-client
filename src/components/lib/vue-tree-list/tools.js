@@ -46,7 +46,6 @@ export const traverseFilteredTree = (root, search) => {
 
   if (search && search !== '' && search.length > 0) {
     if (nodeFinder(root.name, search)) {
-      console.log(root.name)
       root.isVisible = true
       root.isExpanded = true
       while (parent) {
