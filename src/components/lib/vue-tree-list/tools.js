@@ -45,7 +45,7 @@ export const traverseFilteredTree = (root, search) => {
   var parent = root.parent
 
   if (search && search !== '' && search.length > 0) {
-    if (root.name.indexOf(search) > -1) {
+    if (nodeFinder(root.name, search)) {
       root.isVisible = true
       root.isExpanded = true
       while (parent) {
@@ -58,7 +58,7 @@ export const traverseFilteredTree = (root, search) => {
 
       parent = root.parent
 
-      if (data.indexOf(search) > -1) {
+      if (nodeFinder(data, search)) {
         root.isVisible = true
         root.isExpanded = true
         while (parent) {
@@ -93,4 +93,20 @@ export const traverseFilteredTree = (root, search) => {
       })
     }
   }
+}
+
+var nodeFinder = (data, search) => {
+  var isFound = false
+  if (search.includes('|')) {
+    search.split('|').forEach(word => {
+      if (data.indexOf(word) > -1) {
+        isFound = true
+      }
+    })
+  } else {
+    if (data.indexOf(search) > -1) {
+      isFound = true
+    }
+  }
+  return isFound
 }
