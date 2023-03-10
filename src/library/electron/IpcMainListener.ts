@@ -32,9 +32,12 @@ export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig
         if (Array.isArray(objectClasses)){
           objectClasses.forEach((objectClass: string | Buffer) =>{
             const regex = /^\( | \)$/g
-            objectClass = objectClass.toString().trim().replace(regex,'')
+            objectClass = objectClass.toString().trim().replace(regex,'').trim()
             
-            const objectRegex = /(?<oid>([0-9]{0,}\.[0-9]{0,}){0,})/
+            // const objectRegex = /(?<oid>([0-9]{0,}\.[0-9]{0,}){0,}))/
+            const objectRegex = /NAME (?<name>(\( \'.*?\' \)|\'.*?\'))|MUST (?<must>(\( .*? \)|.*))|MAY (?<may>(\( .*? \)|.*))/
+            
+            console.log(objectClass.matchAll(objectRegex))
           })
         }
       })
