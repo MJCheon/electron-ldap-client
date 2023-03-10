@@ -20,6 +20,26 @@ export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig
   if (isAuthenticated){
     let searchResult: SearchResult | null = await ldapServer.search()
     let ldapTree: LdapTree = new LdapTree()
+
+    let schemaResult: SearchResult | null = await ldapServer.getSchema()
+
+    if (schemaResult !== null && schemaResult.searchEntries.length > 0){
+      let searchEntry = schemaResult.searchEntries
+      
+      searchEntry.forEach(entry => {
+        let objectClasses = entry.objectClasses
+
+        if (Array.isArray(objectClasses)){
+          objectClasses.forEach((objectClass: string | Buffer) =>{
+            const regex = /^\( | \)$/g
+            objectClass = objectClass.toString().trim().replace(regex,'')
+            
+            const objectRegex = /(?<oid>([0-9]{0,}\.[0-9]{0,}){0,})/
+          })
+        }
+      })
+    }
+
     if (searchResult){
       ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
       let rootNode : Node<TreeNode> | undefined = ldapTree.rootNode

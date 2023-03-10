@@ -181,6 +181,51 @@ export class LdapServer {
     }
   }
 
+  async getSchema (): Promise<SearchResult | null> {
+    let searchDn: string = this.config.baseDn
+    let searchOptions: SearchOptions = {}
+
+    if (Object.keys(searchOptions).length === 0) {
+      searchOptions.scope = 'base'
+      searchOptions.attributes = ['subschemaSubentry']
+    }
+
+    try {
+      let searchResult: SearchResult = await this.client.search(
+        searchDn,
+        searchOptions
+      )
+
+      if (searchResult.searchEntries.length > 0 && searchResult.searchEntries[0].subschemaSubentry !== null) {
+        let subschemaClass = searchResult.searchEntries[0].subschemaSubentry
+        
+        searchDn = subschemaClass.toString()
+        searchOptions.attributes = ['objectClasses']
+        searchOptions.filter = '(objectClass=subschema)'
+
+        searchResult = await this.client.search(
+          searchDn,
+          searchOptions
+        )
+
+      }
+
+      return searchResult
+    } catch (ex) {
+      let errMsg: string = String(ex)
+      let data: ErrorData = makeErrorData('search', searchDn)
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
+      }
+
+      showError('LDAP Search Error', ldapError)
+    }
+
+    return null
+  }
+
   async disconnect (): Promise<void> {
     try {
       await this.client.unbind()
