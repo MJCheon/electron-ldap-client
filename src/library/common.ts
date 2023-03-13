@@ -65,3 +65,9 @@ export type LdapChange = {
   dn: string;
   changeDataList: ChangeDataList[];
 }
+
+export type ObjectSchema = {
+  name: string
+  must: string | string[] | null
+  may: string | string[] | null
+}

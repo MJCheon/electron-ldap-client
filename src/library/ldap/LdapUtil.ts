@@ -1,6 +1,6 @@
-import { Attribute } from 'ldapts'
+import { Attribute, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode } from "../Common"
+import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode, ObjectSchema } from "../Common"
 import { getEncryptPassword } from './LdapCrypto'
 
 export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange[] {
@@ -361,3 +361,60 @@ export function getParentDn(node: TreeNode): string {
   
   return parentDn
 }
+
+export function getSchemaJson(schemaResult: SearchResult|null): ObjectSchema[] {
+  let objectSchemaList: ObjectSchema[] = []
+
+  if (schemaResult !== null && schemaResult.searchEntries.length > 0){
+    let searchEntry = schemaResult.searchEntries
+  
+    searchEntry.forEach(entry => {
+      let objectClasses = entry.objectClasses
+
+      if (Array.isArray(objectClasses)){
+        objectClasses.forEach((objectClass: string | Buffer) =>{
+          const regex = /^\( | \)$/g
+          objectClass = objectClass.toString().trim().replace(regex,'').trim()
+
+          const objectRegex = / (NAME|DESC|OBSOLETE|SUP|ABSTRACT|STRUCTURAL|AUXILIARY|MUST|MAY)/g
+          const tmpObjectClass = objectClass.replace(objectRegex, '\n$1\:',).split('\n')
+
+          let name: string = ''
+          let must: string|string[]|null = null
+          let may: string|string[]|null = null
+
+          tmpObjectClass.forEach(objectValue => {
+            let keyValueArr = objectValue.split(':')
+
+            if (keyValueArr[0] === 'NAME') {
+              name = keyValueArr[1].replace(/\'/g, '').trim()
+            } else if (keyValueArr[0] === 'MUST' || keyValueArr[0] === 'MAY') {
+              let key = keyValueArr[0].trim().toLowerCase()
+              let value = keyValueArr[1]
+              if (value !== null && value.length > 0) {
+                let data: string|string[] = value.replace(/\( | \)/g, '').trim()
+                if (value.indexOf('$') > 0) {
+                  data = data.split('$').map((value) => (value = value.trim()))
+                }
+                
+                if (key === 'must'){
+                  must = data
+                } else if (key === 'may'){
+                  may = data
+                }
+              }
+            }
+          })
+
+          objectSchemaList.push({
+            name: name,
+            must: must,
+            may: may
+          })
+        })
+      }
+    })
+  }
+
+  return objectSchemaList
+} 

@@ -5,7 +5,7 @@ import { AddDnNodeObject, AddDnObject, DeleteDnObject, LdapChange, LdapConfig, M
 import { LdapFactory } from "../ldap/LdapFactory"
 import { LdapServer } from "../ldap/LdapServer"
 import { LdapTree } from "../ldap/LdapTree"
-import { getAddAttributeList, getAttributeChanges, getDeleteDn, getModifyDn, getParentDn } from "../ldap/LdapUtil"
+import { getAddAttributeList, getAttributeChanges, getDeleteDn, getModifyDn, getParentDn, getSchemaJson } from "../ldap/LdapUtil"
 
 export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig): Promise<void> {
   const ldapServer: LdapServer = LdapFactory.Instance()
@@ -22,26 +22,8 @@ export async function serverBind (event : IpcMainEvent , ldapConfig : LdapConfig
     let ldapTree: LdapTree = new LdapTree()
 
     let schemaResult: SearchResult | null = await ldapServer.getSchema()
-
-    if (schemaResult !== null && schemaResult.searchEntries.length > 0){
-      let searchEntry = schemaResult.searchEntries
-      
-      searchEntry.forEach(entry => {
-        let objectClasses = entry.objectClasses
-
-        if (Array.isArray(objectClasses)){
-          objectClasses.forEach((objectClass: string | Buffer) =>{
-            const regex = /^\( | \)$/g
-            objectClass = objectClass.toString().trim().replace(regex,'').trim()
-            
-            // const objectRegex = /(?<oid>([0-9]{0,}\.[0-9]{0,}){0,}))/
-            const objectRegex = /NAME (?<name>(\( \'.*?\' \)|\'.*?\'))|MUST (?<must>(\( .*? \)|.*))|MAY (?<may>(\( .*? \)|.*))/
-            
-            console.log(objectClass.matchAll(objectRegex))
-          })
-        }
-      })
-    }
+    console.log(getSchemaJson(schemaResult))
+    
 
     if (searchResult){
       ldapTree.makeEntryTree(ldapServer.baseDn, searchResult)
