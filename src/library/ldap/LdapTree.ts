@@ -186,7 +186,7 @@ export class LdapTree {
       if (selectedObjectClassList) {
         // Add objectClass
         let objectClassChildrenList: TreeNode[] = []
-        selectedObjectClassList.forEach(objectClass => {
+        selectedObjectClassList.forEach((objectClass: ObjectClassSchema) => {
           if (!objectClass.isSup) {
             timestampId++
             objectClassChildrenList.push({
@@ -215,7 +215,7 @@ export class LdapTree {
         selectedObjectClassList.forEach(objectClass => {
           if (objectClass.must && objectClass.must.length > 0) {
             objectClass.must.forEach(requiredAttr => {
-              const existAttribute = attrRootNode.children.map(node => {
+              const existAttribute = attrRootNode.children.map((node: TreeNode) => {
                 return node.name
               }).toString()
 

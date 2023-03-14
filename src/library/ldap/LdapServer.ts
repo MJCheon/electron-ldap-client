@@ -217,7 +217,6 @@ export class LdapServer {
           searchDn,
           searchOptions
         )
-
       }
 
       return searchResult

@@ -54,7 +54,7 @@ export function getNewAttributeTree(event : IpcMainEvent, nodeName: string, node
   let objectClassSupList: string[] = []
   const objectClassSchemaList = LdapFactory.Instance().objectClassSchemas
   
-  const selectedObjectClassList: ObjectClassSchema[] = objectClassSchemaList.filter(objectClass => {
+  const selectedObjectClassList: ObjectClassSchema[] = objectClassSchemaList.filter((objectClass: ObjectClassSchema) => {
     if (selectedObjectClassNameList.toString().includes(objectClass.name)) {
       if (objectClass.sup !== '') {
         objectClassSupList.push(objectClass.sup)
@@ -67,8 +67,8 @@ export function getNewAttributeTree(event : IpcMainEvent, nodeName: string, node
   while (objectClassSupList.length > 0) {
     let tmpSupList: string[] = []
 
-    objectClassSupList.forEach(name => {
-      let supObjectClass = objectClassSchemaList.find(objectClass => objectClass.name.toLowerCase() === name.toLowerCase())
+    objectClassSupList.forEach((name: string) => {
+      let supObjectClass = objectClassSchemaList.find((objectClass: ObjectClassSchema) => objectClass.name.toLowerCase() === name.toLowerCase())
 
       if (supObjectClass) {
         if (selectedObjectClassList.indexOf(supObjectClass) === -1) {
@@ -105,7 +105,7 @@ export async function refreshRootTree (event : IpcMainEvent): Promise<void> {
       
     ldapServer.objectClassSchemas = getObjectClassSchemaList(objectClassSchemas)
 
-    const objectClassNameList = ldapServer.objectClassSchemas.map(objectClass => {
+    const objectClassNameList = ldapServer.objectClassSchemas.map((objectClass: ObjectClassSchema) => {
       return objectClass.name
     })
 

@@ -372,7 +372,7 @@ export function getObjectClassSchemaList(schemaResult: SearchResult|null): Objec
           let may: string[]|null = null
           let sup: string = ''
 
-          tmpObjectClass.forEach(objectValue => {
+          tmpObjectClass.forEach((objectValue: string) => {
             let keyValueArr = objectValue.split(':')
 
             if (keyValueArr[0] === 'NAME') {
@@ -385,7 +385,7 @@ export function getObjectClassSchemaList(schemaResult: SearchResult|null): Objec
                 let tmpData: string = value.replace(/\( | \)/g, '').trim()
 
                 if (value.indexOf('$') > 0) {
-                  data = tmpData.split('$').map((value) => (value = value.trim()))
+                  data = tmpData.split('$').map((value: string) => (value = value.trim()))
                 } else {
                   data = [ tmpData ]
                 }
@@ -402,7 +402,7 @@ export function getObjectClassSchemaList(schemaResult: SearchResult|null): Objec
           })
 
           if (name.indexOf(' ') > 0) {
-            name.split(' ').forEach(multipleName => {
+            name.split(' ').forEach((multipleName: string) => {
               let newNode: ObjectClassSchema = {
                 name: multipleName,
                 must: must,

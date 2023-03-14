@@ -85,7 +85,6 @@ ipcMain.addListener('serverBind', serverBind)
 
 // Get Attribute of ldap entry
 ipcMain.addListener('getAttributeTree', getAttributeTree )
-
 ipcMain.addListener('getNewAttributeTree', getNewAttributeTree)
 
 // Refresh All ldap Entries
