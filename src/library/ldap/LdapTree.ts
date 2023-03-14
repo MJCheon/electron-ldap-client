@@ -1,6 +1,6 @@
 import { Entry, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { TreeNode } from '../Common'
+import { ObjectClassSchema, TreeNode } from '../Common'
 
 export class LdapTree {
   private dummyRootNode: Node<TreeNode>;
@@ -96,7 +96,7 @@ export class LdapTree {
     })
   }
 
-  makeAttrTree(nodeName: string, parentDn: string, attributes?: Entry): TreeNode[] {
+  makeAttrTree(nodeName: string, parentDn: string, selectedObjectClassList: ObjectClassSchema[]|null, attributes?: Entry,): TreeNode[] {
     const attrRootNode: TreeNode = {
       id: '',
       name: nodeName,
@@ -152,6 +152,7 @@ export class LdapTree {
       })
     } else {
       let timestampId = Date.now()
+
       // dn 추가
       let realDn: string = nodeName + ',' + parentDn
 
@@ -169,9 +170,10 @@ export class LdapTree {
       if (nodeName.includes('=')) {
         let id = nodeName.split('=')[0]
         let name = nodeName.split('=')[1]
+        timestampId++
 
         attrRootNode.children.push({
-          id: (timestampId + 1).toString(),
+          id: timestampId.toString(),
           name: id+'='+name,
           children: [],
           isExpanded: false,
@@ -180,8 +182,60 @@ export class LdapTree {
           dragDisabled: true
         })
       }
+
+      if (selectedObjectClassList) {
+        // Add objectClass
+        let objectClassChildrenList: TreeNode[] = []
+        selectedObjectClassList.forEach(objectClass => {
+          if (!objectClass.isSup) {
+            timestampId++
+            objectClassChildrenList.push({
+              id: timestampId.toString(),
+              name: objectClass.name,
+              children: [],
+              isExpanded: false,
+              isVisible: true,
+              isLeaf: true,
+              dragDisabled: true
+            })
+          }
+        })
+
+        timestampId++
+        attrRootNode.children.push({
+          id: timestampId.toString(),
+          name: 'objectClass',
+          children: objectClassChildrenList,
+          isExpanded: false,
+          isVisible: true,
+          isLeaf: false,
+          dragDisabled: true
+        })
+
+        selectedObjectClassList.forEach(objectClass => {
+          if (objectClass.must && objectClass.must.length > 0) {
+            objectClass.must.forEach(requiredAttr => {
+              const existAttribute = attrRootNode.children.map(node => {
+                return node.name
+              }).toString()
+
+              if (!existAttribute.includes(requiredAttr) && requiredAttr !== 'objectClass') {
+                timestampId++
+                attrRootNode.children.push({
+                  id: timestampId.toString(),
+                  name: requiredAttr+'=',
+                  children: [],
+                  isExpanded: false,
+                  isVisible: true,
+                  isLeaf: true,
+                  dragDisabled: true
+                })
+              }
+            })
+          }
+        })
+      }
     }
-    
     return [attrRootNode]
   }
 }

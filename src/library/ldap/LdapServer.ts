@@ -1,16 +1,21 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
-import { LdapConfig, ChangeDataList, LdapChange } from '../Common'
+import { LdapConfig, ChangeDataList, LdapChange, ObjectClassSchema } from '../Common'
 import { LdapError, ErrorData, makeErrorData, showError } from '../Error'
 
 export class LdapServer {
   private config!: LdapConfig;
   private client!: Client;
+  private objectClassSchemaList!: ObjectClassSchema[];
 
   constructor () {
   }
 
   set ldapConfig (ldapConfig : LdapConfig) {
     this.config = ldapConfig
+  }
+
+  set objectClassSchemas (schemaList: ObjectClassSchema[]) {
+    this.objectClassSchemaList = schemaList
   }
 
   async connect (): Promise<boolean> {
@@ -64,6 +69,10 @@ export class LdapServer {
     return this.config.baseDn
   }
 
+  get objectClassSchemas (): ObjectClassSchema[] {
+    return this.objectClassSchemaList
+  }
+
   async search (searchDn = '', searchOptions: SearchOptions = {}): Promise<SearchResult | null> {
     if (searchDn === '') {
       searchDn = this.config.baseDn
@@ -96,21 +105,22 @@ export class LdapServer {
   }
 
   async add (dn: string, attrList: Attribute[]): Promise<void> {
-    attrList.forEach(async (attr) => {
-      try {
-        await this.client.add(dn, [attr])
-      } catch (ex) {
-        let errMsg: string = String(ex)
-        let data: ErrorData = makeErrorData(attr.type, attr.values)
+    try {
+      await this.client.add(dn, attrList)
+    } catch (ex) {
+      let errMsg: string = String(ex)
 
-        let ldapError: LdapError = {
-          msg: errMsg,
-          data: data
-        }
-  
-        showError('LDAP Add Error', ldapError)
+      let data: ErrorData = makeErrorData(dn, attrList.map(attr => {
+        return attr.values
+      }).toString())
+
+      let ldapError: LdapError = {
+        msg: errMsg,
+        data: data
       }
-    })
+  
+      showError('LDAP Add Error', ldapError)
+    }
   }
 
   async modify (ldapChange: LdapChange): Promise<void> {
@@ -181,7 +191,7 @@ export class LdapServer {
     }
   }
 
-  async getSchema (): Promise<SearchResult | null> {
+  async searchObjectClassSchema (): Promise<SearchResult | null> {
     let searchDn: string = this.config.baseDn
     let searchOptions: SearchOptions = {}
 

@@ -54,6 +54,7 @@
           <span>Refresh</span>
         </v-tooltip>
       </div>
+      <ObjectClassPage />
       <vue-tree-list
         :search='search'
         @click='onClick'
@@ -107,6 +108,7 @@
 <script>
 import { VueTreeList, Tree } from './lib/vue-tree-list'
 import ChangePage from './ChangePage'
+import ObjectClassPage from './ObjectClassPage'
 import EventBus from '../event-bus'
 import { ipcRenderer } from 'electron'
 
@@ -114,6 +116,7 @@ export default {
   components: {
     VueTreeList,
     ChangePage,
+    ObjectClassPage,
     Keypress: () => import('vue-keypress')
   },
   data: () => ({
@@ -143,6 +146,7 @@ export default {
     ],
     search: null,
     isBinding: false,
+    objectClassNameList: [],
     newTree: {},
     defaultTreeNode: 'New Directory',
     defaultLeafNode: 'New File',
@@ -153,14 +157,16 @@ export default {
     saveAttributeList: [],
     isAttrSave: false,
     showAllChange: false,
+    showObjectClassDialog: false,
     loading: false
   }),
   created () {
-    ipcRenderer.on('allSearchResponse', (event, searchEntryTree) => {
+    ipcRenderer.on('allSearchResponse', (event, searchEntryTree, objectClassNameList) => {
       this.entryTree = null
       this.isBinding = true
       this.loading = false
       this.entryTree = new Tree(Object.assign([], searchEntryTree))
+      this.objectClassNameList = objectClassNameList
     })
     ipcRenderer.on('refreshRootTreeFromMain', () => {
       this.refreshTree()
@@ -249,9 +255,9 @@ export default {
       this.isAttrSave = true
 
       if (this.isNewNode(params.id)) {
-        ipcRenderer.send('getAttributeTree', params.name, params.parent, this.isNewNode(params.id))
+        EventBus.$emit('selectObjectClass', params.name, params.parent, this.objectClassNameList)
       } else {
-        ipcRenderer.send('getAttributeTree', params.id, params.parent, this.isNewNode(params.id), params.data)
+        ipcRenderer.send('getAttributeTree', params.id, params.parent, params.data)
       }
       if (this.search) {
         EventBus.$emit('sendSearchWord', this.search)
