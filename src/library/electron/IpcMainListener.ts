@@ -1,7 +1,7 @@
 import { IpcMainEvent } from "electron"
 import { Attribute, Entry, SearchResult } from "ldapts"
 import { Node } from 'tree-model'
-import { AddDnNodeObject, AddDnObject, DeleteDnObject, LdapChange, LdapConfig, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, ObjectClassSchema, TreeNode } from "../Common"
+import { AddDnNodeObject, AddDnObject, DeleteDnObject, LdapChange, LdapConfig, ModifyAttributeTreeNodeObject, ModifyDnNodeObject, ModifyDnObject, ObjectClassSchema, TreeNode } from "../common"
 import { LdapFactory } from "../ldap/LdapFactory"
 import { LdapServer } from "../ldap/LdapServer"
 import { LdapTree } from "../ldap/LdapTree"

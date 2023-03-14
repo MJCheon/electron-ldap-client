@@ -1,5 +1,5 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts'
-import { LdapConfig, ChangeDataList, LdapChange, ObjectClassSchema } from '../Common'
+import { LdapConfig, ChangeDataList, LdapChange, ObjectClassSchema } from '../common'
 import { LdapError, ErrorData, makeErrorData, showError } from '../Error'
 
 export class LdapServer {
