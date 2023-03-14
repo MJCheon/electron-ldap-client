@@ -6,7 +6,7 @@ import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
 import { LdapServer } from './library/ldap/LdapServer'
 import { LdapFactory } from './library/ldap/LdapFactory'
-import { getAttributeTree, refreshRootTree, saveAllToLdap, serverBind, showAllChange } from './library/electron/IpcMainListener'
+import { getAttributeTree, getNewAttributeTree, refreshRootTree, saveAllToLdap, serverBind, showAllChange } from './library/electron/IpcMainListener'
 import { createMenu } from './library/electron/Menu'
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
@@ -85,6 +85,8 @@ ipcMain.addListener('serverBind', serverBind)
 
 // Get Attribute of ldap entry
 ipcMain.addListener('getAttributeTree', getAttributeTree )
+
+ipcMain.addListener('getNewAttributeTree', getNewAttributeTree)
 
 // Refresh All ldap Entries
 ipcMain.on("refreshRootTree", refreshRootTree)

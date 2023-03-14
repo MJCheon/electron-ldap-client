@@ -1,9 +1,9 @@
-import { Attribute } from 'ldapts'
+import { Attribute, SearchResult } from 'ldapts'
 import TreeModel, { Node } from 'tree-model'
-import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode } from "../Common"
+import { ChangeDataList, LdapChange, ModifyDnNodeObject, TreeNode, ObjectClassSchema } from "../Common"
 import { getEncryptPassword } from './LdapCrypto'
 
-export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange[] {
+export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeNode[]): LdapChange {
   let attrRootNode: Node<TreeNode> = new TreeModel().parse(attrTree)
 
   let allChangeDataList: ChangeDataList[] = []
@@ -171,40 +171,28 @@ export function getAttributeChanges(attrTree: TreeNode[], deleteNodeList?: TreeN
   })
 
   if (deleteChangeData.length > 0) {
-    deleteChangeData.forEach((data) => {
-      allChangeDataList.push({
-        operation: 'delete',
-        modificationList: [data]
-      })
+    allChangeDataList.push({
+      operation: 'delete',
+      modificationList: deleteChangeData
     })
   }
   if (replaceChangeData.length > 0) {
-    replaceChangeData.forEach((data) => {
-      allChangeDataList.push({
-        operation: 'replace',
-        modificationList: [data]
-      })
+    allChangeDataList.push({
+      operation: 'replace',
+      modificationList: replaceChangeData
     })
-   
   }
   if (addChangeData.length > 0) {
-    addChangeData.forEach((data) => {
-      allChangeDataList.push({
-        operation: 'add',
-        modificationList: [data]
-      })
-    })    
+    allChangeDataList.push({
+      operation: 'add',
+      modificationList: addChangeData
+    })
   }
 
-  let returnData: LdapChange[] = [];
-
-  allChangeDataList.forEach((changeData) => {
-    returnData.push({
-      dn: rootId,
-      changeDataList: [changeData]
-    })
-  })
-
+  const returnData: LdapChange = {
+    dn: rootId,
+    changeDataList: allChangeDataList
+  }
   return returnData
 }
 
@@ -360,4 +348,86 @@ export function getParentDn(node: TreeNode): string {
   }
   
   return parentDn
+}
+
+export function getObjectClassSchemaList(schemaResult: SearchResult|null): ObjectClassSchema[] {
+  let objectSchemaList: ObjectClassSchema[] = []
+
+  if (schemaResult !== null && schemaResult.searchEntries.length > 0){
+    let searchEntry = schemaResult.searchEntries
+  
+    searchEntry.forEach(entry => {
+      let objectClasses = entry.objectClasses
+
+      if (Array.isArray(objectClasses)){
+        objectClasses.forEach((objectClass: string | Buffer) =>{
+          const regex = /^\( | \)$/g
+          objectClass = objectClass.toString().trim().replace(regex,'').trim()
+
+          const objectRegex = / (NAME|DESC|OBSOLETE|SUP|ABSTRACT|STRUCTURAL|AUXILIARY|MUST|MAY)/g
+          const tmpObjectClass = objectClass.replace(objectRegex, '\n$1\:',).split('\n')
+
+          let name: string = ''
+          let must: string[]|null = null
+          let may: string[]|null = null
+          let sup: string = ''
+
+          tmpObjectClass.forEach(objectValue => {
+            let keyValueArr = objectValue.split(':')
+
+            if (keyValueArr[0] === 'NAME') {
+              name = keyValueArr[1].replace(/\'|\(|\)/g, '').trim()
+            } else if (keyValueArr[0] === 'MUST' || keyValueArr[0] === 'MAY') {
+              let key = keyValueArr[0].trim().toLowerCase()
+              let value = keyValueArr[1]
+              if (value !== null && value.length > 0) {
+                let data: string[] = []
+                let tmpData: string = value.replace(/\( | \)/g, '').trim()
+
+                if (value.indexOf('$') > 0) {
+                  data = tmpData.split('$').map((value) => (value = value.trim()))
+                } else {
+                  data = [ tmpData ]
+                }
+                
+                if (key === 'must'){
+                  must = data
+                } else if (key === 'may'){
+                  may = data
+                }
+              }
+            } else if (keyValueArr[0] === 'SUP') {
+              sup = keyValueArr[1].trim().toLocaleLowerCase()
+            }
+          })
+
+          if (name.indexOf(' ') > 0) {
+            name.split(' ').forEach(multipleName => {
+              let newNode: ObjectClassSchema = {
+                name: multipleName,
+                must: must,
+                may: may,
+                sup: sup,
+                isSup: false
+              }
+
+              objectSchemaList.push(newNode)
+            })
+          } else {
+            let newNode: ObjectClassSchema = {
+              name: name,
+              must: must,
+              may: may,
+              sup: sup,
+              isSup: false
+            }
+
+            objectSchemaList.push(newNode)
+          }
+        })
+      }
+    })
+  }
+
+  return objectSchemaList
 }
