@@ -34,6 +34,7 @@
           </v-btn>
           <v-btn
             color='blue darken-1'
+            absolute
             text
             right
             @click='getAttribute()'
