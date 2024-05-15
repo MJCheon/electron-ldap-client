@@ -2,7 +2,7 @@
   "description": "LDAP Client for desktop",
   "keywords": [
     "electron",
-    "boilerplate",
+    "ldap",
     "react",
     "typescript",
     "ts",
@@ -85,6 +85,11 @@
     }
   },
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.15.17",
+    "@mui/material": "^5.15.17",
+    "bcrypt": "^5.1.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-store": "^9.0.0",

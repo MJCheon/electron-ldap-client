@@ -1,12 +1,15 @@
 import { Route, MemoryRouter as Router, Routes } from 'react-router-dom';
-import Servers from './servers/page';
+import Home from './home/page';
+import Layout from './components/layout/RootLayout';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Servers />} />
-      </Routes>
-    </Router>
+    <Layout>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </Router>
+    </Layout>
   );
 }
