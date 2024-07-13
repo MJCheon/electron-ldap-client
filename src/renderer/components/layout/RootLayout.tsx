@@ -3,8 +3,8 @@ import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { MdBrightness4, MdBrightness7 } from 'react-icons/md';
+import '@fontsource/open-sans/400.css'
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
@@ -29,11 +29,7 @@ function ToggleButton() {
         onClick={colorMode.toggleColorMode}
         color="inherit"
       >
-        {theme.palette.mode === 'dark' ? (
-          <Brightness7Icon />
-        ) : (
-          <Brightness4Icon />
-        )}
+        {theme.palette.mode === 'dark' ? <MdBrightness7 /> : <MdBrightness4 />}
       </IconButton>
     </Box>
   );
@@ -54,6 +50,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       createTheme({
         palette: {
           mode,
+        },
+        typography: {
+          fontFamily: "'Open Sans', system-ui",
         },
       }),
     [mode],

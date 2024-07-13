@@ -1,29 +1,53 @@
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: 'center',
-  color: theme.palette.text.secondary,
-}));
+import { useEffect, useState } from 'react';
+import { Typography } from '@mui/material';
+import ldapIcon from '../../../assets/512x512.png';
+import ServerAddDialog from '../components/dialog/ServerAddDialog';
+import ServerListCard from '../components/card/SeverListCard';
+import ServerInfo from '../../types/ServerInfo';
+import '@fontsource/poetsen-one/400.css';
 
 export default function Home() {
+  const [servers, setServers] = useState([]);
+  const [change, setChange] = useState(false);
+
+  useEffect(() => {
+    setServers(window.electron.store.get('servers'));
+  }, [change]);
+
   return (
-    <Box my={50} sx={{ width: '100%' }}>
+    <Box my={4} p={4} sx={{ width: '100%' }}>
+      <Stack justifyContent="center" alignContent="center" alignItems="center">
+        <div>
+          <img width="128" height="128" alt="ldap" src={ldapIcon} />
+        </div>
+        <Typography
+          sx={{ fontFamily: "'Poetsen One', system-ui" }}
+          variant="h4"
+        >
+          Electron LDAP Client
+        </Typography>
+      </Stack>
       <Stack
+        my={15}
         direction="row"
         justifyContent="center"
         alignContent="center"
         alignItems="center"
-        spacing={2}
+        spacing={3}
       >
-        <Item>Item 1</Item>
-        <Item>Item 2</Item>
-        <Item>Item 3</Item>
+        {servers.map((server: ServerInfo) => {
+          return (
+            <ServerListCard
+              key={server.id}
+              server={server}
+              change={change}
+              setChange={setChange}
+            />
+          );
+        })}
+        <ServerAddDialog change={change} setChange={setChange} />
       </Stack>
     </Box>
   );
