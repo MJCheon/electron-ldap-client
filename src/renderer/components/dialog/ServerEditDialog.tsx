@@ -1,27 +1,24 @@
-import { useState, Dispatch, SetStateAction, MouseEventHandler } from 'react';
-import { MenuItem } from '@mui/material';
+import { Dispatch, SetStateAction } from 'react';
 import ServerConfigForm from '../form/ServerConfigForm';
 import ServerInfo from '../../../types/ServerInfo';
 
 interface Props {
-  change: boolean;
-  setChange: Dispatch<SetStateAction<boolean>>;
+  dispatch: Dispatch<any>;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   menuClose?: () => void
   server: ServerInfo;
 }
 
-export default function ServerEditDialog({ change, setChange, open, setOpen, menuClose, server}: Props) {
+export default function ServerEditDialog({ open, setOpen, menuClose, dispatch, server}: Props) {
   return (
     <>
       <ServerConfigForm
         open={open}
         setOpen={setOpen}
-        change={change}
-        setChange={setChange}
         menuClose={menuClose}
-        type="Edit"
+        type="EDIT"
+        dispatch={dispatch}
         server={server}
       />
     </>

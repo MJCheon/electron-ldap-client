@@ -9,7 +9,7 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
-import { Dispatch, KeyboardEvent, MouseEvent, SetStateAction, useState } from 'react';
+import { Dispatch, MouseEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEllipsisVertical } from 'react-icons/fa6';
 import ServerInfo from '../../../types/ServerInfo';
@@ -17,11 +17,10 @@ import ServerEditDialog from '../dialog/ServerEditDialog';
 
 interface Props {
   server: ServerInfo;
-  change: boolean;
-  setChange: Dispatch<SetStateAction<boolean>>;
+  dispatch: Dispatch<any>;
 }
 
-export default function ServerListCard({ server, change, setChange }: Props) {
+export default function ServerListCard({ server, dispatch }: Props) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -39,9 +38,8 @@ export default function ServerListCard({ server, change, setChange }: Props) {
     setEditOpen(true);
   }
   const handleDelete = () => {
-    window.electron.store.delete('servers', server.name);
+    dispatch({ type: 'DELETE', name: server.name })
     setAnchorEl(null);
-    setChange(!change);
   };
 
   const connectServer = () => {
@@ -81,8 +79,7 @@ export default function ServerListCard({ server, change, setChange }: Props) {
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
       <ServerEditDialog
-          change={change}
-          setChange={setChange}
+          dispatch={dispatch}
           open={editOpen}
           setOpen={setEditOpen}
           menuClose={menuClose}

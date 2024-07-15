@@ -6,7 +6,6 @@ import {
   Dispatch,
   SetStateAction,
   useEffect,
-  KeyboardEvent,
 } from 'react';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -23,22 +22,20 @@ import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import ServerInfo from '../../../types/ServerInfo';
 
 interface Props {
-  change: boolean;
-  setChange: Dispatch<SetStateAction<boolean>>;
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
-  server: ServerInfo | undefined;
   menuClose?: () => void;
+  server: ServerInfo | undefined;
+  dispatch: Dispatch<any>;
   type: string;
 }
 
 export default function ServerConfigForm({
-  change,
-  setChange,
   open,
   setOpen,
   server,
   type,
+  dispatch,
   menuClose,
 }: Props) {
   const connSecurities = [
@@ -97,7 +94,7 @@ export default function ServerConfigForm({
   const [rootDn, setRootDn] = useState('');
   const [password, setPassword] = useState('');
   const [scope, setScope] = useState('sub');
-  const [connTimeout, setConnTimeout] = useState("5000");
+  const [connTimeout, setConnTimeout] = useState('5000');
 
   useEffect(() => {
     if (server !== undefined) {
@@ -129,13 +126,13 @@ export default function ServerConfigForm({
             formJson.id = server.id;
             formJson.iv = server.iv;
           }
-          window.electron.store.set('servers', formJson);
-          setChange(!change);
+          dispatch({ type: type, data: formJson});
+          server = undefined
           setOpen(false);
         },
       }}
     >
-      <DialogTitle>{type === 'add' ? 'Add' : 'Edit'} Ldap Server</DialogTitle>
+      <DialogTitle>{type === 'ADD' ? 'Add' : 'Edit'} Ldap Server</DialogTitle>
       <DialogContent>
         <Grid container spacing={4}>
           <Grid container item xs={6}>
@@ -202,7 +199,6 @@ export default function ServerConfigForm({
               name="security"
               select
               label="Connection Security"
-              defaultValue="none"
               value={security}
               onChange={(event) => setSecurity(event.target.value)}
             >
@@ -285,7 +281,6 @@ export default function ServerConfigForm({
               name="scope"
               select
               label="scope"
-              defaultValue="sub"
               value={scope}
               onChange={(event) => setScope(event.target.value)}
             >
@@ -313,7 +308,6 @@ export default function ServerConfigForm({
                   <InputAdornment position="end">ms</InputAdornment>
                 ),
               }}
-              defaultValue="5000"
               value={connTimeout}
               onChange={(event) => setConnTimeout(event.target.value)}
             />
@@ -321,8 +315,8 @@ export default function ServerConfigForm({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        {type === 'add' ? (
+        <Button onClick={handleClose} >Cancel</Button>
+        {type === 'ADD' ? (
           <Button variant="contained" endIcon={<IoMdAdd />} type="submit">
             Add
           </Button>

@@ -1,14 +1,13 @@
-import { useState, Dispatch, SetStateAction } from 'react';
+import { useState, Dispatch } from 'react';
 import { BiSolidAddToQueue } from 'react-icons/bi';
 import { Fab } from '@mui/material';
 import ServerConfigForm from '../form/ServerConfigForm';
 
 interface Props {
-  change: boolean;
-  setChange: Dispatch<SetStateAction<boolean>>;
+  dispatch: Dispatch<any>;
 }
 
-export default function ServerAddDialog({ change, setChange }: Props) {
+export default function ServerAddDialog({ dispatch }: Props) {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -28,9 +27,8 @@ export default function ServerAddDialog({ change, setChange }: Props) {
       <ServerConfigForm
         open={open}
         setOpen={setOpen}
-        change={change}
-        setChange={setChange}
-        type="add"
+        dispatch={dispatch}
+        type="ADD"
         server={undefined}
       />
     </>

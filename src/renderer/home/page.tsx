@@ -1,20 +1,18 @@
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import { useEffect, useState } from 'react';
+import { useReducer } from 'react';
 import { Typography } from '@mui/material';
 import ldapIcon from '../../../assets/512x512.png';
 import ServerAddDialog from '../components/dialog/ServerAddDialog';
 import ServerListCard from '../components/card/SeverListCard';
 import ServerInfo from '../../types/ServerInfo';
+import serverReducer from '../reducers/ServerReducer';
 import '@fontsource/poetsen-one/400.css';
 
-export default function Home() {
-  const [servers, setServers] = useState([]);
-  const [change, setChange] = useState(false);
 
-  useEffect(() => {
-    setServers(window.electron.store.get('servers'));
-  }, [change]);
+
+export default function Home() {
+  const [servers, dispatch] = useReducer(serverReducer, window.electron.store.get('servers'));
 
   return (
     <Box my={4} p={4} sx={{ width: '100%' }}>
@@ -42,12 +40,11 @@ export default function Home() {
             <ServerListCard
               key={server.id}
               server={server}
-              change={change}
-              setChange={setChange}
+              dispatch={dispatch}
             />
           );
         })}
-        <ServerAddDialog change={change} setChange={setChange} />
+        <ServerAddDialog dispatch={dispatch} />
       </Stack>
     </Box>
   );
