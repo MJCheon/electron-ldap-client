@@ -5,13 +5,13 @@ import Servers from './server/[id]/page';
 
 export default function App() {
   return (
-    <Layout>
-      <Router>
+    <Router>
+      <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/server" element={<Servers />} />
         </Routes>
-      </Router>
-    </Layout>
+      </Layout>
+    </Router>
   );
 }

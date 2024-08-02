@@ -11,16 +11,16 @@ import {
 } from '@mui/material';
 import { Dispatch, MouseEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEllipsisVertical } from 'react-icons/fa6';
+import { FaEllipsisV } from '@react-icons/all-files/fa/FaEllipsisV';
 import ServerInfo from '../../../types/ServerInfo';
 import ServerEditDialog from '../dialog/ServerEditDialog';
 
 interface Props {
   server: ServerInfo;
-  dispatch: Dispatch<any>;
+  serverDispatch: Dispatch<any>;
 }
 
-export default function ServerListCard({ server, dispatch }: Props) {
+export default function ServerListCard({ server, serverDispatch }: Props) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editOpen, setEditOpen] = useState(false);
@@ -36,14 +36,15 @@ export default function ServerListCard({ server, dispatch }: Props) {
 
   const handleEdit = () => {
     setEditOpen(true);
-  }
+  };
+
   const handleDelete = () => {
-    dispatch({ type: 'DELETE', name: server.name })
+    serverDispatch({ type: 'DELETE', name: server.name });
     setAnchorEl(null);
   };
 
   const connectServer = () => {
-    navigate(`/server?id=${server.name}`);
+    navigate(`/server?id=${server.id}`);
   };
 
   return (
@@ -62,7 +63,7 @@ export default function ServerListCard({ server, dispatch }: Props) {
         title={server.name}
         action={
           <IconButton onClick={menuClick} aria-label="settings">
-            <FaEllipsisVertical />
+            <FaEllipsisV />
           </IconButton>
         }
       />
@@ -79,11 +80,11 @@ export default function ServerListCard({ server, dispatch }: Props) {
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
       <ServerEditDialog
-          dispatch={dispatch}
-          open={editOpen}
-          setOpen={setEditOpen}
-          menuClose={menuClose}
-          server={server}
+        serverDispatch={serverDispatch}
+        open={editOpen}
+        setOpen={setEditOpen}
+        menuClose={menuClose}
+        server={server}
       />
       <CardContent>
         <Typography sx={{ fontSize: 14 }} color="text.secondary">
@@ -93,7 +94,7 @@ export default function ServerListCard({ server, dispatch }: Props) {
         <Typography sx={{ fontSize: 14 }} color="text.secondary">
           {server.baseDn}
         </Typography>
-        <CardActions sx={{ padding:0, pt:3, pl:3 }}>
+        <CardActions sx={{ padding: 0, pt: 3, pl: 3 }}>
           <Button sx={{ fontWeight: 'bold' }} onClick={connectServer}>
             Connect
           </Button>

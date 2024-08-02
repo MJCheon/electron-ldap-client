@@ -6,13 +6,14 @@ import ldapIcon from '../../../assets/512x512.png';
 import ServerAddDialog from '../components/dialog/ServerAddDialog';
 import ServerListCard from '../components/card/SeverListCard';
 import ServerInfo from '../../types/ServerInfo';
-import serverReducer from '../reducers/ServerReducer';
+import ServerReducer from '../reducers/ServerReducer';
 import '@fontsource/poetsen-one/400.css';
 
-
-
 export default function Home() {
-  const [servers, dispatch] = useReducer(serverReducer, window.electron.store.get('servers'));
+  const [servers, serverDispatch] = useReducer(
+    ServerReducer,
+    window.electron.store.getAll('servers'),
+  );
 
   return (
     <Box my={4} p={4} sx={{ width: '100%' }}>
@@ -40,11 +41,11 @@ export default function Home() {
             <ServerListCard
               key={server.id}
               server={server}
-              dispatch={dispatch}
+              serverDispatch={serverDispatch}
             />
           );
         })}
-        <ServerAddDialog dispatch={dispatch} />
+        <ServerAddDialog serverDispatch={serverDispatch} />
       </Stack>
     </Box>
   );

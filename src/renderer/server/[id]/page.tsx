@@ -1,3 +1,10 @@
+import { useSearchParams } from 'react-router-dom';
+import ServerInfo from '../../../types/ServerInfo';
+
 export default function Servers() {
-  return <h1>ServerPage</h1>;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const id = searchParams.get('id');
+  const server: ServerInfo = window.electron.store.get('servers', id);
+
+  return <h1>{server.name}</h1>;
 }

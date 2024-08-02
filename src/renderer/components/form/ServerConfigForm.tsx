@@ -13,12 +13,14 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { IoMdAdd, IoMdSave } from 'react-icons/io';
+import { IoMdAdd } from '@react-icons/all-files/io/IoMdAdd';
+import { IoMdSave } from '@react-icons/all-files/io/IoMdSave';
 import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
 import { InputAdornment } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { MdVisibility } from '@react-icons/all-files/md/MdVisibility';
+import { MdVisibilityOff } from '@react-icons/all-files/md/MdVisibilityOff';
 import ServerInfo from '../../../types/ServerInfo';
 
 interface Props {
@@ -26,7 +28,7 @@ interface Props {
   setOpen: Dispatch<SetStateAction<boolean>>;
   menuClose?: () => void;
   server: ServerInfo | undefined;
-  dispatch: Dispatch<any>;
+  serverDispatch: Dispatch<any>;
   type: string;
 }
 
@@ -35,7 +37,7 @@ export default function ServerConfigForm({
   setOpen,
   server,
   type,
-  dispatch,
+  serverDispatch,
   menuClose,
 }: Props) {
   const connSecurities = [
@@ -72,7 +74,7 @@ export default function ServerConfigForm({
     if (reason === 'backdropClick') {
       return;
     }
-    if ( menuClose !== undefined) {
+    if (menuClose !== undefined) {
       menuClose();
     }
     setOpen(false);
@@ -126,8 +128,8 @@ export default function ServerConfigForm({
             formJson.id = server.id;
             formJson.iv = server.iv;
           }
-          dispatch({ type: type, data: formJson});
-          server = undefined
+          serverDispatch({ type, data: formJson });
+          server = undefined;
           setOpen(false);
         },
       }}
@@ -297,8 +299,8 @@ export default function ServerConfigForm({
             {/* ConnectTimeout */}
             <TextField
               margin="dense"
-              id="ConnectTimeout"
-              name="ConnectTimeout"
+              id="connectTimeout"
+              name="connectTimeout"
               label="Connection Timeout"
               type="string"
               fullWidth
@@ -315,13 +317,18 @@ export default function ServerConfigForm({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} >Cancel</Button>
+        <Button onClick={handleClose}>Cancel</Button>
         {type === 'ADD' ? (
           <Button variant="contained" endIcon={<IoMdAdd />} type="submit">
             Add
           </Button>
         ) : (
-          <Button onClick={handleClose} variant="contained" endIcon={<IoMdSave />} type="submit">
+          <Button
+            onClick={handleClose}
+            variant="contained"
+            endIcon={<IoMdSave />}
+            type="submit"
+          >
             Save
           </Button>
         )}

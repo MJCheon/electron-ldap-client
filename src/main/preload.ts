@@ -6,8 +6,11 @@ export type Channels = 'ipc-electron-ldap';
 
 const electronHandler = {
   store: {
-    get(key: string) {
-      return ipcRenderer.sendSync('server-get', key);
+    getAll(key: string) {
+      return ipcRenderer.sendSync('server-getAll', key);
+    },
+    get(key: string, val: any) {
+      return ipcRenderer.sendSync('server-get', key, val);
     },
     set(property: string, val: any) {
       ipcRenderer.send('server-set', property, val);

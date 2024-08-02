@@ -6,7 +6,7 @@ import { decrypt, encrypt, getIv } from './utils/password';
 
 const store = new Store();
 
-export async function getServer(
+export async function getAllServer(
   event: IpcMainEvent,
   key: string,
 ): Promise<void> {
@@ -21,6 +21,17 @@ export async function getServer(
     return server;
   });
   event.returnValue = servers;
+}
+
+export async function getServer(
+  event: IpcMainEvent,
+  key: string,
+  id: string,
+): Promise<void> {
+  const servers: ServerInfo[] | any = store.get(key);
+  const foundServer: ServerInfo = servers.find((server: ServerInfo) => server.id === id);
+
+  event.returnValue = foundServer;
 }
 
 export async function setServer(

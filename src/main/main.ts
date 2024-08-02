@@ -13,10 +13,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 // import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './utils/html';
-import ServerInfo from '../types/ServerInfo';
-import { getParsedUuid, getServerUuid } from './utils/uuid';
-import { decrypt, encrypt, getIv } from './utils/password';
-import { delServer, getServer, setServer } from './ipcMainListener';
+import { delServer, getAllServer, getServer, setServer } from './ipcMainListener';
 
 // class AppUpdater {
 //   constructor() {
@@ -36,6 +33,7 @@ let mainWindow: BrowserWindow | null = null;
 //   event.reply('ipc-example', msgTemplate('pong'));
 // });
 
+ipcMain.addListener('server-getAll', getAllServer);
 ipcMain.addListener('server-get', getServer);
 ipcMain.addListener('server-set', setServer);
 ipcMain.addListener('server-del', delServer);

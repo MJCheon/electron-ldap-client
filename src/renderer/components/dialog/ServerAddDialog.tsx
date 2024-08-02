@@ -1,13 +1,13 @@
 import { useState, Dispatch } from 'react';
-import { BiSolidAddToQueue } from 'react-icons/bi';
+import { BiAddToQueue } from '@react-icons/all-files/bi/BiAddToQueue';
 import { Fab } from '@mui/material';
 import ServerConfigForm from '../form/ServerConfigForm';
 
 interface Props {
-  dispatch: Dispatch<any>;
+  serverDispatch: Dispatch<any>;
 }
 
-export default function ServerAddDialog({ dispatch }: Props) {
+export default function ServerAddDialog({ serverDispatch }: Props) {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -22,12 +22,12 @@ export default function ServerAddDialog({ dispatch }: Props) {
         aria-label="add"
         onClick={handleClickOpen}
       >
-        <BiSolidAddToQueue size="24" />
+        <BiAddToQueue size="24" />
       </Fab>
       <ServerConfigForm
         open={open}
         setOpen={setOpen}
-        dispatch={dispatch}
+        serverDispatch={serverDispatch}
         type="ADD"
         server={undefined}
       />
