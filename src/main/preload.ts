@@ -19,6 +19,11 @@ const electronHandler = {
       ipcRenderer.send('server-del', property, val);
     },
   },
+  ldap: {
+    connect(val: any) {
+      return ipcRenderer.sendSync('ldap-connect', val);
+    },
+  },
   ipcRenderer: {
     sendMessage(channel: Channels, ...args: unknown[]) {
       ipcRenderer.send(channel, ...args);

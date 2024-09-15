@@ -157,27 +157,25 @@ export default class MenuBuilder {
         {
           label: 'Learn More',
           click() {
-            shell.openExternal('https://electronjs.org');
-          },
-        },
-        {
-          label: 'Documentation',
-          click() {
             shell.openExternal(
-              'https://github.com/electron/electron/tree/main/docs#readme',
+              'https://github.com/MJCheon/electron-ldap-client/wiki',
             );
           },
         },
         {
-          label: 'Community Discussions',
+          label: 'Download Lateset Version',
           click() {
-            shell.openExternal('https://www.electronjs.org/community');
+            shell.openExternal(
+              'https://github.com/MJCheon/electron-ldap-client/releases',
+            );
           },
         },
         {
           label: 'Search Issues',
           click() {
-            shell.openExternal('https://github.com/electron/electron/issues');
+            shell.openExternal(
+              'https://github.com/MJCheon/electron-ldap-client/issues',
+            );
           },
         },
       ],
@@ -258,27 +256,25 @@ export default class MenuBuilder {
           {
             label: 'Learn More',
             click() {
-              shell.openExternal('https://electronjs.org');
-            },
-          },
-          {
-            label: 'Documentation',
-            click() {
               shell.openExternal(
-                'https://github.com/electron/electron/tree/main/docs#readme',
+                'https://github.com/MJCheon/electron-ldap-client/wiki',
               );
             },
           },
           {
-            label: 'Community Discussions',
+            label: 'Download Lateset Version',
             click() {
-              shell.openExternal('https://www.electronjs.org/community');
+              shell.openExternal(
+                'https://github.com/MJCheon/electron-ldap-client/releases',
+              );
             },
           },
           {
             label: 'Search Issues',
             click() {
-              shell.openExternal('https://github.com/electron/electron/issues');
+              shell.openExternal(
+                'https://github.com/MJCheon/electron-ldap-client/issues',
+              );
             },
           },
         ],

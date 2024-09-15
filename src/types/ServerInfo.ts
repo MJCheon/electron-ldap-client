@@ -9,5 +9,5 @@ export default interface ServerInfo {
   password: string;
   security: string;
   connectTimeout: string;
-  scope: string;
+  scope: 'base' | 'children' | 'one' | 'sub' | undefined;
 }

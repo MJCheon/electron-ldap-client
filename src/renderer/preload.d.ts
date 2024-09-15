@@ -7,6 +7,9 @@ declare global {
         set: (key: string, val: any) => void;
         delete: (key: string, val: any) => void;
       };
+      ldap: {
+        connect: (val: any) => void;
+      };
     };
   }
 }

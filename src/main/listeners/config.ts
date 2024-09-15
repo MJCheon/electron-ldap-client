@@ -1,8 +1,8 @@
 import { IpcMainEvent } from 'electron';
 import Store from 'electron-store';
-import ServerInfo from '../types/ServerInfo';
-import { getParsedUuid, getServerUuid } from './utils/uuid';
-import { decrypt, encrypt, getIv } from './utils/password';
+import ServerInfo from '../../types/ServerInfo';
+import { getParsedUuid, getServerUuid } from '../utils/uuid';
+import { decrypt, encrypt, getIv } from '../utils/password';
 
 const store = new Store();
 
@@ -29,7 +29,9 @@ export async function getServer(
   id: string,
 ): Promise<void> {
   const servers: ServerInfo[] | any = store.get(key);
-  const foundServer: ServerInfo = servers.find((server: ServerInfo) => server.id === id);
+  const foundServer: ServerInfo = servers.find(
+    (server: ServerInfo) => server.id === id,
+  );
 
   event.returnValue = foundServer;
 }
