@@ -1,5 +1,6 @@
 import { Attribute, Change, Client, SearchOptions, SearchResult } from 'ldapts';
 
+import { getSchemaAttributes } from 'ldap-schema-ts-generator';
 import { LdapError, ErrorData, makeErrorData, showError } from '../Error';
 import ServerInfo from '../../../types/ServerInfo';
 import { decrypt } from '../../utils/password';
@@ -51,7 +52,10 @@ export default class LdapServer {
       };
 
       showError('LDAP Connect Error', ldapError);
-      await this.client.unbind();
+
+      if (this.client.isConnected) {
+        await this.client.unbind();
+      }
     }
 
     return isAuthenticated;
@@ -163,22 +167,25 @@ export default class LdapServer {
   //   }
   // }
 
-  // async modifyDn(originDn: string, modifyDn: string): Promise<void> {
-  //   try {
-  //     if (originDn !== modifyDn) {
-  //       await this.client.modifyDN(originDn, modifyDn);
-  //     }
-  //   } catch (ex) {
-  //     const errMsg: string = String(ex);
-  //     const data: ErrorData = makeErrorData('modifyDn', modifyDn);
-  //     const ldapError: LdapError = {
-  //       msg: errMsg,
-  //       data,
-  //     };
+  async modifyDn(originDn: string, modifyDn: string): Promise<boolean> {
+    try {
+      if (originDn !== modifyDn) {
+        await this.client.modifyDN(originDn, modifyDn);
+      }
+    } catch (ex) {
+      const errMsg: string = String(ex);
+      const data: ErrorData = makeErrorData('modifyDn', modifyDn);
+      const ldapError: LdapError = {
+        msg: errMsg,
+        data,
+      };
 
-  //     showError('LDAP ModifyDn Error', ldapError);
-  //   }
-  // }
+      showError('LDAP ModifyDn Error', ldapError);
+      return false;
+    }
+
+    return true;
+  }
 
   // async delete(originDn: string): Promise<void> {
   //   try {
@@ -199,13 +206,13 @@ export default class LdapServer {
   // }
 
   async searchObjectClassSchema(): Promise<SearchResult | null> {
-    let searchDn: string = this.serverInfo.baseDn;
-    const searchOptions: SearchOptions = {};
-
-    if (Object.keys(searchOptions).length === 0) {
-      searchOptions.scope = 'sub';
-      searchOptions.attributes = ['subschemaSubentry'];
-    }
+    // subschemaSubentry 검색
+    const searchDn: string = this.serverInfo.baseDn;
+    let searchOptions: SearchOptions = {
+      scope: 'sub',
+      filter: '(objectClass=*)',
+      attributes: ['subschemaSubentry'],
+    };
 
     try {
       let searchResult: SearchResult = await this.client.search(
@@ -219,11 +226,17 @@ export default class LdapServer {
       ) {
         const subschemaClass = searchResult.searchEntries[0].subschemaSubentry;
 
-        searchDn = subschemaClass.toString();
-        searchOptions.attributes = ['objectClasses'];
-        searchOptions.filter = '(objectClass=subschema)';
+        const subschemaSubentryDn = subschemaClass.toString();
+        searchOptions = {
+          scope: 'base',
+          filter: '(objectClass=subschema)',
+          attributes: ['objectClasses'],
+        };
 
-        searchResult = await this.client.search(searchDn, searchOptions);
+        searchResult = await this.client.search(
+          subschemaSubentryDn,
+          searchOptions,
+        );
       }
 
       return searchResult;

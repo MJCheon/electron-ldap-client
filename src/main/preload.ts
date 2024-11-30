@@ -23,6 +23,15 @@ const electronHandler = {
     connect(val: any) {
       return ipcRenderer.sendSync('ldap-connect', val);
     },
+    modifyDn(name: string, newName: string) {
+      return ipcRenderer.sendSync('modifyDn', name, newName);
+    },
+    refresh() {
+      return ipcRenderer.sendSync('refresh');
+    },
+    getSchemas() {
+      return ipcRenderer.sendSync('getSchemas');
+    },
   },
   ipcRenderer: {
     sendMessage(channel: Channels, ...args: unknown[]) {

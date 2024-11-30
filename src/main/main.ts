@@ -13,8 +13,18 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 // import log from 'electron-log';
 import MenuBuilder from './Menu';
 import { resolveHtmlPath } from './utils/html';
-import { delServer, getAllServer, getServer, setServer } from './listeners/config';
-import connectLdap from './listeners/ldap';
+import {
+  delServer,
+  getAllServer,
+  getServer,
+  setServer,
+} from './listeners/config';
+import {
+  connectLdap,
+  getObjectSchemas,
+  modifyDn,
+  refresh,
+} from './listeners/ldap';
 
 // class AppUpdater {
 //   constructor() {
@@ -40,6 +50,9 @@ ipcMain.addListener('server-del', delServer);
 
 // LDAP
 ipcMain.addListener('ldap-connect', connectLdap);
+ipcMain.addListener('modifyDn', modifyDn);
+ipcMain.addListener('refresh', refresh);
+ipcMain.addListener('getSchemas', getObjectSchemas);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

@@ -1,30 +1,30 @@
 import { CSSProperties, MouseEventHandler, useState } from 'react';
 import { IconContext } from '@react-icons/all-files/lib';
-import { FaEdit } from '@react-icons/all-files/fa/FaEdit';
+import { IoMdAddCircle } from '@react-icons/all-files/io/IoMdAddCircle';
 import { IconButton, Tooltip } from '@mui/material';
 
-interface RenameIconProps {
+interface DeleteIconProps {
   style: CSSProperties;
   onClick: MouseEventHandler<SVGElement> | undefined;
 }
 
-export default function RenameIcon({ style, onClick }: RenameIconProps) {
+export default function AddIcon({ style, onClick }: DeleteIconProps) {
   const [hoverd, setHoverd] = useState(false);
 
   const handleMouseEnter = () => setHoverd(true);
   const handleMouseLeave = () => setHoverd(false);
 
   return (
-    <Tooltip title="Rename">
+    <Tooltip title="Add">
       <IconButton
-        disableRipple
         size="small"
+        disableRipple
         sx={{ margin: 0, padding: 0 }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <IconContext.Provider value={{ color: hoverd ? '#FF5722' : '#E2E2E2' }}>
-          <FaEdit style={style} onClick={onClick} />
+          <IoMdAddCircle style={style} onClick={onClick} />
         </IconContext.Provider>
       </IconButton>
     </Tooltip>

@@ -1,11 +1,12 @@
 import { NodeApi, NodeRendererProps } from 'react-arborist';
-import { Dispatch, MouseEvent, SetStateAction } from 'react';
+import { Dispatch, MouseEvent, SetStateAction, useState } from 'react';
 import LdapNode from '../../../types/LdapNode';
 import FileIcon from '../icons/FileIcon';
 import OpenFolderIcon from '../icons/OpenFolderIcon';
 import FolderIcon from '../icons/FolderIcon';
 import RenameIcon from '../icons/RenameIcon';
 import DeleteIcon from '../icons/DeleteIcon';
+import AddIcon from '../icons/AddIcon';
 
 function NodeIcon(node: NodeApi<LdapNode>) {
   if (node.children === null || node.children.length === 0) {
@@ -34,50 +35,78 @@ function Input({ node }: { node: NodeApi<LdapNode> }) {
 }
 
 interface LdapTreeNodeProps extends NodeRendererProps<LdapNode> {
-  setDn: Dispatch<SetStateAction<string>>;
+  setAttr: Dispatch<SetStateAction<string>>;
   onMoreInfo: () => void;
 }
 
 export default function LdapTreeNode({
   node,
   style,
+  tree,
   dragHandle,
-  setDn,
+  setAttr,
   onMoreInfo,
 }: LdapTreeNodeProps) {
-  const onClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
-    event.stopPropagation();
-    node.toggle();
-  };
+  const [clickTimeout, setClickTimeout] = useState(null);
 
-  const onNodeClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
-    event.stopPropagation();
-    setDn(node.data.ldapData);
+  const onNodeClick = () => {
+    setAttr(node.data.ldapData);
     onMoreInfo();
   };
 
-  const onEditClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onClick = () => {
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      setClickTimeout(null);
+      onNodeClick();
+    } else {
+      setClickTimeout(
+        setTimeout(() => {
+          node.toggle();
+          setClickTimeout(null);
+        }, 200),
+      );
+    }
+  };
+
+  const onAddClick = (
+    event: MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
+    event.stopPropagation();
+    node.select();
+    if (node.children == null || node.children.length === 0) {
+      tree.createInternal();
+    } else {
+      tree.createLeaf();
+    }
+  };
+
+  const onEditClick = (
+    event: MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
     event.stopPropagation();
     node.edit();
   };
 
-  const onDeleteClick = (event: MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const onDeleteClick = (
+    event: MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
+  ) => {
     event.stopPropagation();
-    alert("Delete");
+    tree.delete(node);
   };
 
   return (
-    <div style={style} ref={dragHandle}>
-      <span onClick={onClick}> {NodeIcon(node)} </span>
-      <span
-        style={{ cursor: 'pointer', marginLeft: '6px' }}
-        onClick={onNodeClick}
-      >
-        {node.isEditing ? <Input node={node} /> : node.data.name}
-      </span>
+    <div style={style} ref={dragHandle} onClick={onClick}>
+      {NodeIcon(node)}
+      {node.isEditing ? <Input node={node} /> : node.data.name}
+
       <RenameIcon
         style={{ cursor: 'pointer', marginLeft: '12px' }}
         onClick={onEditClick}
+      />
+      <AddIcon
+        style={{ cursor: 'pointer', marginLeft: '3px', paddingTop: '2px' }}
+        onClick={onAddClick}
       />
       <DeleteIcon
         style={{ cursor: 'pointer', marginLeft: '2px' }}

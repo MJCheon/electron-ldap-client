@@ -1,3 +1,6 @@
+import LdapNode from '../types/LdapNode';
+import ObjectClassSchema from '../types/ObjectSchema';
+
 declare global {
   interface Window {
     electron: {
@@ -8,7 +11,10 @@ declare global {
         delete: (key: string, val: any) => void;
       };
       ldap: {
-        connect: (val: any) => void;
+        connect: (val: any) => LdapNode | undefined;
+        modifyDn: (name: string, newName: string) => boolean;
+        refresh: () => LdapNode | undefined;
+        getSchemas: () => ObjectClassSchema[] | null;
       };
     };
   }
